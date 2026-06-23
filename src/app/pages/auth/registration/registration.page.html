@@ -1,0 +1,179 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Registration</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+
+    <div class="logo">
+      🚐
+    </div>
+
+    <h2>Welcome</h2>
+
+    <p>Select your role and register</p>
+
+    <!-- Role Selection -->
+
+    <ion-segment
+      [(ngModel)]="selectedRole"
+      (ionChange)="changeRole()">
+
+      <ion-segment-button value="driver">
+        <ion-label>Driver</ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="parent">
+        <ion-label>Parent</ion-label>
+      </ion-segment-button>
+
+    </ion-segment>
+
+    <form [formGroup]="registrationForm">
+
+      <!-- Common Fields -->
+
+      <ion-item>
+        <ion-input
+          label="Name"
+          labelPlacement="floating"
+          formControlName="name">
+        </ion-input>
+      </ion-item>
+
+      <small *ngIf="submitted && registrationForm.get('name')?.invalid">
+        Enter valid name
+      </small>
+
+      <ion-item>
+        <ion-input
+          type="tel"
+          label="Mobile Number"
+          labelPlacement="floating"
+          formControlName="mobileNumber">
+        </ion-input>
+      </ion-item>
+
+      <small *ngIf="submitted && registrationForm.get('mobileNumber')?.invalid">
+        Enter valid mobile number
+      </small>
+
+      <ion-item>
+
+  <ion-input
+    type="password"
+    label="Password"
+    labelPlacement="floating"
+    formControlName="password">
+
+  </ion-input>
+
+</ion-item>
+
+<small *ngIf="submitted && registrationForm.get('password')?.invalid">
+
+  Password must be at least 6 characters
+
+</small>
+
+      <!-- DRIVER FIELDS -->
+
+      <ng-container *ngIf="selectedRole === 'driver'">
+
+        <ion-item>
+          <ion-input
+            label="Vehicle Number"
+            labelPlacement="floating"
+            formControlName="vehicleNumber">
+          </ion-input>
+        </ion-item>
+
+        <small *ngIf="submitted && registrationForm.get('vehicleNumber')?.invalid">
+          Vehicle number required
+        </small>
+
+        <ion-item>
+          <ion-input
+            label="Route / Area"
+            labelPlacement="floating"
+            formControlName="routeArea">
+          </ion-input>
+        </ion-item>
+
+        <small *ngIf="submitted && registrationForm.get('routeArea')?.invalid">
+          Route area required
+        </small>
+
+      </ng-container>
+
+      <!-- PARENT FIELDS -->
+
+      <ng-container *ngIf="selectedRole === 'parent'">
+
+        <ion-item>
+          <ion-input
+            label="Student Name"
+            labelPlacement="floating"
+            formControlName="studentName">
+          </ion-input>
+        </ion-item>
+
+        <small *ngIf="submitted && registrationForm.get('studentName')?.invalid">
+          Student name required
+        </small>
+
+        <ion-item>
+          <ion-input
+            label="School Name"
+            labelPlacement="floating"
+            formControlName="schoolName">
+          </ion-input>
+        </ion-item>
+
+        <small *ngIf="submitted && registrationForm.get('schoolName')?.invalid">
+          School name required
+        </small>
+
+        <ion-item>
+          <ion-input
+            label="Pickup Area"
+            labelPlacement="floating"
+            formControlName="pickupArea">
+          </ion-input>
+        </ion-item>
+
+        <small *ngIf="submitted && registrationForm.get('pickupArea')?.invalid">
+          Pickup area required
+        </small>
+
+        <ion-item>
+          <ion-input
+            label="Drop Area"
+            labelPlacement="floating"
+            formControlName="dropArea">
+          </ion-input>
+        </ion-item>
+
+        <small *ngIf="submitted && registrationForm.get('dropArea')?.invalid">
+          Drop area required
+        </small>
+
+      </ng-container>
+
+      <ion-button
+        expand="block"
+        class="register-btn"
+        (click)="register()">
+
+        Register
+
+      </ion-button>
+
+    </form>
+
+  </div>
+
+</ion-content>

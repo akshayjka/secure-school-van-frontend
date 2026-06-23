@@ -1,0 +1,58 @@
+<ion-header>
+
+  <ion-toolbar color="primary">
+
+    <ion-title>
+
+      Dashboard
+
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+
+    <div class="welcome-card">
+
+      <h2>
+
+        Welcome {{ userName }}
+
+      </h2>
+
+      <p *ngIf="userRole === 'driver'">
+
+        Manage your parents and students
+
+      </p>
+
+      <p *ngIf="userRole === 'parent'">
+
+        Manage your driver details
+
+      </p>
+
+    </div>
+
+    <div class="action-card">
+
+      <ion-button
+        expand="block"
+        size="large"
+        (click)="navigateAction()">
+
+        {{ userRole === 'driver'
+            ? 'Add Parent'
+            : 'Add Driver' }}
+
+      </ion-button>
+
+    </div>
+
+  </div>
+
+</ion-content>

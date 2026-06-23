@@ -1,0 +1,251 @@
+<ion-header>
+
+  <ion-toolbar color="primary">
+
+    <ion-title>
+
+      Driver Login
+
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content fullscreen>
+
+<div class="container">
+
+<div class="logo">
+
+<ion-icon
+name="bus"
+size="large">
+</ion-icon>
+
+<h2>Secure School Van</h2>
+
+</div>
+
+<form [formGroup]="loginForm">
+
+<ion-item>
+
+<ion-input
+
+label="Mobile Number"
+
+labelPlacement="stacked"
+
+type="tel"
+
+maxlength="10"
+
+formControlName="mobileNumber">
+
+</ion-input>
+
+</ion-item>
+
+<ion-note
+
+color="danger"
+
+*ngIf="
+loginForm.get('mobileNumber')?.touched &&
+loginForm.get('mobileNumber')?.invalid">
+
+Enter valid mobile number
+
+</ion-note>
+
+<ion-item>
+
+<ion-input
+
+label="Password"
+
+labelPlacement="stacked"
+
+type="password"
+
+formControlName="password">
+
+</ion-input>
+
+<div class="forgot-password">
+
+<ion-button
+
+fill="clear"
+
+size="small"
+
+(click)="openForgotPassword()">
+
+Forgot Password?
+
+</ion-button>
+
+</div>
+
+</ion-item>
+
+<ion-note
+
+color="danger"
+
+*ngIf="
+loginForm.get('password')?.touched &&
+loginForm.get('password')?.invalid">
+
+Password required
+
+</ion-note>
+
+<ion-button
+
+expand="block"
+
+size="large"
+
+class="login-btn"
+
+[disabled]="isLoading"
+
+(click)="login()">
+
+{{isLoading ? 'Please Wait...' : 'Login'}}
+
+</ion-button>
+
+</form>
+
+<div class="register">
+
+<p>
+
+Don't have an account?
+
+</p>
+
+<ion-button
+
+fill="clear"
+
+routerLink="/auth/driver-registration">
+
+Register
+
+</ion-button>
+
+</div>
+
+</div>
+
+
+<ion-modal
+
+[isOpen]="showForgotPassword">
+
+<ng-template>
+
+<ion-header>
+
+<ion-toolbar color="primary">
+
+<ion-title>
+
+Forgot Password
+
+</ion-title>
+
+<ion-buttons slot="end">
+
+<ion-button
+
+(click)="closeForgotPassword()">
+
+Close
+
+</ion-button>
+
+</ion-buttons>
+
+</ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+
+<form
+
+[formGroup]="forgotPasswordForm"
+
+class="forgot-container">
+
+<ion-item>
+
+<ion-input
+
+label="Mobile Number"
+
+labelPlacement="stacked"
+
+formControlName="mobileNumber">
+
+</ion-input>
+
+</ion-item>
+
+<ion-item>
+
+<ion-input
+
+label="New Password"
+
+labelPlacement="stacked"
+
+type="password"
+
+formControlName="newPassword">
+
+</ion-input>
+
+</ion-item>
+
+<ion-item>
+
+<ion-input
+
+label="Confirm Password"
+
+labelPlacement="stacked"
+
+type="password"
+
+formControlName="confirmPassword">
+
+</ion-input>
+
+</ion-item>
+
+<ion-button
+
+expand="block"
+
+(click)="updatePassword()">
+
+Update Password
+
+</ion-button>
+
+</form>
+
+</ion-content>
+
+</ng-template>
+
+</ion-modal>
+
+</ion-content>

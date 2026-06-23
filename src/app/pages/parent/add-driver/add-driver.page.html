@@ -1,0 +1,63 @@
+<ion-header>
+
+  <ion-toolbar color="primary">
+
+    <ion-title>
+
+      Add Driver
+
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+
+    <form [formGroup]="driverForm">
+
+      <ion-item>
+
+        <ion-input
+          label="Driver Name"
+          labelPlacement="floating"
+          formControlName="driverName">
+
+        </ion-input>
+
+      </ion-item>
+
+      <ion-item>
+
+        <ion-input
+          label="Mobile Number"
+          labelPlacement="floating"
+          formControlName="mobileNumber">
+
+        </ion-input>
+
+      </ion-item>
+
+      <ion-button
+        expand="block"
+        (click)="saveDriver()">
+
+        Save Driver
+
+      </ion-button>
+
+          <ion-button
+        expand="block"
+        (click)="goto()">
+
+       back
+
+      </ion-button>
+
+    </form>
+
+  </div>
+
+</ion-content>
