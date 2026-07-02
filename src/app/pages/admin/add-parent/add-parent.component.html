@@ -1,0 +1,63 @@
+<ion-header>
+
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard">
+      </ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Add Parent
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+
+  <form [formGroup]="form">
+
+    <ion-item>
+      <ion-input label="Driver ID" formControlName="driverId">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input label="Parent Name" formControlName="name">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input label="Mobile Number" formControlName="mobileNumber">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input label="Student Name" formControlName="studentName">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input label="School Name" formControlName="schoolName">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input label="Pickup Area" formControlName="pickupArea">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input label="Drop Area" formControlName="dropArea">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" (click)="save()">
+
+      Save
+
+    </ion-button>
+
+  </form>
+
+</ion-content>

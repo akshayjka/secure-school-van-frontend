@@ -20,6 +20,7 @@ import {
 } from '@ionic/angular/standalone';
 import { Driver } from 'src/app/core/services/driver';
 import { Router } from '@angular/router';
+import { ToastService } from 'src/app/core/services/toast';
 
 @Component({
   selector: 'app-add-driver',
@@ -46,26 +47,60 @@ import { Router } from '@angular/router';
 export class AddDriverPage {
 
   driverForm!: FormGroup;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
     private driverService: Driver,
-    private router : Router
+    private router : Router,
+    private toastService: ToastService
   ) {
 
-    this.driverForm = this.fb.group({
+  this.driverForm = this.fb.group({
 
-      driverName: ['', Validators.required],
+  name: [
 
-      mobileNumber: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern('^[0-9]{10}$')
-        ]
-      ]
+    '',
 
-    });
+    Validators.required
+
+  ],
+
+  mobileNumber: [
+
+    '',
+
+    [
+
+      Validators.required,
+
+      Validators.pattern(
+
+        '^[0-9]{10}$'
+
+      )
+
+    ]
+
+  ],
+
+  vehicleNumber: [
+
+    '',
+
+    Validators.required
+
+  ],
+
+  routeArea: [
+
+    '',
+
+    Validators.required
+
+  ]
+
+});
 
   }
 
@@ -79,48 +114,54 @@ saveDriver() {
 
   }
 
-  const payload = {
+  this.isLoading = true;
 
-    driverName: this.driverForm.value.driverName,
+  this.driverService.addDriver(
+    this.driverForm.value
+  ).subscribe({
 
-    mobileNumber: this.driverForm.value.mobileNumber
+    next: (response) => {
 
-  };
+      this.toastService.showToast(
 
-  this.driverService
+        response.message ||
 
-    .addDriver(payload)
+        'Driver added successfully'
 
-    .subscribe({
+      );
 
-      next: (response) => {
+      this.driverForm.reset();
 
-        console.log(
+      this.isLoading = false;
 
-          'Driver added successfully',
+    },
 
-          response
+    error: (error) => {
 
-        );
+      this.isLoading = false;
 
-        alert('Driver added successfully');
+      this.toastService.showToast(
 
-        this.driverForm.reset();
+        error?.error?.message ||
 
-      },
+        'Failed to add driver'
 
-      error: (error) => {
+      );
 
-        console.log(error);
+    }
 
-      }
-
-    });
+  });
 
 }
 
 goto() {
-  this.router.navigateByUrl('driver/dashboard')
+
+  this.router.navigateByUrl(
+
+    '/driver/dashboard'
+
+  );
+
 }
 
 }

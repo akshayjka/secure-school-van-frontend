@@ -21,9 +21,12 @@
       <ion-item>
 
         <ion-input
+
           label="Driver Name"
+
           labelPlacement="floating"
-          formControlName="driverName">
+
+          formControlName="name">
 
         </ion-input>
 
@@ -32,27 +35,64 @@
       <ion-item>
 
         <ion-input
+
           label="Mobile Number"
+
           labelPlacement="floating"
+
           formControlName="mobileNumber">
 
         </ion-input>
 
       </ion-item>
 
+      <ion-item>
+
+        <ion-input
+
+          label="Vehicle Number"
+
+          labelPlacement="floating"
+
+          formControlName="vehicleNumber">
+
+        </ion-input>
+
+      </ion-item>
+
+      <ion-item>
+
+        <ion-input
+
+          label="Route Area"
+
+          labelPlacement="floating"
+
+          formControlName="routeArea">
+
+        </ion-input>
+
+      </ion-item>
+
       <ion-button
+
         expand="block"
+
         (click)="saveDriver()">
 
         Save Driver
 
       </ion-button>
 
-          <ion-button
+      <ion-button
+
         expand="block"
+
+        fill="outline"
+
         (click)="goto()">
 
-       back
+        Back
 
       </ion-button>
 

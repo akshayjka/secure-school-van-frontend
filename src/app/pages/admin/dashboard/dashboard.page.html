@@ -1,0 +1,88 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      Admin Dashboard
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+
+        <ion-icon name="log-out-outline"></ion-icon>
+
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+    <h2>Overview</h2>
+
+    <div class="grid">
+      <div class="card">
+        <h3>{{counts.totalDrivers || 0}}</h3>
+
+        <p>Total Drivers</p>
+
+      </div>
+      <div class="card">
+
+        <h3>{{counts.totalParents || 0}}</h3>
+
+        <p>Total Parents</p>
+
+      </div>
+
+      <div class="card">
+
+        <h3>{{counts.totalStudents || 0}}</h3>
+
+        <p>Total Students</p>
+
+      </div>
+
+      <div class="card">
+
+        <h3>{{counts.activeDrivers || 0}}</h3>
+
+        <p>Active Drivers</p>
+
+      </div>
+
+    </div>
+
+    <h2>Management</h2>
+
+    <ion-button expand="block" (click)="goToDrivers()">
+
+      Drivers
+
+    </ion-button>
+
+    <ion-button expand="block" color="success" (click)="goToParents()">
+
+      Parents
+
+    </ion-button>
+
+    <!-- <ion-button expand="block" color="warning" (click)="goToStudents()">
+
+      Students
+
+    </ion-button> -->
+
+    <ion-button expand="block" color="warning" (click)="goToTracking()">
+
+      Live Tracking
+
+    </ion-button>
+
+    <ion-button expand="block" color="medium" (click)="goToReports()">
+
+      Reports
+
+    </ion-button>
+
+  </div>
+
+</ion-content>

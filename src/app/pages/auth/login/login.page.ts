@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-
+import { ToastService } from '../../../core/services/toast';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -42,20 +42,21 @@ export class LoginPage {
 
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
+
 
   ) { }
 
-ngOnInit() {
+  ngOnInit() {
 
-  this.initializeForm();
+    this.initializeForm();
 
-  this.initializeForgotPasswordForm();
+    this.initializeForgotPasswordForm();
 
-}
+  }
 
-  initializeForgotPasswordForm() 
-  {
+  initializeForgotPasswordForm() {
     this.forgotPasswordForm = this.fb.group({
       mobileNumber: [
         '',
@@ -81,14 +82,13 @@ ngOnInit() {
 
   }
 
-  openForgotPassword() 
-  {
-  this.showForgotPassword = true;
+  openForgotPassword() {
+    this.showForgotPassword = true;
   }
 
-closeForgotPassword() {
-  this.showForgotPassword = false;
-}
+  closeForgotPassword() {
+    this.showForgotPassword = false;
+  }
 
   initializeForm() {
 
@@ -114,73 +114,68 @@ closeForgotPassword() {
 
   }
 
-updatePassword() {
+  updatePassword() {
 
-  if (this.forgotPasswordForm.invalid) {
+    if (this.forgotPasswordForm.invalid) {
 
-    this.forgotPasswordForm.markAllAsTouched();
+      this.forgotPasswordForm.markAllAsTouched();
 
-    return;
-
-  }
-
-  const {
-
-    mobileNumber,
-
-    newPassword,
-
-    confirmPassword
-
-  } = this.forgotPasswordForm.value;
-
-  if (newPassword !== confirmPassword) {
-
-    alert('Passwords do not match');
-
-    return;
-
-  }
-
-  const payload = {
-
-    mobileNumber,
-
-    password: newPassword
-
-  };
-
-  this.authService.setPassword(
-
-    payload
-
-  ).subscribe({
-
-    next: (response) => {
-
-      // alert(response.message);
-
-      this.closeForgotPassword();
-
-      this.forgotPasswordForm.reset();
-
-    },
-
-    error: (error) => {
-
-      alert(
-
-        error?.error?.message ||
-
-        'Unable to update password'
-
-      );
+      return;
 
     }
 
-  });
+    const {
 
-}
+      mobileNumber,
+
+      newPassword,
+
+      confirmPassword
+
+    } = this.forgotPasswordForm.value;
+
+    if (newPassword !== confirmPassword) {
+
+      alert('Passwords do not match');
+
+      return;
+
+    }
+
+    const payload = {
+
+      mobileNumber,
+
+      password: newPassword
+
+    };
+
+    this.authService.setPassword(
+
+      payload
+
+    ).subscribe({
+
+      next: (response) => {
+
+        // alert(response.message);
+
+
+        this.closeForgotPassword();
+
+        this.forgotPasswordForm.reset();
+
+      },
+
+      error: (error) => {
+
+        this.toastService.showToast(error?.error?.message || 'Unable to update password', 'danger');
+
+      }
+
+    });
+
+  }
 
   login() {
 
@@ -194,58 +189,38 @@ updatePassword() {
 
       .subscribe({
 
-       next: (response) => {
+        next: (response) => {
 
-  console.log(response);
+          localStorage.setItem('token', response.token);
 
-  localStorage.setItem(
-    'token',
-    response.token
-  );
+          localStorage.setItem('role', response.role);
 
-  localStorage.setItem(
-    'role',
-    response.role
-  );
+         localStorage.setItem(
+  'userName',
+  response.user?.name || response.name || ''
+);
 
-  if (response.role === 'driver') {
+          if (response.role === 'driver') {
+            localStorage.setItem(
+              'driverId',
+              response.user.driverId
+            );
+            this.router.navigate(['/driver/dashboard']);
+          }
+          else if (response.role === 'admin') {
+            console.log("The resposne is working : ",response.role)
+            this.router.navigate(['/admin/dashboard']);
+          }
+          else {
+            this.router.navigate(['/parent/dashboard']);
+          }
 
-    this.router.navigate([
-      '/driver/dashboard'
-    ]);
 
-  }
-
-  else if (response.role === 'parent') {
-
-    this.router.navigate([
-      '/parent/dashboard'
-    ]);
-
-  }
-
-  else {
-
-    alert('Invalid role');
-
-  }
-
-},
-
+        },
         error: (error) => {
-
           console.log(error);
-
-          alert(
-
-            error.error?.message ||
-
-            'Login failed'
-
-          );
-
+          this.toastService.showToast(error.error?.message || 'Login failed', 'danger');
           this.isLoading = false;
-
         },
 
         complete: () => {

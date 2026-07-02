@@ -14,238 +14,158 @@
 
 <ion-content fullscreen>
 
-<div class="container">
+  <div class="container">
 
-<div class="logo">
+    <div class="logo">
 
-<ion-icon
-name="bus"
-size="large">
-</ion-icon>
+      <ion-icon name="bus" size="large">
+      </ion-icon>
 
-<h2>Secure School Van</h2>
+      <h2>Secure School Van</h2>
 
-</div>
+    </div>
 
-<form [formGroup]="loginForm">
+    <form [formGroup]="loginForm">
 
-<ion-item>
+      <ion-item>
 
-<ion-input
+        <ion-input label="Mobile Number" labelPlacement="stacked" type="tel" maxlength="10"
+          formControlName="mobileNumber">
 
-label="Mobile Number"
+        </ion-input>
 
-labelPlacement="stacked"
+      </ion-item>
 
-type="tel"
-
-maxlength="10"
-
-formControlName="mobileNumber">
-
-</ion-input>
-
-</ion-item>
-
-<ion-note
-
-color="danger"
-
-*ngIf="
+      <ion-note color="danger" *ngIf="
 loginForm.get('mobileNumber')?.touched &&
 loginForm.get('mobileNumber')?.invalid">
 
-Enter valid mobile number
+        Enter valid mobile number
 
-</ion-note>
+      </ion-note>
 
-<ion-item>
+      <ion-item>
 
-<ion-input
+        <ion-input label="Password" labelPlacement="stacked" type="password" formControlName="password">
 
-label="Password"
+        </ion-input>
 
-labelPlacement="stacked"
+        <div class="forgot-password">
 
-type="password"
+          <ion-button fill="clear" size="small" (click)="openForgotPassword()">
 
-formControlName="password">
+            Forgot Password?
 
-</ion-input>
+          </ion-button>
 
-<div class="forgot-password">
+        </div>
 
-<ion-button
+      </ion-item>
 
-fill="clear"
-
-size="small"
-
-(click)="openForgotPassword()">
-
-Forgot Password?
-
-</ion-button>
-
-</div>
-
-</ion-item>
-
-<ion-note
-
-color="danger"
-
-*ngIf="
+      <ion-note color="danger" *ngIf="
 loginForm.get('password')?.touched &&
 loginForm.get('password')?.invalid">
 
-Password required
+        Password required
 
-</ion-note>
+      </ion-note>
 
-<ion-button
+      <ion-button expand="block" size="large" class="login-btn" [disabled]="isLoading" (click)="login()">
 
-expand="block"
+        {{isLoading ? 'Please Wait...' : 'Login'}}
 
-size="large"
+      </ion-button>
 
-class="login-btn"
+    </form>
 
-[disabled]="isLoading"
+    <div class="register">
 
-(click)="login()">
+      <p>
 
-{{isLoading ? 'Please Wait...' : 'Login'}}
+        Don't have an account?
 
-</ion-button>
+      </p>
 
-</form>
+      <ion-button fill="clear" routerLink="/auth/driver-registration">
 
-<div class="register">
+        Register
 
-<p>
+      </ion-button>
 
-Don't have an account?
+    </div>
 
-</p>
+  </div>
 
-<ion-button
 
-fill="clear"
+  <ion-modal [isOpen]="showForgotPassword">
 
-routerLink="/auth/driver-registration">
+    <ng-template>
 
-Register
+      <ion-header>
 
-</ion-button>
+        <ion-toolbar color="primary">
 
-</div>
+          <ion-title>
 
-</div>
+            Forgot Password
 
+          </ion-title>
 
-<ion-modal
+          <ion-buttons slot="end">
 
-[isOpen]="showForgotPassword">
+            <ion-button (click)="closeForgotPassword()">
 
-<ng-template>
+              Close
 
-<ion-header>
+            </ion-button>
 
-<ion-toolbar color="primary">
+          </ion-buttons>
 
-<ion-title>
+        </ion-toolbar>
 
-Forgot Password
+      </ion-header>
 
-</ion-title>
+      <ion-content>
 
-<ion-buttons slot="end">
+        <form [formGroup]="forgotPasswordForm" class="forgot-container">
 
-<ion-button
+          <ion-item>
 
-(click)="closeForgotPassword()">
+            <ion-input label="Mobile Number" labelPlacement="stacked" formControlName="mobileNumber">
 
-Close
+            </ion-input>
 
-</ion-button>
+          </ion-item>
 
-</ion-buttons>
+          <ion-item>
 
-</ion-toolbar>
+            <ion-input label="New Password" labelPlacement="stacked" type="password" formControlName="newPassword">
 
-</ion-header>
+            </ion-input>
 
-<ion-content>
+          </ion-item>
 
-<form
+          <ion-item>
 
-[formGroup]="forgotPasswordForm"
+            <ion-input label="Confirm Password" labelPlacement="stacked" type="password"
+              formControlName="confirmPassword">
 
-class="forgot-container">
+            </ion-input>
 
-<ion-item>
+          </ion-item>
 
-<ion-input
+          <ion-button expand="block" (click)="updatePassword()">
 
-label="Mobile Number"
+            Update Password
 
-labelPlacement="stacked"
+          </ion-button>
 
-formControlName="mobileNumber">
+        </form>
 
-</ion-input>
+      </ion-content>
 
-</ion-item>
+    </ng-template>
 
-<ion-item>
-
-<ion-input
-
-label="New Password"
-
-labelPlacement="stacked"
-
-type="password"
-
-formControlName="newPassword">
-
-</ion-input>
-
-</ion-item>
-
-<ion-item>
-
-<ion-input
-
-label="Confirm Password"
-
-labelPlacement="stacked"
-
-type="password"
-
-formControlName="confirmPassword">
-
-</ion-input>
-
-</ion-item>
-
-<ion-button
-
-expand="block"
-
-(click)="updatePassword()">
-
-Update Password
-
-</ion-button>
-
-</form>
-
-</ion-content>
-
-</ng-template>
-
-</ion-modal>
+  </ion-modal>
 
 </ion-content>

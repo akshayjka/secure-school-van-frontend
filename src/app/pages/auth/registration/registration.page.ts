@@ -16,6 +16,7 @@ import {
   IonSegmentButton
 } from '@ionic/angular/standalone';
 import { Driver } from 'src/app/core/services/driver';
+import { ToastService } from 'src/app/core/services/toast';
 // import { IonSegmentButton } from '@ionic/angular
 
 @Component({
@@ -54,7 +55,8 @@ export class RegistrationPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private driverService: Driver,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {
 
     this.buildDriverForm();
@@ -213,6 +215,13 @@ buildDriverForm() {
         next: (response) => {
 
           console.log(response);
+          this.toastService.showToast(
+
+'Driver added successfully',
+
+'success'
+
+);
 
           this.router.navigateByUrl('/auth/login');
 
@@ -231,10 +240,38 @@ buildDriverForm() {
   else {
 
     // parentService.register(payload)
+     this.driverService
+      .register(payload)
+
+      .subscribe({
+
+        next: (response) => {
+
+          console.log(response);
+
+          this.toastService.showToast(
+
+'Parent added successfully',
+
+'success'
+
+);
+
+          this.router.navigateByUrl('/auth/login');
+
+        },
+
+        error: (error) => {
+
+          console.log(error);
+
+        }
+
+      });
 
     console.log('Parent Registration');
 
-    this.router.navigateByUrl('/auth/login');
+    // this.router.navigateByUrl('/auth/login');
 
   }
 

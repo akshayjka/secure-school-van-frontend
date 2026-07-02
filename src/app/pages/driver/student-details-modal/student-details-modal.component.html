@@ -1,0 +1,87 @@
+<ion-header>
+
+  <ion-toolbar color="primary">
+
+    <ion-title>
+
+      Student Details
+
+    </ion-title>
+
+    <ion-buttons slot="end">
+
+      <ion-button (click)="close()">
+
+        <!-- <ion-icon name="close"></ion-icon> -->
+                <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+
+    </ion-buttons>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+
+    <p>
+
+      <b>Student :</b>
+
+      {{student.studentName}}
+
+    </p>
+
+    <p>
+
+      <b>Parent :</b>
+
+      {{student.name}}
+
+    </p>
+
+    <p>
+
+      <b>Mobile :</b>
+
+      {{student.mobileNumber}}
+
+    </p>
+
+    <p>
+
+      <b>School :</b>
+
+      {{student.schoolName}}
+
+    </p>
+
+    <p>
+
+      <b>Pickup :</b>
+
+      {{student.pickupArea}}
+
+    </p>
+
+    <p>
+
+      <b>Drop :</b>
+
+      {{student.dropArea}}
+
+    </p>
+
+    <p>
+
+      <b>Status :</b>
+
+      {{student.attendance}}
+
+    </p>
+
+  </div>
+
+</ion-content>

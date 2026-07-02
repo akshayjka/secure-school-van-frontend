@@ -1,0 +1,130 @@
+ <ion-header>
+
+  <ion-toolbar color="primary">
+
+    <ion-title>
+
+      Add Student
+
+    </ion-title>
+
+    <ion-buttons slot="end">
+
+      <ion-button (click)="close()">
+
+        <ion-icon
+          slot="icon-only"
+          name="close-outline">
+
+        </ion-icon>
+
+      </ion-button>
+
+    </ion-buttons>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+ 
+ <form
+  [formGroup]="parentForm"
+  (ngSubmit)="saveParent()"
+>
+
+  <ion-item>
+
+    <ion-input
+
+      label="Parent Name"
+
+      labelPlacement="stacked"
+
+      formControlName="name">
+
+    </ion-input>
+
+  </ion-item>
+
+  <ion-item>
+
+    <ion-input
+
+      label="Parent Mobile"
+
+      labelPlacement="stacked"
+
+      type="tel"
+
+      formControlName="mobileNumber">
+
+    </ion-input>
+
+  </ion-item>
+
+  <ion-item>
+
+    <ion-input
+
+      label="Student Name"
+
+      labelPlacement="stacked"
+
+      formControlName="studentName">
+
+    </ion-input>
+
+  </ion-item>
+
+  <ion-item>
+
+    <ion-input
+
+      label="School Name"
+
+      labelPlacement="stacked"
+
+      formControlName="schoolName">
+
+    </ion-input>
+
+  </ion-item>
+
+  <ion-item>
+
+    <ion-input
+
+      label="Pickup Area"
+
+      labelPlacement="stacked"
+
+      formControlName="pickupArea">
+
+    </ion-input>
+
+  </ion-item>
+
+  <ion-item>
+
+    <ion-input
+
+      label="Drop Area"
+
+      labelPlacement="stacked"
+
+      formControlName="dropArea">
+
+    </ion-input>
+
+  </ion-item>
+
+ <ion-button
+expand="block"
+type="submit"
+[disabled]="isLoading">
+{{isLoading ? 'Saving...' : 'Save'}}
+
+</ion-button>
+</form>
+</ion-content>

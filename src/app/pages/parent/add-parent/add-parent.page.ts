@@ -15,6 +15,7 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 import { ParentService } from '../../../core/services/parent';
+import { ToastService } from 'src/app/core/services/toast';
 
 @Component({
 
@@ -47,7 +48,8 @@ export class AddParentPage implements OnInit {
 
     private parentService: ParentService,
 
-    private router: Router
+    private router: Router,
+     private toastService: ToastService
 
   ) {
 
@@ -87,55 +89,55 @@ export class AddParentPage implements OnInit {
 
   }
 
-  saveParent() {
+saveParent() {
 
-    if (this.parentForm.invalid) {
+  if (this.parentForm.invalid) {
 
-      this.parentForm.markAllAsTouched();
+    this.parentForm.markAllAsTouched();
 
-      return;
+    return;
+
+  }
+
+  this.isLoading = true;
+
+  this.parentService.addParent(
+    this.parentForm.value
+  ).subscribe({
+
+    next: (response) => {
+
+      console.log('Response', response);
+
+      this.toastService.showToast(
+        response.message || 'Parent added successfully'
+      );
+
+      this.parentForm.reset();
+
+      this.isLoading = false;
+
+    },
+
+    error: (error) => {
+
+      console.error(error);
+
+      this.isLoading = false;
+
+      this.toastService.showToast(
+
+        error?.error?.message ||
+
+        'Failed to add parent'
+
+      );
 
     }
 
-    this.isLoading = true;
+  });
 
-    this.parentService.addParent(
-
-      this.parentForm.value
-
-    ).subscribe({
-
-      next: (response) => {
-
-        console.log('Response', response);
-
-        alert(response.message);
-
-        this.parentForm.reset();
-
-        this.isLoading = false;
-
-      },
-
-      error: (error) => {
-
-        console.error(error);
-
-        this.isLoading = false;
-
-        alert(
-
-          error?.error?.message ||
-
-          'Unable to add parent'
-
-        );
-
-      }
-
-    });
-
-  }
+}
 
   gotodashboard() {
 

@@ -1,0 +1,36 @@
+.container {
+
+  padding: 16px;
+}
+
+.top-section {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.top-section ion-button {
+
+  margin: 0;
+}
+
+ion-card {
+
+  border-radius: 12px;
+
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+
+  .top-section {
+
+    justify-content: flex-end;
+  }
+
+}

@@ -1,0 +1,201 @@
+<ion-header>
+
+  <ion-toolbar color="primary">
+
+    <ion-title>
+
+      Driver Dashboard
+
+    </ion-title>
+
+    <ion-buttons slot="end">
+
+      <ion-button (click)="logout()">
+
+        <ion-icon slot="icon-only" name="log-out-outline">
+        </ion-icon>
+
+      </ion-button>
+
+    </ion-buttons>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+
+    <!-- Driver ID -->
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          Driver ID
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        {{ driverId }}
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Ride Controls -->
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          Ride Controls
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" size="large" color="success" (click)="startRide()" [disabled]="rideStarted">
+
+          START RIDE
+
+        </ion-button>
+
+        <ion-button expand="block" size="large" color="danger" (click)="endRide()" [disabled]="!rideStarted">
+
+          END RIDE
+
+        </ion-button>
+
+        <p class="ride-status">
+          Status :
+          <strong>
+            {{ rideStarted ? 'Running' : 'Stopped' }}
+          </strong>
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Referral Program -->
+
+    <ion-card>
+
+      <ion-card-header>
+
+        <ion-card-title>
+          Referral Program
+        </ion-card-title>
+
+      </ion-card-header>
+
+      <ion-card-content>
+
+        <h2>
+          {{ referralCode }}
+        </h2>
+
+        <p>
+          Total Referrals:
+          {{ referralCount }}
+        </p>
+
+        <ion-button expand="block" color="success" (click)="shareReferralCode()">
+
+          Share Referral Code
+
+        </ion-button>
+
+      </ion-card-content>
+
+    </ion-card>
+
+    <!-- Today Card -->
+
+    <ion-card>
+
+      <ion-card-header>
+
+        <ion-card-title>
+
+          Today's List
+
+        </ion-card-title>
+
+      </ion-card-header>
+
+      <ion-card-content>
+
+        <p>
+
+          Present :
+
+          {{ todayStats.present }}
+
+        </p>
+
+        <p>
+
+          Absent :
+
+          {{ todayStats.absent }}
+
+        </p>
+
+        <p>
+
+          Total :
+
+          {{ todayStats.total }}
+
+        </p>
+
+      </ion-card-content>
+
+    </ion-card>
+
+    <!-- Add Student Button -->
+
+    <div class="student-action">
+
+      <ion-button shape="round" (click)="openAddStudent()">
+
+        <ion-icon slot="start" name="add-outline">
+        </ion-icon>
+
+        Add Student
+
+      </ion-button>
+
+    </div>
+
+    <!-- Students -->
+
+    <ion-card>
+
+      <ion-card-header>
+
+        <ion-card-title>
+
+          Students
+
+        </ion-card-title>
+
+      </ion-card-header>
+
+      <ion-card-content>
+
+        <ion-list>
+
+          <ion-item button *ngFor="let student of students" (click)="openStudent(student)">
+
+            <ion-label>
+
+              {{ student.studentName }}
+
+            </ion-label>
+
+          </ion-item>
+
+        </ion-list>
+
+      </ion-card-content>
+
+    </ion-card>
+
+  </div>
+
+</ion-content>

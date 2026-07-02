@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      Parent Dashboard
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline">
+        </ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Student Profile</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <p>
+      <strong>Student Name:</strong>
+      {{ parent.studentName }}
+    </p>
+    <p>
+      <strong>School Name:</strong>
+      {{ parent.schoolName }}
+    </p>
+    <p>
+      <strong>Pickup Area:</strong>
+      {{ parent.pickupArea }}
+    </p>
+    <p>
+      <strong>Drop Area:</strong>
+      {{ parent.dropArea }}
+    </p>
+  </ion-card-content>
+</ion-card>
+
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Driver Details</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <p>
+      <strong>Name:</strong>
+      {{ driver.name }}
+    </p>
+    <p>
+      <strong>Phone:</strong>
+      {{ driver.mobileNumber }}
+    </p>
+  </ion-card-content>
+</ion-card>
+
+<ion-card>
+
+  <ion-card-header>
+    <ion-card-title>Ride Status</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ion-chip *ngIf="rideStarted" color="success">
+      Ride Started
+    </ion-chip>
+    <ion-chip *ngIf="!rideStarted" color="danger">
+      Ride Ended
+    </ion-chip>
+  </ion-card-content>
+</ion-card>
+
+<ion-card>
+
+  <ion-card-header>
+    <ion-card-title>
+      Attendance
+    </ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ion-item>
+      <ion-label>
+        Present
+      </ion-label>
+      <ion-toggle [(ngModel)]="isPresent" (ionChange)="updateAttendance()">
+      </ion-toggle>
+    </ion-item>
+  </ion-card-content>
+</ion-card>
+
+
+<ion-button *ngIf="rideStarted" expand="block" color="success" (click)="openTracking()">
+
+  Track School Van
+
+</ion-button>

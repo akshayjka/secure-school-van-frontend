@@ -8,6 +8,19 @@
 
     </ion-title>
 
+    <ion-buttons slot="end">
+
+      <ion-button (click)="logout()">
+
+        <ion-icon
+          slot="icon-only"
+          name="log-out-outline">
+        </ion-icon>
+
+      </ion-button>
+
+    </ion-buttons>
+
   </ion-toolbar>
 
 </ion-header>
@@ -40,16 +53,23 @@
 
     <div class="action-card">
 
-      <ion-button
-        expand="block"
-        size="large"
-        (click)="navigateAction()">
+<ion-button
+  *ngIf="userRole === 'driver'"
+  expand="block"
+  (click)="navigateAction()">
 
-        {{ userRole === 'driver'
-            ? 'Add Parent'
-            : 'Add Driver' }}
+  Add Parent
 
-      </ion-button>
+</ion-button>
+
+<ion-button
+  *ngIf="userRole === 'parent'"
+  expand="block"
+  (click)="navigateAction()">
+
+  Add Driver
+
+</ion-button>
 
     </div>
 

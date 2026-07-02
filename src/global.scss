@@ -24,7 +24,7 @@
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
-
+@import "leaflet/dist/leaflet.css";
 /**
  * Ionic Dark Mode
  * -----------------------------------------------------
@@ -35,3 +35,264 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+body {
+
+  background: var(--app-background);
+
+  color: var(--app-text);
+
+  font-family:
+
+  "Inter",
+
+  "Roboto",
+
+  sans-serif;
+
+}
+
+ion-content {
+
+  --background: var(--app-background);
+
+}
+
+.container {
+
+  padding:24px;
+
+}
+
+.page-title {
+
+  font-size:28px;
+
+  font-weight:700;
+
+}
+
+.page-subtitle {
+
+  color:var(--app-subtext);
+
+  font-size:14px;
+
+}
+
+.card {
+
+  background:var(--app-card);
+
+  border-radius:16px;
+
+  padding:20px;
+
+  box-shadow:var(--app-shadow);
+
+}
+
+.section-title {
+
+  font-size:20px;
+
+  font-weight:600;
+
+}
+
+.full-width-btn {
+
+  height:50px;
+
+  margin-top:20px;
+
+  border-radius:12px;
+
+}
+
+.text-center {
+
+  text-align:center;
+
+}
+
+.mt-1{
+
+margin-top:8px;
+
+}
+
+.mt-2{
+
+margin-top:16px;
+
+}
+
+.mt-3{
+
+margin-top:24px;
+
+}
+
+.mt-4{
+
+margin-top:32px;
+
+}
+
+// toolbar
+ion-toolbar {
+
+  --background:#1E3A8A;
+
+  --color:white;
+
+}
+
+ion-title {
+
+  font-weight:700;
+
+}
+
+ion-header {
+
+  box-shadow:
+
+  0 2px 6px rgba(0,0,0,0.1);
+
+}
+
+//  button design
+
+ion-button {
+
+  height:50px;
+
+  --border-radius:12px;
+
+  font-weight:600;
+
+  text-transform:none;
+}
+
+// card
+
+.app-card {
+
+  background:#fff;
+
+  border-radius:16px;
+
+  padding:20px;
+
+  box-shadow:
+
+  0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+// toaster
+.universal-toast {
+
+  --border-radius: 14px;
+
+  --box-shadow:
+    0 6px 18px rgba(0,0,0,0.2);
+
+  font-weight: 600;
+
+  letter-spacing: 0.4px;
+
+}
+
+// Dailog
+.universal-alert {
+
+  --backdrop-opacity: 0.6;
+
+  .alert-wrapper {
+
+    border-radius: 22px;
+
+    padding: 8px;
+
+    box-shadow:
+      0 10px 30px rgba(0,0,0,0.15);
+
+    width: 320px;
+  }
+
+  .alert-head {
+
+    text-align: center;
+
+    padding-top: 20px;
+  }
+
+  .alert-title {
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    color: #0f172a;
+  }
+
+  .alert-sub-title {
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    font-weight: 500;
+  }
+
+  .alert-message {
+
+    text-align: center;
+
+    font-size: 15px;
+
+    color: #475569;
+
+    line-height: 1.6;
+
+    padding: 12px 24px;
+  }
+
+  .alert-button-group {
+
+    padding: 16px;
+
+    display: flex;
+
+    gap: 12px;
+  }
+
+  .alert-button {
+
+    flex: 1;
+
+    height: 48px;
+
+    border-radius: 12px;
+
+    font-weight: 600;
+
+    font-size: 15px;
+  }
+
+  .alert-button-role-cancel {
+
+    background: #f1f5f9;
+
+    color: #475569;
+  }
+
+  .alert-button-role-confirm {
+
+    background: #ef4444;
+
+    color: #ffffff;
+  }
+}

@@ -1,0 +1,70 @@
+.container{
+padding:16px;
+}
+
+ion-card{
+border-radius:16px;
+margin-bottom:20px;
+}
+
+ion-card-title{
+font-weight:700;
+}
+
+ion-item{
+--border-radius:10px;
+margin-bottom:10px;
+}
+
+// button 
+.container {
+  padding: 16px;
+}
+
+.student-action {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.student-action ion-button {
+  --border-radius: 12px;
+  height: 44px;
+  font-weight: 600;
+}
+
+ion-card {
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+ion-card-title {
+  font-weight: 700;
+}
+
+ion-item {
+  --border-radius: 10px;
+  margin-bottom: 10px;
+}
+.referral-card {
+  text-align: center;
+}
+
+.referral-code {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  margin: 10px 0;
+}
+
+.ride-status {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 15px;
+  font-weight: 600;
+}
+
+ion-button {
+  margin-top: 10px;
+}

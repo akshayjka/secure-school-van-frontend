@@ -1,0 +1,89 @@
+<ion-header>
+
+  <ion-toolbar color="primary">
+
+    <ion-title>
+      Edit Driver
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+
+    <form
+      [formGroup]="driverForm">
+
+      <ion-card>
+
+        <ion-card-content>
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Driver Name
+            </ion-label>
+
+            <ion-input
+              formControlName="name">
+            </ion-input>
+
+          </ion-item>
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Mobile Number
+            </ion-label>
+
+            <ion-input
+              formControlName="mobileNumber">
+            </ion-input>
+
+          </ion-item>
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Vehicle Number
+            </ion-label>
+
+            <ion-input
+              formControlName="vehicleNumber">
+            </ion-input>
+
+          </ion-item>
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Route Area
+            </ion-label>
+
+            <ion-input
+              formControlName="routeArea">
+            </ion-input>
+
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            color="primary"
+            (click)="updateDriver()">
+
+            Update Driver
+
+          </ion-button>
+
+        </ion-card-content>
+
+      </ion-card>
+
+    </form>
+
+  </div>
+
+</ion-content>

@@ -1,0 +1,149 @@
+<ion-header>
+  <ion-toolbar color="primary">
+
+    <ion-buttons slot="start">
+      <ion-back-button
+        defaultHref="/admin/dashboard">
+      </ion-back-button>
+    </ion-buttons>
+    
+    <ion-title>
+      Drivers
+    </ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="container">
+
+    <div class="top-section">
+
+      <ion-button
+        color="success"
+        (click)="addDriver()">
+
+        <ion-icon
+          slot="start"
+          name="add">
+        </ion-icon>
+
+        Add Driver
+
+      </ion-button>
+
+    </div>
+
+   <div class="table-container desktop-view">
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Driver ID</th>
+        <th>Mobile</th>
+        <th>Name</th>
+        <th>Vehicle</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let driver of drivers">
+
+        <td>{{driver.driverId}}</td>
+        <td>{{driver.mobileNumber}}</td>
+        <td>{{driver.name}}</td>
+        <td>{{driver.vehicleNumber}}</td>
+
+        <td>
+
+          <ion-button
+            fill="clear"
+            color="warning"
+            (click)="editDriver(driver)">
+
+            <ion-icon
+              name="create-outline">
+            </ion-icon>
+
+          </ion-button>
+
+          <ion-button
+            fill="clear"
+            color="danger"
+            (click)="deleteDriver(driver)">
+
+            <ion-icon
+              name="trash-outline">
+            </ion-icon>
+
+          </ion-button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
+
+<div class="mobile-view">
+
+  <ion-card
+    *ngFor="let driver of drivers">
+
+    <ion-card-content>
+
+      <h2>{{driver.name}}</h2>
+
+      <p>
+        Driver ID :
+        {{driver.driverId}}
+      </p>
+
+      <p>
+        Mobile :
+        {{driver.mobileNumber}}
+      </p>
+
+      <p>
+        Vehicle :
+        {{driver.vehicleNumber}}
+      </p>
+
+      <div class="card-actions">
+
+        <ion-button
+          size="small"
+          color="warning"
+          (click)="editDriver(driver)">
+
+          Edit
+
+        </ion-button>
+
+        <ion-button
+          size="small"
+          color="danger"
+          (click)="deleteDriver(driver)">
+
+          Delete
+
+        </ion-button>
+
+      </div>
+
+    </ion-card-content>
+
+  </ion-card>
+
+</div>
+
+  </div>
+
+</ion-content>

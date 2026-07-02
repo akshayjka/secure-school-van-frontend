@@ -3,14 +3,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import {
-  IonContent,
   IonHeader,
-  IonButton,
+  IonToolbar,
   IonTitle,
-  IonToolbar
+  IonContent,
+  IonButton,
+  IonButtons,
+  IonIcon
 } from '@ionic/angular/standalone';
-
 import { Router } from '@angular/router';
+import { addIcons } from 'ionicons';
+
+import { logOutOutline } from 'ionicons/icons';
+import { DialogService } from 'src/app/core/services/dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,26 +30,37 @@ import { Router } from '@angular/router';
     IonTitle,
     IonToolbar,
     CommonModule,
-    FormsModule
+    FormsModule,
+    IonButtons,
+    IonIcon
   ]
 })
-export class DashboardPage implements OnInit {
+export class DashboardPages implements OnInit {
 
   userName = '';
 
   userRole = '';
 
   constructor(
-    private router: Router
-  ) {}
+    private router: Router,
+    private dialogService: DialogService
+  ) {
+    addIcons({
+
+    logOutOutline
+
+  });
+  }
 
   ngOnInit() {
+
+     this.userRole = localStorage.getItem('role') || '';
 
     this.userName =
       localStorage.getItem('userName') || '';
 
-    this.userRole =
-      localStorage.getItem('userRole') || '';
+    // this.userRole =
+    //   localStorage.getItem('userRole') || '';
   }
 
   navigateAction() {
@@ -57,6 +73,21 @@ export class DashboardPage implements OnInit {
 
       this.router.navigateByUrl('/add-driver');
     }
+  }
+
+ async logout() {
+
+    const confirmed = await this.dialogService.confirmLogout();
+
+    if (!confirmed) return;
+
+    localStorage.removeItem('token');
+
+    localStorage.removeItem('role');
+
+    localStorage.removeItem('name');
+
+    this.router.navigate(['/auth/login']);
   }
 
 }
