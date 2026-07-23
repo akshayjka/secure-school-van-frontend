@@ -9,7 +9,7 @@ export const routes: Routes = [
 
   {
     path: '',
-    redirectTo: 'auth/registration',
+    redirectTo: 'auth/login',
     pathMatch: 'full'
   },
 
