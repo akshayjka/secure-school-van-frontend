@@ -2,17 +2,62 @@
 
   <ion-toolbar color="primary">
 
+    <!-- Back Button -->
+
+    <ion-buttons
+      slot="start"
+      *ngIf="currentView !== 'dashboard'">
+
+      <ion-button (click)="goBack()">
+
+        <ion-icon
+          slot="icon-only"
+          name="arrow-back-outline">
+        </ion-icon>
+
+      </ion-button>
+
+    </ion-buttons>
+
+
+    <!-- Title -->
+
     <ion-title>
 
-      Driver Dashboard
+      {{
+        currentView === 'dashboard'
+        ? 'Driver Dashboard'
+        : pageTitle
+      }}
 
     </ion-title>
 
-    <ion-buttons slot="end">
+
+    <!-- Dashboard Actions -->
+
+    <ion-buttons
+      slot="end"
+      *ngIf="currentView === 'dashboard'">
+
+      <!-- Menu -->
+
+      <ion-button (click)="openMenu($event)">
+
+        <ion-icon
+          slot="icon-only"
+          name="menu-outline">
+        </ion-icon>
+
+      </ion-button>
+
+
+      <!-- Logout -->
 
       <ion-button (click)="logout()">
 
-        <ion-icon slot="icon-only" name="log-out-outline">
+        <ion-icon
+          slot="icon-only"
+          name="log-out-outline">
         </ion-icon>
 
       </ion-button>
@@ -23,12 +68,14 @@
 
 </ion-header>
 
+<!-- <div *ngIf="currentView === 'dashboard'"> -->
+
+
+<!-- </div> -->
+
 <ion-content>
 
-  <div class="container">
-
-    <!-- Driver ID -->
-
+  <div *ngIf="currentView === 'dashboard'">
     <ion-card>
       <ion-card-header>
         <ion-card-title>
@@ -55,7 +102,7 @@
 
         </ion-button>
 
-        <ion-button expand="block" size="large" color="danger" (click)="endRide()" [disabled]="!rideStarted">
+        <ion-button expand="block" size="large" color="danger" (click)="endRide()" [disabled]="!canEndRide()">
 
           END RIDE
 
@@ -70,27 +117,37 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Referral Program -->
+  </div>
+
+  <!-- referal View -->
+
+  <div *ngIf="currentView === 'referral'">
 
     <ion-card>
 
       <ion-card-header>
 
         <ion-card-title>
+
           Referral Program
+
         </ion-card-title>
 
       </ion-card-header>
 
       <ion-card-content>
 
-        <h2>
+        <h2 class="referral-code">
+
           {{ referralCode }}
+
         </h2>
 
         <p>
+
           Total Referrals:
           {{ referralCount }}
+
         </p>
 
         <ion-button expand="block" color="success" (click)="shareReferralCode()">
@@ -103,7 +160,11 @@
 
     </ion-card>
 
-    <!-- Today Card -->
+  </div>
+
+  <!-- attendance View -->
+
+  <div *ngIf="currentView === 'attendance'">
 
     <ion-card>
 
@@ -111,7 +172,7 @@
 
         <ion-card-title>
 
-          Today's List
+          Today's Attendance
 
         </ion-card-title>
 
@@ -119,54 +180,186 @@
 
       <ion-card-content>
 
-        <p>
+        <ion-item>
 
-          Present :
+          <ion-label>
 
-          {{ todayStats.present }}
+            Present
 
-        </p>
+          </ion-label>
 
-        <p>
+          <ion-badge color="success">
 
-          Absent :
+            {{ todayStats.present }}
 
-          {{ todayStats.absent }}
+          </ion-badge>
 
-        </p>
+        </ion-item>
 
-        <p>
+        <ion-item>
 
-          Total :
+          <ion-label>
 
-          {{ todayStats.total }}
+            Absent
 
-        </p>
+          </ion-label>
+
+          <ion-badge color="danger">
+
+            {{ todayStats.absent }}
+
+          </ion-badge>
+
+        </ion-item>
+
+        <ion-item>
+
+          <ion-label>
+
+            Total
+
+          </ion-label>
+
+          <ion-badge color="primary">
+
+            {{ todayStats.total }}
+
+          </ion-badge>
+
+        </ion-item>
 
       </ion-card-content>
 
     </ion-card>
 
-    <!-- Add Student Button -->
+  </div>
 
-    <div class="student-action">
+  <!-- route card -->
 
-      <ion-button shape="round" (click)="openAddStudent()">
 
-        <ion-icon slot="start" name="add-outline">
-        </ion-icon>
+ <!-- TODAY ROUTE -->
 
-        Add Student
+<div *ngIf="currentView === 'route'">
 
-      </ion-button>
+  <ion-card>
 
-    </div>
+    <ion-card-header>
 
-    <!-- Students -->
+      <ion-card-title>
+        Today's Route
+      </ion-card-title>
+
+    </ion-card-header>
+
+    <ion-card-content>
+
+      <!-- STUDENTS AVAILABLE -->
+
+      <ion-list *ngIf="selectedStudents.length > 0">
+
+        <ion-item *ngFor="let student of selectedStudents">
+
+          <ion-label>
+
+            <h2>
+              {{ student.studentName }}
+            </h2>
+
+            <ion-badge
+              [color]="
+                studentStatuses[student.parentId] === 'Dropped'
+                ? 'success'
+                : studentStatuses[student.parentId] === 'Picked'
+                ? 'warning'
+                : 'medium'
+              ">
+
+              {{ studentStatuses[student.parentId] || 'Pending' }}
+
+            </ion-badge>
+
+
+            <div class="action-buttons">
+
+              <!-- PICKED -->
+
+              <ion-button
+                size="small"
+                color="success"
+                [disabled]="
+                  (studentStatuses[student.parentId] || 'Pending')
+                  !== 'Pending'
+                "
+                (click)="markPicked(student)">
+
+                Picked
+
+              </ion-button>
+
+
+              <!-- DROPPED -->
+
+              <ion-button
+                size="small"
+                color="warning"
+                [disabled]="
+                  studentStatuses[student.parentId]
+                  !== 'Picked'
+                "
+                (click)="markDropped(student)">
+
+                Dropped
+
+              </ion-button>
+
+
+              <!-- EDIT -->
+
+              <ion-button
+                size="small"
+                fill="outline"
+                color="primary"
+                (click)="editStatus(student)">
+
+                Edit
+
+              </ion-button>
+
+            </div>
+
+          </ion-label>
+
+        </ion-item>
+
+      </ion-list>
+
+
+      <!-- NO STUDENTS -->
+
+      <div
+        *ngIf="selectedStudents.length === 0"
+        class="empty-route">
+
+        <p>
+          No present students for today's route.
+        </p>
+
+      </div>
+
+    </ion-card-content>
+
+  </ion-card>
+
+</div>
+
+  <!-- students view -->
+
+  <div *ngIf="currentView === 'students'">
 
     <ion-card>
 
       <ion-card-header>
+
 
         <ion-card-title>
 
@@ -197,5 +390,7 @@
     </ion-card>
 
   </div>
+
+
 
 </ion-content>

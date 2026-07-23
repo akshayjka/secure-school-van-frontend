@@ -18,9 +18,7 @@
 
     <!-- Role Selection -->
 
-    <ion-segment
-      [(ngModel)]="selectedRole"
-      (ionChange)="changeRole()">
+    <ion-segment [(ngModel)]="selectedRole" (ionChange)="changeRole()">
 
       <ion-segment-button value="driver">
         <ion-label>Driver</ion-label>
@@ -37,10 +35,7 @@
       <!-- Common Fields -->
 
       <ion-item>
-        <ion-input
-          label="Name"
-          labelPlacement="floating"
-          formControlName="name">
+        <ion-input label="Name" labelPlacement="floating" formControlName="name">
         </ion-input>
       </ion-item>
 
@@ -49,11 +44,7 @@
       </small>
 
       <ion-item>
-        <ion-input
-          type="tel"
-          label="Mobile Number"
-          labelPlacement="floating"
-          formControlName="mobileNumber">
+        <ion-input type="tel" label="Mobile Number" labelPlacement="floating" formControlName="mobileNumber">
         </ion-input>
       </ion-item>
 
@@ -63,31 +54,24 @@
 
       <ion-item>
 
-  <ion-input
-    type="password"
-    label="Password"
-    labelPlacement="floating"
-    formControlName="password">
+        <ion-input type="password" label="Password" labelPlacement="floating" formControlName="password">
 
-  </ion-input>
+        </ion-input>
 
-</ion-item>
+      </ion-item>
 
-<small *ngIf="submitted && registrationForm.get('password')?.invalid">
+      <small *ngIf="submitted && registrationForm.get('password')?.invalid">
 
-  Password must be at least 6 characters
+        Password must be at least 6 characters
 
-</small>
+      </small>
 
       <!-- DRIVER FIELDS -->
 
       <ng-container *ngIf="selectedRole === 'driver'">
 
         <ion-item>
-          <ion-input
-            label="Vehicle Number"
-            labelPlacement="floating"
-            formControlName="vehicleNumber">
+          <ion-input label="Vehicle Number" labelPlacement="floating" formControlName="vehicleNumber">
           </ion-input>
         </ion-item>
 
@@ -96,16 +80,21 @@
         </small>
 
         <ion-item>
-          <ion-input
-            label="Route / Area"
-            labelPlacement="floating"
-            formControlName="routeArea">
+          <ion-input label="Route / Area" labelPlacement="floating" formControlName="routeArea">
           </ion-input>
         </ion-item>
 
         <small *ngIf="submitted && registrationForm.get('routeArea')?.invalid">
           Route area required
         </small>
+
+        <ion-item>
+
+          <ion-input label="Referral Code (Optional)" labelPlacement="floating" formControlName="referredByCode">
+
+          </ion-input>
+
+        </ion-item>
 
       </ng-container>
 
@@ -114,10 +103,7 @@
       <ng-container *ngIf="selectedRole === 'parent'">
 
         <ion-item>
-          <ion-input
-            label="Student Name"
-            labelPlacement="floating"
-            formControlName="studentName">
+          <ion-input label="Student Name" labelPlacement="floating" formControlName="studentName">
           </ion-input>
         </ion-item>
 
@@ -126,10 +112,7 @@
         </small>
 
         <ion-item>
-          <ion-input
-            label="School Name"
-            labelPlacement="floating"
-            formControlName="schoolName">
+          <ion-input label="School Name" labelPlacement="floating" formControlName="schoolName">
           </ion-input>
         </ion-item>
 
@@ -138,10 +121,7 @@
         </small>
 
         <ion-item>
-          <ion-input
-            label="Pickup Area"
-            labelPlacement="floating"
-            formControlName="pickupArea">
+          <ion-input label="Pickup Area" labelPlacement="floating" formControlName="pickupArea">
           </ion-input>
         </ion-item>
 
@@ -150,10 +130,7 @@
         </small>
 
         <ion-item>
-          <ion-input
-            label="Drop Area"
-            labelPlacement="floating"
-            formControlName="dropArea">
+          <ion-input label="Drop Area" labelPlacement="floating" formControlName="dropArea">
           </ion-input>
         </ion-item>
 
@@ -163,10 +140,7 @@
 
       </ng-container>
 
-      <ion-button
-        expand="block"
-        class="register-btn"
-        (click)="register()">
+      <ion-button expand="block" class="register-btn" (click)="register()">
 
         Register
 

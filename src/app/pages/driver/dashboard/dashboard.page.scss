@@ -68,3 +68,10 @@ ion-item {
 ion-button {
   margin-top: 10px;
 }
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}

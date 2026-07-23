@@ -12,6 +12,27 @@
   </ion-toolbar>
 </ion-header>
 
+<ion-content [fullscreen]="true">
+
+  <ion-card>
+
+  <ion-card-header>
+    <ion-card-title>
+      Attendance
+    </ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ion-item>
+      <ion-label>
+        Present
+      </ion-label>
+      <ion-toggle [(ngModel)]="isPresent" (ionChange)="updateAttendance()">
+      </ion-toggle>
+    </ion-item>
+  </ion-card-content>
+</ion-card>
+
 <ion-card>
   <ion-card-header>
     <ion-card-title>Student Profile</ion-card-title>
@@ -74,24 +95,31 @@
 
   <ion-card-header>
     <ion-card-title>
-      Attendance
+      Student Status
     </ion-card-title>
   </ion-card-header>
 
   <ion-card-content>
-    <ion-item>
-      <ion-label>
-        Present
-      </ion-label>
-      <ion-toggle [(ngModel)]="isPresent" (ionChange)="updateAttendance()">
-      </ion-toggle>
-    </ion-item>
+
+   <ion-chip *ngIf="studentStatus === 'waiting'" color="warning">
+  Waiting for Pickup
+</ion-chip>
+
+<ion-chip *ngIf="studentStatus === 'picked_up'" color="success">
+  Picked Up
+</ion-chip>
+
+<ion-chip *ngIf="studentStatus === 'dropped'" color="primary">
+  Dropped
+</ion-chip>
+
   </ion-card-content>
+
 </ion-card>
 
 
+
+</ion-content>
 <ion-button *ngIf="rideStarted" expand="block" color="success" (click)="openTracking()">
-
   Track School Van
-
 </ion-button>

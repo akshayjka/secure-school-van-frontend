@@ -27,7 +27,13 @@ export class LiveTrackingPage implements AfterViewInit  {
 
  map:any;
 
-  marker:any;
+  vanMarker: any;
+
+schoolMarker: any;
+
+schoolLat = 11.0168;
+
+schoolLng = 76.9558;
 
  ngAfterViewInit() {
 
@@ -46,7 +52,27 @@ export class LiveTrackingPage implements AfterViewInit  {
 
     L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',  { maxZoom: 19 } ).addTo(this.map);
 
-    this.marker = L.marker( [11.0168, 76.9558] ).addTo(this.map);
+    this.schoolMarker = L.marker(
+  [
+    this.schoolLat,
+    this.schoolLng
+  ]
+).addTo(this.map);
+
+this.schoolMarker.bindPopup(
+  '🏫 Lisieux Matriculation School'
+);
+
+this.vanMarker = L.marker(
+  [
+    this.schoolLat,
+    this.schoolLng
+  ]
+).addTo(this.map);
+
+this.vanMarker.bindPopup(
+  '🚐 School Van'
+);
 
     setInterval(() => {
 
@@ -60,14 +86,27 @@ export class LiveTrackingPage implements AfterViewInit  {
 
   .subscribe((res:any)=>{
 
-    this.marker.setLatLng([
+   this.vanMarker.setLatLng([
+  res.latitude,
+  res.longitude
+]);
+    const bounds = L.latLngBounds([
+  [
+    res.latitude,
+    res.longitude
+  ],
+  [
+    this.schoolLat,
+    this.schoolLng
+  ]
+]);
 
-      res.latitude,
-
-      res.longitude
-
-    ]);
-    this.map.panTo([ res.latitude,  res.longitude]);
+this.map.fitBounds(
+  bounds,
+  {
+    padding: [50, 50]
+  }
+);
   });
 
 },15000);

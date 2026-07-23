@@ -212,6 +212,7 @@ export class LoginPage {
             this.router.navigate(['/admin/dashboard']);
           }
           else {
+             localStorage.setItem('parentId', response.user.parentId);
             this.router.navigate(['/parent/dashboard']);
           }
 

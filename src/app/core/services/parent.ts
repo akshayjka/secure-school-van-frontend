@@ -54,5 +54,10 @@ getDashboard(parentId: string) {
 updateAttendance(payload: any) {
   return this.http.put(`${this.apiUrl}/attendance`, payload);
 }
+getProfile(parentId: string) {
+  return this.http.get(
+    `${this.apiUrl}/profile/${parentId}`
+  );
+}
 
 }

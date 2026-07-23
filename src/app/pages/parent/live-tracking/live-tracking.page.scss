@@ -18,3 +18,14 @@ ion-button {
   margin-top: 20px;
 
 }
+.school-card {
+  background: #ffffff;
+  padding: 12px;
+  margin: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+#map {
+  height: calc(70vh - 180px);
+}

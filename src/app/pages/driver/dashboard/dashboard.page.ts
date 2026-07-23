@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  DriverMenuPopoverComponent
+} from '../driver-menu-popover/driver-menu-popover.component';
 import { FormsModule } from '@angular/forms';
 
 import {
@@ -17,12 +20,16 @@ import {
   IonList,
   IonItem,
   IonLabel,
-  ModalController
+  ModalController,
+  IonBadge,
+  
+  PopoverController
+  
 } from '@ionic/angular/standalone';
 import { RideService }
-from '../../../core/services/ride';
+  from '../../../core/services/ride';
 import { LocationService }
-from '../../../core/services/location';
+  from '../../../core/services/location';
 
 import { Driver } from 'src/app/core/services/driver';
 import { ToastService } from 'src/app/core/services/toast';
@@ -32,12 +39,15 @@ import { StudentDetailsModalComponent } from '../student-details-modal/student-d
 import { AddStudentModalComponent } from '../add-student-modal/add-student-modal.component';
 import { addIcons } from 'ionicons';
 
+
 import {
   addOutline,
   logOutOutline,
   peopleOutline,
   personOutline,
-  schoolOutline
+  schoolOutline,
+  menuOutline,
+  arrowBackOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -48,11 +58,11 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-IonButtons,
-IonIcon,
-IonList,
-IonItem,
-IonLabel,
+    IonButtons,
+    IonIcon,
+    IonList,
+    IonItem,
+    IonLabel,
     IonContent,
     IonHeader,
     IonTitle,
@@ -61,19 +71,36 @@ IonLabel,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton
+    IonButton,
+    IonBadge,
+  
+  
   ]
 })
 export class DashboardPage implements OnInit {
 
   driverId = '';
 
+  currentView = 'dashboard';
+
+
+pageTitle = 'Driver Dashboard';
+
+
   referralCode = '';
   referralCount = 0;
   referredByCode = '';
   rideStarted = false;
+  routeMode = false;
 
   students: any[] = [];
+  presentStudents: any[] = [];
+  absentStudents: any[] = [];
+  selectedStudents: any[] = [];
+  showStudentList = false;
+  studentStatuses: {
+    [parentId: string]: string
+  } = {};
 
   todayStats = {
     present: 0,
@@ -86,17 +113,29 @@ export class DashboardPage implements OnInit {
     private router: Router,
     private dialogService: DialogService,
     private toastService: ToastService,
-    private modalCtrl:ModalController,
+    private modalCtrl: ModalController,
     private rideService: RideService,
-private locationService: LocationService
+    private locationService: LocationService,
+      private popoverCtrl: PopoverController
+    // private popoverController: PopoverController
   ) {
     addIcons({
-    addOutline,
-    logOutOutline,
-    peopleOutline,
-    personOutline,
-    schoolOutline
-  });
+      addOutline,
+      logOutOutline,
+      peopleOutline,
+      personOutline,
+      schoolOutline,
+      menuOutline,
+      arrowBackOutline
+    });
+
+  }
+
+   select(view: string) {
+
+    this.popoverCtrl.dismiss({
+      view: view
+    });
 
   }
 
@@ -108,86 +147,165 @@ private locationService: LocationService
     if (this.driverId) {
 
       this.loadDashboard();
+      this.presentStudents = this.students.filter(student => student.attendance);
+      this.absentStudents = this.students.filter(student => !student.attendance);
+      // setInterval(() => {
+      //   this.loadDashboard();
+      // }, 10000);
 
       this.loadReferralDetails();
 
     }
 
-    this.rideStarted =
-localStorage.getItem('rideStarted')
-=== 'true';
+    this.rideStarted = localStorage.getItem('rideStarted') === 'true';
+  }
+
+  async markPicked(student: any) {
+
+    const confirmed =
+      await this.dialogService.confirm(
+        'Mark Picked',
+        `Mark ${student.studentName} as Picked?`
+      );
+
+    if (!confirmed) return;
+
+    this.studentStatuses[
+      student.parentId
+    ] = 'Picked';
+
+  }
+async openMenu(event: Event) {
+
+  const popover = await this.popoverCtrl.create({
+
+    component: DriverMenuPopoverComponent,
+
+    event: event,
+
+    side: 'bottom',
+
+    alignment: 'end'
+
+  });
+
+  await popover.present();
+
+  const result = await popover.onDidDismiss();
+
+  const view = result.data?.view;
+
+  if (view) {
+    this.openView(view);
+  }
+
+}
+
+
+async markDropped(student: any) {
+
+  const confirmed =
+    await this.dialogService.confirm(
+      'Mark Dropped',
+      `Mark ${student.studentName} as Dropped?`
+    );
+
+  if (!confirmed) return;
+
+  this.studentStatuses[
+    student.parentId
+  ] = 'Dropped';
+
+}
+
+
+  async editStatus(student: any) {
+
+    const confirmed =
+      await this.dialogService.confirm(
+        'Edit Status',
+        `Edit status for ${student.studentName}?`
+      );
+
+    if (!confirmed) return;
+
+    this.studentStatuses[
+      student.parentId
+    ] = 'Pending';
 
   }
 
   loadDashboard(): void {
 
-    this.driverService
-      .getDashboard(this.driverId)
-      .subscribe({
+    this.students.forEach(student => {
 
-        next: (res) => {
+      if (!this.studentStatuses[student.parentId]) {
 
-          this.students =
-            res.students || [];
+        this.studentStatuses[student.parentId] = 'Pending';
+      }
 
-          this.todayStats =
-            res.todayStats || {
-              present: 0,
-              absent: 0,
-              total: 0
-            };
+    });
 
-        },
+    this.driverService.getDashboard(this.driverId).subscribe({
 
-        error: (err) => {
+      next: (res) => {
 
-          console.error(err);
+        console.log(res);
+        this.students = res.students || [];
+        this.students.forEach(student => {
 
-          this.toastService.showToast(
-            'Unable to load dashboard',
-            'danger'
-          );
+          if (!this.studentStatuses[student.parentId]) {
+            this.studentStatuses[student.parentId] = 'Pending';
+          }
+        });
+        this.presentStudents = this.students.filter(student => student.attendance === true);
+        this.absentStudents = this.students.filter(student => student.attendance === false);
+        this.todayStats =
+          res.todayStats || {
+            present: 0,
+            absent: 0,
+            total: 0
+          };
+        console.log('Present Students', this.presentStudents);
+        console.log('Absent Students', this.absentStudents);
+      },
 
-        }
-
-      });
+      error: (err) => {
+        console.error(err);
+        this.toastService.showToast('Unable to load dashboard', 'danger');
+      }
+    });
 
   }
 
   loadReferralDetails(): void {
 
-    this.driverService
-      .getReferralDetails(this.driverId)
-      .subscribe({
+    this.driverService.getReferralDetails(this.driverId).subscribe({
+      next: (response) => {
+        const data = response.data;
+        this.referralCode = data?.referralCode || '';
+        this.referralCount = data?.referralCount || 0;
+        this.referredByCode = data?.referredByCode || '';
+      },
 
-        next: (response) => {
+      error: (error) => {
+        console.error(error);
+        this.toastService.showToast('Unable to load referral details', 'danger');
+      }
+    });
+  }
 
-          const data = response.data;
 
-          this.referralCode =
-            data?.referralCode || '';
+  showPresentStudents() {
+    this.selectedStudents = this.presentStudents;
+    this.showStudentList = true;
+      this.routeMode = true;
+  }
 
-          this.referralCount =
-            data?.referralCount || 0;
-
-          this.referredByCode =
-            data?.referredByCode || '';
-
-        },
-
-        error: (error) => {
-
-          console.error(error);
-
-          this.toastService.showToast(
-            'Unable to load referral details',
-            'danger'
-          );
-
-        }
-
-      });
-
+  showAbsentStudents() {
+    this.selectedStudents = this.absentStudents;
+    this.showStudentList = true;
+    this.routeMode = false;
   }
 
   async shareReferralCode(): Promise<void> {
@@ -216,24 +334,19 @@ localStorage.getItem('rideStarted')
 
   }
 
+  async openStudent(student: any) {
+    const modal = await this.modalCtrl.create({
+      component: StudentDetailsModalComponent,
+      componentProps: {
+        student
+      }
+    });
 
-async openStudent(student:any){
+    await modal.present();
 
-const modal=await this.modalCtrl.create({
+  }
 
-component:StudentDetailsModalComponent,
-
-componentProps:{
-student
-}
-
-});
-
-await modal.present();
-
-}
-
-async logout() {
+  async logout() {
 
     const confirmed = await this.dialogService.confirmLogout();
 
@@ -244,113 +357,103 @@ async logout() {
     localStorage.removeItem('role');
 
     localStorage.removeItem('name');
-     localStorage.removeItem('driverId');
-      localStorage.removeItem('userName');
+    localStorage.removeItem('driverId');
+    localStorage.removeItem('userName');
 
     this.router.navigate(['/auth/login']);
   }
 
   async openAddStudent() {
+    const modal = await this.modalCtrl.create({
+      component: AddStudentModalComponent,
+      componentProps: {
+        driverId: this.driverId
+      }
+    });
+    modal.onDidDismiss().then(() => {
+      this.loadDashboard();
+    });
+    await modal.present();
+  }
 
-  const modal = await this.modalCtrl.create({
-
-    component: AddStudentModalComponent,
-
-    componentProps: {
-
-      driverId: this.driverId
-
-    }
-
-  });
-
-  modal.onDidDismiss()
-
-  .then(() => {
-
-    this.loadDashboard();
-
-  });
-
-  await modal.present();
-
-}
-
-startRide() {
-
-  this.rideService
-    .startRide(this.driverId)
-    .subscribe({
-
+  startRide() {
+    this.rideService.startRide(this.driverId).subscribe({
       next: () => {
-
         this.rideStarted = true;
-
-        localStorage.setItem(
-          'rideStarted',
-          'true'
-        );
-
-        this.locationService
-          .startTracking(
-            this.driverId
-          );
-
-        this.toastService.showToast(
-          'Ride Started',
-          'success'
-        );
-
+        localStorage.setItem('rideStarted', 'true');
+        this.locationService.startTracking(this.driverId);
+        this.toastService.showToast('Ride Started', 'success');
       },
-
       error: () => {
-
-        this.toastService.showToast(
-          'Unable to start ride',
-          'danger'
-        );
-
+        this.toastService.showToast('Unable to start ride', 'danger');
       }
-
     });
+  }
 
-}
-
-endRide() {
-
-  this.rideService
-    .endRide(this.driverId)
-    .subscribe({
-
+  endRide() {
+    this.rideService.endRide(this.driverId).subscribe({
       next: () => {
-
         this.rideStarted = false;
-
-        localStorage.removeItem(
-          'rideStarted'
-        );
-
-        this.locationService
-          .stopTracking();
-
-        this.toastService.showToast(
-          'Ride Ended',
-          'success'
-        );
-
+        localStorage.removeItem('rideStarted');
+        this.locationService.stopTracking();
+        this.toastService.showToast('Ride Ended', 'success');
       },
-
       error: () => {
-
-        this.toastService.showToast(
-          'Unable to end ride',
-          'danger'
-        );
-
+        this.toastService.showToast('Unable to end ride', 'danger');
       }
-
     });
+  }
+  canEndRide(): boolean {
 
+  if (!this.rideStarted) {
+    return false;
+  }
+
+  const presentStudents = this.selectedStudents.length
+    ? this.selectedStudents
+    : this.presentStudents;
+
+  if (presentStudents.length === 0) {
+    return false;
+  }
+
+  return presentStudents.every(
+    student =>
+      this.studentStatuses[student.parentId] === 'Dropped'
+  );
 }
 
+openView(view: string) {
+
+  this.currentView = view;
+
+  const titles: any = {
+    referral: 'Referral Program',
+    attendance: 'Today Attendance',
+    route: 'Today Route',
+    students: 'Students',
+    addStudent: 'Add Student'
+  };
+
+  this.pageTitle = titles[view] || 'Driver Dashboard';
+
+  // When Today Route is opened
+  if (view === 'route') {
+
+    this.routeMode = true;
+
+    // Show only PRESENT students
+    this.selectedStudents = this.presentStudents;
+
+    console.log('Today Route Students:', this.selectedStudents);
+  }
+}
+
+goBack() {
+
+  this.currentView = 'dashboard';
+
+  this.pageTitle = 'Driver Dashboard';
+
+}
 }
