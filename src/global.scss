@@ -1,40 +1,45 @@
 /*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
+ * GLOBAL STYLES
+ * Secure School Van
  */
 
-/* Core CSS required for Ionic components to work properly */
+
+/* =====================================================
+   IONIC CORE
+===================================================== */
+
 @import "@ionic/angular/css/core.css";
 
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
-@import "leaflet/dist/leaflet.css";
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import "leaflet/dist/leaflet.css";
+
+
+/* =====================================================
+   IMPORTANT:
+   Remove this if you don't want device dark mode
+   automatically changing the UI.
+===================================================== */
+
+/*
 @import '@ionic/angular/css/palettes/dark.system.css';
+*/
+
+
+/* =====================================================
+   APP BASE
+===================================================== */
+
+html,
 body {
 
   background: var(--app-background);
@@ -42,257 +47,1089 @@ body {
   color: var(--app-text);
 
   font-family:
-
-  "Inter",
-
-  "Roboto",
-
-  sans-serif;
+    "Inter",
+    "Roboto",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 
 }
+
+
+ion-app {
+
+  background: var(--app-background);
+
+}
+
 
 ion-content {
 
   --background: var(--app-background);
 
+  --color: var(--app-text);
+
 }
+
+
+/* =====================================================
+   PAGE LAYOUT
+===================================================== */
 
 .container {
 
-  padding:24px;
+  padding: 20px;
 
 }
+
+
+.page-container {
+
+  padding:
+
+    20px;
+
+  max-width:
+
+    1200px;
+
+  margin:
+
+    0 auto;
+
+}
+
+
+/* =====================================================
+   TYPOGRAPHY
+===================================================== */
 
 .page-title {
 
-  font-size:28px;
+  margin: 0;
 
-  font-weight:700;
+  color: var(--app-text);
+
+  font-size: 28px;
+
+  font-weight: 700;
+
+  letter-spacing: -0.5px;
 
 }
+
 
 .page-subtitle {
 
-  color:var(--app-subtext);
+  margin-top: 6px;
 
-  font-size:14px;
+  color: var(--app-subtext);
 
-}
+  font-size: 14px;
 
-.card {
-
-  background:var(--app-card);
-
-  border-radius:16px;
-
-  padding:20px;
-
-  box-shadow:var(--app-shadow);
+  line-height: 1.5;
 
 }
+
 
 .section-title {
 
-  font-size:20px;
+  color: var(--app-text);
 
-  font-weight:600;
+  font-size: 20px;
+
+  font-weight: 700;
+
+}
+
+
+.text-muted {
+
+  color: var(--app-subtext);
 
 }
 
-.full-width-btn {
-
-  height:50px;
-
-  margin-top:20px;
-
-  border-radius:12px;
-
-}
 
 .text-center {
 
-  text-align:center;
+  text-align: center;
 
 }
 
-.mt-1{
 
-margin-top:8px;
-
-}
-
-.mt-2{
-
-margin-top:16px;
-
-}
-
-.mt-3{
-
-margin-top:24px;
-
-}
-
-.mt-4{
-
-margin-top:32px;
-
-}
-
-// toolbar
-ion-toolbar {
-
-  --background:#1E3A8A;
-
-  --color:white;
-
-}
-
-ion-title {
-
-  font-weight:700;
-
-}
+/* =====================================================
+   HEADER / TOOLBAR
+===================================================== */
 
 ion-header {
 
   box-shadow:
 
-  0 2px 6px rgba(0,0,0,0.1);
+    0 2px 12px rgba(15, 23, 42, 0.08);
 
 }
 
-//  button design
+
+ion-toolbar {
+
+  --background:
+
+    linear-gradient(
+      135deg,
+      var(--app-primary),
+      var(--app-primary-dark)
+    );
+
+  --color:
+
+    var(--app-text-on-primary);
+
+  --border-color:
+
+    transparent;
+
+  --min-height:
+
+    64px;
+
+}
+
+
+ion-title {
+
+  color:
+
+    var(--app-text-on-primary);
+
+  font-weight:
+
+    700;
+
+  letter-spacing:
+
+    -0.2px;
+
+}
+
+
+ion-toolbar ion-button {
+
+  --color:
+
+    var(--app-text-on-primary);
+
+}
+
+
+ion-toolbar ion-icon {
+
+  color:
+
+    var(--app-text-on-primary);
+
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
 
 ion-button {
 
-  height:50px;
+  min-height:
 
-  --border-radius:12px;
+    48px;
 
-  font-weight:600;
+  --border-radius:
 
-  text-transform:none;
+    12px;
+
+  font-weight:
+
+    600;
+
+  text-transform:
+
+    none;
+
+  letter-spacing:
+
+    0;
+
 }
 
-// card
 
-.app-card {
+ion-button:not([fill="clear"]):not([fill="outline"]) {
 
-  background:#fff;
+  --background:
 
-  border-radius:16px;
+    var(--app-primary);
 
-  padding:20px;
+  --background-hover:
+
+    var(--app-primary-dark);
+
+  --background-activated:
+
+    var(--app-primary-dark);
+
+  --color:
+
+    #ffffff;
+
+  --box-shadow:
+
+    0 6px 16px rgba(79, 70, 229, 0.20);
+
+}
+
+
+ion-button[fill="outline"] {
+
+  --border-color:
+
+    var(--app-primary);
+
+  --color:
+
+    var(--app-primary);
+
+}
+
+
+ion-button[fill="clear"] {
+
+  --color:
+
+    var(--app-primary);
+
+}
+
+
+.full-width-btn {
+
+  width:
+
+    100%;
+
+  min-height:
+
+    50px;
+
+  margin-top:
+
+    20px;
+
+}
+
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+ion-card {
+
+  --background:
+
+    var(--app-card);
+
+  margin:
+
+    12px 0;
+
+  border:
+
+    1px solid var(--app-border-light);
+
+  border-radius:
+
+    18px;
 
   box-shadow:
 
-  0 4px 12px rgba(0,0,0,0.08);
+    var(--app-shadow-sm);
 
 }
 
-// toaster
-.universal-toast {
 
-  --border-radius: 14px;
+ion-card-title {
+
+  color:
+
+    var(--app-text);
+
+  font-weight:
+
+    700;
+
+}
+
+
+ion-card-subtitle {
+
+  color:
+
+    var(--app-subtext);
+
+}
+
+
+.app-card,
+.card {
+
+  background:
+
+    var(--app-card);
+
+  border:
+
+    1px solid var(--app-border-light);
+
+  border-radius:
+
+    18px;
+
+  padding:
+
+    20px;
+
+  box-shadow:
+
+    var(--app-shadow);
+
+}
+
+
+/* =====================================================
+   FORM INPUTS
+===================================================== */
+
+ion-item {
+
+  --background:
+
+    var(--app-surface);
+
+  --color:
+
+    var(--app-text);
+
+  --border-color:
+
+    var(--app-border);
+
+  --highlight-color-focused:
+
+    var(--app-primary);
+
+}
+
+
+ion-input,
+ion-textarea,
+ion-select {
+
+  --color:
+
+    var(--app-text);
+
+  --placeholder-color:
+
+    var(--app-text-muted);
+
+  --highlight-color-focused:
+
+    var(--app-primary);
+
+}
+
+
+ion-label {
+
+  color:
+
+    var(--app-text-secondary);
+
+}
+
+
+/* =====================================================
+   LISTS
+===================================================== */
+
+ion-list {
+
+  background:
+
+    transparent;
+
+}
+
+
+ion-list ion-item {
+
+  --background:
+
+    var(--app-card);
+
+  --color:
+
+    var(--app-text);
+
+}
+
+
+/* =====================================================
+   MENU / SIDEBAR
+===================================================== */
+
+ion-menu {
+
+  --background:
+
+    var(--app-surface);
+
+}
+
+
+ion-menu ion-content {
+
+  --background:
+
+    var(--app-surface);
+
+}
+
+
+ion-menu ion-list {
+
+  background:
+
+    transparent;
+
+  padding:
+
+    12px;
+
+}
+
+
+ion-menu ion-item {
+
+  --background:
+
+    transparent;
+
+  --color:
+
+    var(--app-text-secondary);
+
+  --border-radius:
+
+    12px;
+
+  margin-bottom:
+
+    6px;
+
+}
+
+
+ion-menu ion-item:hover {
+
+  --background:
+
+    var(--app-primary-light);
+
+  --color:
+
+    var(--app-primary);
+
+}
+
+
+ion-menu ion-icon {
+
+  color:
+
+    var(--app-primary);
+
+}
+
+
+/* =====================================================
+   POPOVER MENU
+===================================================== */
+
+ion-popover {
+
+  --background:
+
+    var(--app-surface);
 
   --box-shadow:
-    0 6px 18px rgba(0,0,0,0.2);
 
-  font-weight: 600;
+    var(--app-shadow-lg);
 
-  letter-spacing: 0.4px;
+  --border-radius:
+
+    16px;
 
 }
 
-// Dailog
+
+ion-popover ion-content {
+
+  --background:
+
+    var(--app-surface);
+
+}
+
+
+ion-popover ion-item {
+
+  --background:
+
+    transparent;
+
+  --color:
+
+    var(--app-text);
+
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+ion-modal {
+
+  --background:
+
+    var(--app-background);
+
+  --border-radius:
+
+    22px;
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.universal-toast {
+
+  --background:
+
+    #0f172a;
+
+  --color:
+
+    #ffffff;
+
+  --border-radius:
+
+    14px;
+
+  --box-shadow:
+
+    0 8px 24px rgba(15, 23, 42, 0.22);
+
+  font-weight:
+
+    600;
+
+  letter-spacing:
+
+    0.2px;
+
+}
+
+
+.toast-success {
+
+  --background:
+
+    var(--app-success);
+
+}
+
+
+.toast-danger {
+
+  --background:
+
+    var(--app-danger);
+
+}
+
+
+.toast-warning {
+
+  --background:
+
+    var(--app-warning);
+
+}
+
+
+/* =====================================================
+   ALERT / DIALOG
+===================================================== */
+
 .universal-alert {
 
-  --backdrop-opacity: 0.6;
+  --backdrop-opacity:
 
-  .alert-wrapper {
+    0.55;
 
-    border-radius: 22px;
+}
 
-    padding: 8px;
 
-    box-shadow:
-      0 10px 30px rgba(0,0,0,0.15);
+.universal-alert .alert-wrapper {
 
-    width: 320px;
-  }
+  background:
 
-  .alert-head {
+    var(--app-surface);
 
-    text-align: center;
+  border:
 
-    padding-top: 20px;
-  }
+    1px solid var(--app-border-light);
 
-  .alert-title {
+  border-radius:
 
-    font-size: 24px;
+    22px;
 
-    font-weight: 700;
+  box-shadow:
 
-    color: #0f172a;
-  }
+    var(--app-shadow-lg);
 
-  .alert-sub-title {
+  width:
 
-    color: #64748b;
+    min(90vw, 340px);
 
-    font-size: 14px;
+}
 
-    font-weight: 500;
-  }
 
-  .alert-message {
+.universal-alert .alert-head {
 
-    text-align: center;
+  padding:
 
-    font-size: 15px;
+    24px 24px 8px;
 
-    color: #475569;
+  text-align:
 
-    line-height: 1.6;
+    center;
 
-    padding: 12px 24px;
-  }
+}
 
-  .alert-button-group {
 
-    padding: 16px;
+.universal-alert .alert-title {
 
-    display: flex;
+  color:
 
-    gap: 12px;
-  }
+    var(--app-text);
 
-  .alert-button {
+  font-size:
 
-    flex: 1;
+    22px;
 
-    height: 48px;
+  font-weight:
 
-    border-radius: 12px;
+    700;
 
-    font-weight: 600;
+}
 
-    font-size: 15px;
-  }
 
-  .alert-button-role-cancel {
+.universal-alert .alert-sub-title {
 
-    background: #f1f5f9;
+  color:
 
-    color: #475569;
-  }
+    var(--app-subtext);
 
-  .alert-button-role-confirm {
+  font-size:
 
-    background: #ef4444;
+    14px;
 
-    color: #ffffff;
-  }
+  font-weight:
+
+    500;
+
+}
+
+
+.universal-alert .alert-message {
+
+  padding:
+
+    12px 24px 20px;
+
+  color:
+
+    var(--app-text-secondary);
+
+  font-size:
+
+    15px;
+
+  line-height:
+
+    1.6;
+
+  text-align:
+
+    center;
+
+}
+
+
+.universal-alert .alert-button-group {
+
+  display:
+
+    flex;
+
+  gap:
+
+    10px;
+
+  padding:
+
+    12px 16px 18px;
+
+}
+
+
+.universal-alert .alert-button {
+
+  min-height:
+
+    46px;
+
+  border-radius:
+
+    12px;
+
+  font-size:
+
+    15px;
+
+  font-weight:
+
+    600;
+
+}
+
+
+.universal-alert .alert-button-role-cancel {
+
+  background:
+
+    var(--app-surface-soft);
+
+  color:
+
+    var(--app-text-secondary);
+
+}
+
+
+.universal-alert .alert-button-role-confirm {
+
+  background:
+
+    var(--app-primary);
+
+  color:
+
+    #ffffff;
+
+}
+
+
+/* Danger confirmation dialog */
+
+.universal-alert.danger-alert
+.alert-button-role-confirm {
+
+  background:
+
+    var(--app-danger);
+
+}
+
+
+/* =====================================================
+   BADGES
+===================================================== */
+
+ion-badge {
+
+  padding:
+
+    6px 10px;
+
+  border-radius:
+
+    20px;
+
+  font-weight:
+
+    600;
+
+}
+
+
+/* =====================================================
+   SEGMENT
+===================================================== */
+
+ion-segment {
+
+  --background:
+
+    var(--app-surface-soft);
+
+  border-radius:
+
+    12px;
+
+  padding:
+
+    4px;
+
+}
+
+
+ion-segment-button {
+
+  --color:
+
+    var(--app-subtext);
+
+  --color-checked:
+
+    var(--app-primary);
+
+  --indicator-color:
+
+    var(--app-surface);
+
+  --border-radius:
+
+    10px;
+
+}
+
+
+/* =====================================================
+   FAB
+===================================================== */
+
+ion-fab-button {
+
+  --background:
+
+    var(--app-primary);
+
+  --background-activated:
+
+    var(--app-primary-dark);
+
+  --color:
+
+    #ffffff;
+
+  --box-shadow:
+
+    0 8px 22px rgba(79, 70, 229, 0.30);
+
+}
+
+
+/* =====================================================
+   STATUS UTILITY CLASSES
+===================================================== */
+
+.status-success {
+
+  background:
+
+    var(--app-success-light);
+
+  color:
+
+    var(--app-success);
+
+}
+
+
+.status-warning {
+
+  background:
+
+    var(--app-warning-light);
+
+  color:
+
+    var(--app-warning);
+
+}
+
+
+.status-danger {
+
+  background:
+
+    var(--app-danger-light);
+
+  color:
+
+    var(--app-danger);
+
+}
+
+
+.status-info {
+
+  background:
+
+    var(--app-info-light);
+
+  color:
+
+    var(--app-info);
+
+}
+
+
+/* =====================================================
+   SPACING UTILITIES
+===================================================== */
+
+.mt-1 {
+
+  margin-top: 8px;
+
+}
+
+.mt-2 {
+
+  margin-top: 16px;
+
+}
+
+.mt-3 {
+
+  margin-top: 24px;
+
+}
+
+.mt-4 {
+
+  margin-top: 32px;
+
+}
+
+/* Standard dashboard card */
+
+.dashboard-card {
+
+  background:
+
+    var(--app-card);
+
+  border:
+
+    1px solid var(--app-border-light);
+
+  border-radius:
+
+    18px;
+
+  padding:
+
+    20px;
+
+  box-shadow:
+
+    var(--app-shadow-sm);
+
+}
+
+
+/* Interactive card */
+
+.action-card {
+
+  background:
+
+    var(--app-card);
+
+  border:
+
+    1px solid var(--app-border-light);
+
+  border-radius:
+
+    18px;
+
+  padding:
+
+    20px;
+
+  box-shadow:
+
+    var(--app-shadow-sm);
+
+  transition:
+
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+}
+
+
+.action-card:active {
+
+  transform:
+
+    scale(0.98);
+
+}
+
+
+/* Highlight card */
+
+.primary-card {
+
+  background:
+
+    linear-gradient(
+      135deg,
+      var(--app-primary),
+      var(--app-primary-dark)
+    );
+
+  color:
+
+    #ffffff;
+
+  border-radius:
+
+    20px;
+
+  padding:
+
+    22px;
+
+  box-shadow:
+
+    0 10px 28px rgba(79, 70, 229, 0.20);
+
 }

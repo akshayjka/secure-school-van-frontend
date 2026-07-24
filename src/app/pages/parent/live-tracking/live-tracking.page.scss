@@ -19,7 +19,9 @@ ion-button {
 
 }
 .school-card {
-  background: #ffffff;
+  // background: #ffffff;
+
+  background: var(--app-card);
   padding: 12px;
   margin: 12px;
   border-radius: 10px;

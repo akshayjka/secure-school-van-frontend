@@ -16,106 +16,123 @@
 
   <ion-card>
 
-  <ion-card-header>
-    <ion-card-title>
-      Attendance
-    </ion-card-title>
-  </ion-card-header>
+    <ion-card-header>
+      <ion-card-title>
+        Attendance
+      </ion-card-title>
+    </ion-card-header>
 
-  <ion-card-content>
-    <ion-item>
+    <ion-card-content>
+      <!-- <ion-item>
       <ion-label>
         Present
       </ion-label>
-      <ion-toggle [(ngModel)]="isPresent" (ionChange)="updateAttendance()">
+      <ion-toggle  [(ngModel)]="isPresent" (ionChange)="updateAttendance()">
       </ion-toggle>
-    </ion-item>
-  </ion-card-content>
-</ion-card>
+    </ion-item> -->
+      <ion-item>
 
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>Student Profile</ion-card-title>
-  </ion-card-header>
+        <ion-label>
+          <h2>Today's Attendance</h2>
 
-  <ion-card-content>
-    <p>
-      <strong>Student Name:</strong>
-      {{ parent.studentName }}
-    </p>
-    <p>
-      <strong>School Name:</strong>
-      {{ parent.schoolName }}
-    </p>
-    <p>
-      <strong>Pickup Area:</strong>
-      {{ parent.pickupArea }}
-    </p>
-    <p>
-      <strong>Drop Area:</strong>
-      {{ parent.dropArea }}
-    </p>
-  </ion-card-content>
-</ion-card>
+          <p>
+            {{ isPresent ? 'Present' : 'Absent' }}
+          </p>
+        </ion-label>
 
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>Driver Details</ion-card-title>
-  </ion-card-header>
+        <ion-toggle slot="end" [checked]="isPresent" (ionChange)="updateAttendance($event)">
+        </ion-toggle>
 
-  <ion-card-content>
-    <p>
-      <strong>Name:</strong>
-      {{ driver.name }}
-    </p>
-    <p>
-      <strong>Phone:</strong>
-      {{ driver.mobileNumber }}
-    </p>
-  </ion-card-content>
-</ion-card>
+      </ion-item>
 
-<ion-card>
 
-  <ion-card-header>
-    <ion-card-title>Ride Status</ion-card-title>
-  </ion-card-header>
+      
+    </ion-card-content>
+  </ion-card>
 
-  <ion-card-content>
-    <ion-chip *ngIf="rideStarted" color="success">
-      Ride Started
-    </ion-chip>
-    <ion-chip *ngIf="!rideStarted" color="danger">
-      Ride Ended
-    </ion-chip>
-  </ion-card-content>
-</ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Student Profile</ion-card-title>
+    </ion-card-header>
 
-<ion-card>
+    <ion-card-content>
+      <p>
+        <strong>Student Name:</strong>
+        {{ parent.studentName }}
+      </p>
+      <p>
+        <strong>School Name:</strong>
+        {{ parent.schoolName }}
+      </p>
+      <p>
+        <strong>Pickup Area:</strong>
+        {{ parent.pickupArea }}
+      </p>
+      <p>
+        <strong>Drop Area:</strong>
+        {{ parent.dropArea }}
+      </p>
+    </ion-card-content>
+  </ion-card>
 
-  <ion-card-header>
-    <ion-card-title>
-      Student Status
-    </ion-card-title>
-  </ion-card-header>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Driver Details</ion-card-title>
+    </ion-card-header>
 
-  <ion-card-content>
+    <ion-card-content>
+      <p>
+        <strong>Name:</strong>
+        {{ driver.name }}
+      </p>
+      <p>
+        <strong>Phone:</strong>
+        {{ driver.mobileNumber }}
+      </p>
+    </ion-card-content>
+  </ion-card>
 
-   <ion-chip *ngIf="studentStatus === 'waiting'" color="warning">
-  Waiting for Pickup
-</ion-chip>
+  <ion-card>
 
-<ion-chip *ngIf="studentStatus === 'picked_up'" color="success">
-  Picked Up
-</ion-chip>
+    <ion-card-header>
+      <ion-card-title>Ride Status</ion-card-title>
+    </ion-card-header>
 
-<ion-chip *ngIf="studentStatus === 'dropped'" color="primary">
-  Dropped
-</ion-chip>
+    <ion-card-content>
+      <ion-chip *ngIf="rideStarted" color="success">
+        Ride Started
+      </ion-chip>
+      <ion-chip *ngIf="!rideStarted" color="danger">
+        Ride Ended
+      </ion-chip>
+    </ion-card-content>
+  </ion-card>
 
-  </ion-card-content>
+  <ion-card>
 
-</ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        Student Status
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+
+      <ion-chip *ngIf="studentStatus === 'waiting'" color="warning">
+        Waiting for Pickup
+      </ion-chip>
+
+      <ion-chip *ngIf="studentStatus === 'picked_up'" color="success">
+        Picked Up
+      </ion-chip>
+
+      <ion-chip *ngIf="studentStatus === 'dropped'" color="primary">
+        Dropped
+      </ion-chip>
+
+    </ion-card-content>
+
+  </ion-card>
 
 
 

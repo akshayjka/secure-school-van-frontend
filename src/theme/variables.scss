@@ -1,31 +1,159 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
 :root {
 
-  --ion-color-primary: #1E3A8A;
+  /* =====================================================
+     BRAND COLORS
+  ===================================================== */
 
-  --ion-color-primary-rgb: 30,58,138;
+  --app-primary: #4f46e5;
+  --app-primary-dark: #3730a3;
+  --app-primary-light: #eef2ff;
 
-  --ion-color-secondary: #2563EB;
+  --app-secondary: #0f766e;
+  --app-secondary-light: #ccfbf1;
 
-  --ion-color-success: #16A34A;
+  --app-accent: #0891b2;
+  --app-accent-light: #cffafe;
 
-  --ion-color-warning: #EA580C;
 
-  --ion-color-danger: #DC2626;
+  /* =====================================================
+     BACKGROUND COLORS
+  ===================================================== */
 
-  --app-background: #F8FAFC;
+  --app-background: #f4f7fb;
 
-  --app-card: #FFFFFF;
+  --app-surface: #ffffff;
 
-  --app-text: #0F172A;
+  --app-card: #ffffff;
 
-  --app-subtext: #64748B;
+  --app-surface-soft: #f8fafc;
 
-  --app-border: #E2E8F0;
+
+  /* =====================================================
+     TEXT COLORS
+  ===================================================== */
+
+  --app-text: #0f172a;
+
+  --app-text-secondary: #475569;
+
+  --app-subtext: #64748b;
+
+  --app-text-muted: #94a3b8;
+
+  --app-text-on-primary: #ffffff;
+
+
+  /* =====================================================
+     BORDER COLORS
+  ===================================================== */
+
+  --app-border: #e2e8f0;
+
+  --app-border-light: #f1f5f9;
+
+
+  /* =====================================================
+     STATUS COLORS
+  ===================================================== */
+
+  --app-success: #16a34a;
+  --app-success-light: #dcfce7;
+
+  --app-warning: #d97706;
+  --app-warning-light: #fef3c7;
+
+  --app-danger: #dc2626;
+  --app-danger-light: #fee2e2;
+
+  --app-info: #0284c7;
+  --app-info-light: #e0f2fe;
+
+
+  /* =====================================================
+     SHADOWS
+  ===================================================== */
+
+  --app-shadow-sm:
+    0 2px 8px rgba(15, 23, 42, 0.06);
 
   --app-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.08);
 
-    0 4px 12px rgba(0,0,0,0.08);
+  --app-shadow-lg:
+    0 16px 40px rgba(15, 23, 42, 0.12);
+
+
+  /* =====================================================
+     IONIC PRIMARY
+  ===================================================== */
+
+  --ion-color-primary: #4f46e5;
+  --ion-color-primary-rgb: 79, 70, 229;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #453dca;
+  --ion-color-primary-tint: #6159e8;
+
+
+  /* =====================================================
+     IONIC SECONDARY
+  ===================================================== */
+
+  --ion-color-secondary: #0f766e;
+  --ion-color-secondary-rgb: 15, 118, 110;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #0d6861;
+  --ion-color-secondary-tint: #27847d;
+
+
+  /* =====================================================
+     IONIC TERTIARY
+  ===================================================== */
+
+  --ion-color-tertiary: #0891b2;
+  --ion-color-tertiary-rgb: 8, 145, 178;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #07809d;
+  --ion-color-tertiary-tint: #21a0ba;
+
+
+  /* =====================================================
+     IONIC SUCCESS / WARNING / DANGER
+  ===================================================== */
+
+  --ion-color-success: #16a34a;
+  --ion-color-success-rgb: 22, 163, 74;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-shade: #138f41;
+  --ion-color-success-tint: #2dad5c;
+
+  --ion-color-warning: #d97706;
+  --ion-color-warning-rgb: 217, 119, 6;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-shade: #bf6905;
+  --ion-color-warning-tint: #dd851f;
+
+  --ion-color-danger: #dc2626;
+  --ion-color-danger-rgb: 220, 38, 38;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-shade: #c22121;
+  --ion-color-danger-tint: #e03c3c;
+
+
+  /* =====================================================
+     GLOBAL IONIC BACKGROUND
+  ===================================================== */
+
+  --ion-background-color: #f4f7fb;
+
+  --ion-text-color: #0f172a;
+
+  --ion-card-background: #ffffff;
+
+  --ion-toolbar-background: #4f46e5;
+
+  --ion-toolbar-color: #ffffff;
 
 }

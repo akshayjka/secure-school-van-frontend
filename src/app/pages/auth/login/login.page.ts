@@ -186,52 +186,250 @@ login() {
 
   this.isLoading = true;
 
-  this.authService.login(
-    this.loginForm.getRawValue()
-  ).subscribe({
+  const payload = this.loginForm.getRawValue();
 
-        next: (response) => {
+  console.log('LOGIN PAYLOAD:', payload);
 
-          localStorage.setItem('token', response.token);
+  this.authService.login(payload).subscribe({
 
-          localStorage.setItem('role', response.role);
+    next: (response: any) => {
 
-         localStorage.setItem(
-  'userName',
-  response.user?.name || response.name || ''
-);
+      console.log('LOGIN RESPONSE:', response);
 
-          if (response.role === 'driver') {
-            localStorage.setItem(
-              'driverId',
-              response.user.driverId
-            );
-            this.router.navigate(['/driver/dashboard']);
-          }
-          else if (response.role === 'admin') {
-            console.log("The resposne is working : ",response.role)
-            this.router.navigate(['/admin/dashboard']);
-          }
-          else {
-             localStorage.setItem('parentId', response.user.parentId);
-            this.router.navigate(['/parent/dashboard']);
-          }
+      // -----------------------------
+      // 1. Validate token
+      // -----------------------------
 
+      if (!response?.token) {
+        console.error('Token missing in login response');
 
-        },
-        error: (error) => {
-          console.log(error);
-          this.toastService.showToast(error.error?.message || 'Login failed', 'danger');
+        this.toastService.showToast(
+          'Invalid login response. Token missing.',
+          'danger'
+        );
+
+        this.isLoading = false;
+        return;
+      }
+
+      // -----------------------------
+      // 2. Get role safely
+      // -----------------------------
+
+      const role = response?.role || response?.user?.role;
+
+      if (!role) {
+        console.error('Role missing:', response);
+
+        this.toastService.showToast(
+          'User role not found.',
+          'danger'
+        );
+
+        this.isLoading = false;
+        return;
+      }
+
+      // -----------------------------
+      // 3. Store common login data
+      // -----------------------------
+
+      localStorage.setItem(
+        'token',
+        response.token
+      );
+
+      localStorage.setItem(
+        'role',
+        role
+      );
+
+      const userName =
+        response?.user?.name ||
+        response?.name ||
+        '';
+
+      localStorage.setItem(
+        'userName',
+        userName
+      );
+
+      // -----------------------------
+      // 4. DRIVER LOGIN
+      // -----------------------------
+
+      if (role === 'driver') {
+
+        const driverId =
+          response?.user?.driverId ||
+          response?.driverId;
+
+        if (!driverId) {
+
+          console.error(
+            'Driver ID missing:',
+            response
+          );
+
+          this.toastService.showToast(
+            'Driver information not found.',
+            'danger'
+          );
+
+          this.clearLoginStorage();
+
           this.isLoading = false;
-        },
 
-        complete: () => {
-
-          this.isLoading = false;
-
+          return;
         }
 
-      });
+        localStorage.setItem(
+          'driverId',
+          driverId
+        );
 
-  }
+        console.log(
+          'Driver logged in:',
+          driverId
+        );
+
+        this.router.navigateByUrl(
+          '/driver/dashboard',
+          {
+            replaceUrl: true
+          }
+        );
+
+        return;
+      }
+
+      // -----------------------------
+      // 5. ADMIN LOGIN
+      // -----------------------------
+
+      if (role === 'admin') {
+
+        console.log(
+          'Admin logged in'
+        );
+
+        this.router.navigateByUrl(
+          '/admin/dashboard',
+          {
+            replaceUrl: true
+          }
+        );
+
+        return;
+      }
+
+      // -----------------------------
+      // 6. PARENT LOGIN
+      // -----------------------------
+
+      if (role === 'parent') {
+
+        const parentId =
+          response?.user?.parentId ||
+          response?.parentId;
+
+        if (!parentId) {
+
+          console.error(
+            'Parent ID missing:',
+            response
+          );
+
+          this.toastService.showToast(
+            'Parent information not found.',
+            'danger'
+          );
+
+          this.clearLoginStorage();
+
+          this.isLoading = false;
+
+          return;
+        }
+
+        localStorage.setItem(
+          'parentId',
+          parentId
+        );
+
+        console.log(
+          'Parent logged in:',
+          parentId
+        );
+
+        this.router.navigateByUrl(
+          '/parent/dashboard',
+          {
+            replaceUrl: true
+          }
+        );
+
+        return;
+      }
+
+      // -----------------------------
+      // 7. Unknown role
+      // -----------------------------
+
+      console.error(
+        'Unknown role:',
+        role
+      );
+
+      this.toastService.showToast(
+        'Invalid user role.',
+        'danger'
+      );
+
+      this.clearLoginStorage();
+
+      this.isLoading = false;
+
+    },
+
+    error: (error) => {
+
+      console.error(
+        'LOGIN ERROR:',
+        error
+      );
+
+      this.toastService.showToast(
+        error?.error?.message ||
+        'Login failed. Please try again.',
+        'danger'
+      );
+
+      this.isLoading = false;
+
+    },
+
+    complete: () => {
+
+      this.isLoading = false;
+
+    }
+
+  });
+
+}
+
+private clearLoginStorage() {
+
+  localStorage.removeItem('token');
+
+  localStorage.removeItem('role');
+
+  localStorage.removeItem('userName');
+
+  localStorage.removeItem('driverId');
+
+  localStorage.removeItem('parentId');
+
+}
 }

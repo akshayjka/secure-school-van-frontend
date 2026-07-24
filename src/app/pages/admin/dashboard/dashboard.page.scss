@@ -18,8 +18,8 @@
 
 .card {
 
-    background: #fff;
-
+    // background: #fff;
+    background: var(--app-card);
     border-radius: 16px;
 
     padding: 20px;
