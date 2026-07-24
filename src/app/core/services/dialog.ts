@@ -55,11 +55,17 @@ export class DialogService {
 
 }
 
- async confirmLogout(): Promise<boolean> {
+async confirmLogout(): Promise<boolean> {
+
+  console.log('1 - confirmLogout entered');
+
   try {
+
+    console.log('2 - before create');
+
     const alert = await this.alertController.create({
       header: 'Logout',
-      message: 'Are you sure you want to logout from your account?',
+      message: 'Are you sure you want to logout?',
       backdropDismiss: false,
       buttons: [
         {
@@ -73,14 +79,20 @@ export class DialogService {
       ]
     });
 
+    console.log('3 - alert created', alert);
+
     await alert.present();
 
-    const { role } = await alert.onDidDismiss();
+    console.log('4 - alert presented');
 
-    return role === 'confirm';
+    const result = await alert.onDidDismiss();
+
+    return result.role === 'confirm';
 
   } catch (error) {
-    console.error('ALERT ERROR:', error);
+
+    console.error('ALERT FAILED:', error);
+
     return false;
   }
 }
