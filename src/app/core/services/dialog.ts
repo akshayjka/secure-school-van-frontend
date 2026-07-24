@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
-
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 
 @Injectable({
   providedIn: 'root'
 })
-
 export class DialogService {
 
   constructor(
@@ -13,93 +11,65 @@ export class DialogService {
   ) {}
 
   async confirm(
-  header: string,
-  message: string
-): Promise<boolean> {
+    header: string,
+    message: string
+  ): Promise<boolean> {
 
-  const alert =
-    await this.alertController.create({
+    return new Promise(async (resolve) => {
 
-      header,
+      const alert = await this.alertController.create({
+        header,
+        message,
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {
+              resolve(false);
+            }
+          },
+          {
+            text: 'Confirm',
+            role: 'confirm',
+            handler: () => {
+              resolve(true);
+            }
+          }
+        ]
+      });
 
-      // subHeader: 'Secure School Van',
-
-      message,
-
-      // cssClass: 'universal-alert',
-
-      backdropDismiss: false,
-
-      buttons: [
-
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-
-        {
-          text: 'Confirm',
-          role: 'confirm'
-        }
-
-      ]
-
+      await alert.present();
     });
+  }
 
-  await alert.present();
+  async confirmLogout(): Promise<boolean> {
 
-  const result =
-    await alert.onDidDismiss();
+    return new Promise(async (resolve) => {
 
-  return result.role === 'confirm';
+      const alert = await this.alertController.create({
+        header: 'Logout',
+        message: 'Are you sure you want to logout?',
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {
+              resolve(false);
+            }
+          },
+          {
+            text: 'Logout',
+            role: 'confirm',
+            handler: () => {
+              resolve(true);
+            }
+          }
+        ]
+      });
 
-}
-
-// async confirmLogout(): Promise<boolean> {
-
-//   console.log('1 - confirmLogout entered');
-
-//   try {
-
-//     console.log('2 - before create');
-
-//     const alert = await this.alertController.create({
-//       header: 'Logout',
-//       message: 'Are you sure you want to logout?',
-//       backdropDismiss: false,
-//       buttons: [
-//         {
-//           text: 'Cancel',
-//           role: 'cancel'
-//         },
-//         {
-//           text: 'Logout',
-//           role: 'confirm'
-//         }
-//       ]
-//     });
-
-//     console.log('3 - alert created', alert);
-
-//     await alert.present();
-
-//     console.log('4 - alert presented');
-
-//     const result = await alert.onDidDismiss();
-
-//     return result.role === 'confirm';
-
-//   } catch (error) {
-
-//     console.error('ALERT FAILED:', error);
-
-//     return false;
-//   }
-// }
-
-async confirmLogout(): Promise<boolean> {
-  return window.confirm(
-    'Are you sure you want to logout from your account?'
-  );
-}
+      await alert.present();
+    });
+  }
 }
