@@ -177,17 +177,18 @@ export class LoginPage {
 
   }
 
-  login() {
+login() {
 
-    this.isLoading = true;
+  if (this.loginForm.invalid || this.isLoading) {
+    this.loginForm.markAllAsTouched();
+    return;
+  }
 
-    this.authService.login(
+  this.isLoading = true;
 
-      this.loginForm.value
-
-    )
-
-      .subscribe({
+  this.authService.login(
+    this.loginForm.getRawValue()
+  ).subscribe({
 
         next: (response) => {
 
