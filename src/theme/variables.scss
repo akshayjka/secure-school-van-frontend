@@ -1,60 +1,55 @@
 :root {
 
   /* =====================================================
-     BRAND COLORS
+     SECURE SCHOOL VAN
+     AMBER / SCHOOL BUS THEME
   ===================================================== */
 
-  --app-primary: #4f46e5;
-  --app-primary-dark: #3730a3;
-  --app-primary-light: #eef2ff;
+  /* BRAND */
 
-  --app-secondary: #0f766e;
-  --app-secondary-light: #ccfbf1;
+  --app-primary: #f59e0b;
+  --app-primary-dark: #d97706;
+  --app-primary-deep: #b45309;
+  --app-primary-light: #fff7e6;
+  --app-primary-soft: #fffbeb;
 
-  --app-accent: #0891b2;
-  --app-accent-light: #cffafe;
+  --app-secondary: #172554;
+  --app-secondary-dark: #0f172a;
+  --app-secondary-light: #e8edf7;
+
+  --app-accent: #f97316;
+  --app-accent-light: #ffedd5;
 
 
-  /* =====================================================
-     BACKGROUND COLORS
-  ===================================================== */
+  /* BACKGROUNDS */
 
-  --app-background: #f4f7fb;
+  --app-background: #fffaf2;
+  --app-background-secondary: #fff7e8;
 
   --app-surface: #ffffff;
-
   --app-card: #ffffff;
+  --app-surface-soft: #fffbf5;
 
-  --app-surface-soft: #f8fafc;
 
+  /* TEXT */
 
-  /* =====================================================
-     TEXT COLORS
-  ===================================================== */
-
-  --app-text: #0f172a;
-
+  --app-text: #172033;
   --app-text-secondary: #475569;
-
   --app-subtext: #64748b;
-
   --app-text-muted: #94a3b8;
 
   --app-text-on-primary: #ffffff;
+  --app-text-on-dark: #ffffff;
 
 
-  /* =====================================================
-     BORDER COLORS
-  ===================================================== */
+  /* BORDER */
 
-  --app-border: #e2e8f0;
-
-  --app-border-light: #f1f5f9;
+  --app-border: #eadfce;
+  --app-border-light: #f5ead9;
+  --app-border-primary: #fcd68a;
 
 
-  /* =====================================================
-     STATUS COLORS
-  ===================================================== */
+  /* STATUS */
 
   --app-success: #16a34a;
   --app-success-light: #dcfce7;
@@ -69,59 +64,68 @@
   --app-info-light: #e0f2fe;
 
 
-  /* =====================================================
-     SHADOWS
-  ===================================================== */
+  /* SHADOWS */
+
+  --app-shadow-xs:
+    0 2px 6px rgba(120, 74, 20, 0.04);
 
   --app-shadow-sm:
-    0 2px 8px rgba(15, 23, 42, 0.06);
+    0 4px 14px rgba(120, 74, 20, 0.07);
 
   --app-shadow:
-    0 8px 24px rgba(15, 23, 42, 0.08);
+    0 10px 30px rgba(120, 74, 20, 0.09);
 
   --app-shadow-lg:
-    0 16px 40px rgba(15, 23, 42, 0.12);
+    0 20px 50px rgba(120, 74, 20, 0.14);
+
+
+  /* BORDER RADIUS */
+
+  --app-radius-sm: 10px;
+  --app-radius: 14px;
+  --app-radius-lg: 20px;
+  --app-radius-xl: 26px;
 
 
   /* =====================================================
      IONIC PRIMARY
   ===================================================== */
 
-  --ion-color-primary: #4f46e5;
-  --ion-color-primary-rgb: 79, 70, 229;
+  --ion-color-primary: #f59e0b;
+  --ion-color-primary-rgb: 245, 158, 11;
+
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #453dca;
-  --ion-color-primary-tint: #6159e8;
+
+  --ion-color-primary-shade: #d98b0a;
+  --ion-color-primary-tint: #f6a823;
 
 
-  /* =====================================================
-     IONIC SECONDARY
-  ===================================================== */
+  /* SECONDARY */
 
-  --ion-color-secondary: #0f766e;
-  --ion-color-secondary-rgb: 15, 118, 110;
+  --ion-color-secondary: #172554;
+  --ion-color-secondary-rgb: 23, 37, 84;
+
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #0d6861;
-  --ion-color-secondary-tint: #27847d;
+
+  --ion-color-secondary-shade: #14214a;
+  --ion-color-secondary-tint: #2e3b65;
 
 
-  /* =====================================================
-     IONIC TERTIARY
-  ===================================================== */
+  /* TERTIARY */
 
-  --ion-color-tertiary: #0891b2;
-  --ion-color-tertiary-rgb: 8, 145, 178;
+  --ion-color-tertiary: #f97316;
+  --ion-color-tertiary-rgb: 249, 115, 22;
+
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #07809d;
-  --ion-color-tertiary-tint: #21a0ba;
+
+  --ion-color-tertiary-shade: #db6513;
+  --ion-color-tertiary-tint: #fa812d;
 
 
-  /* =====================================================
-     IONIC SUCCESS / WARNING / DANGER
-  ===================================================== */
+  /* SUCCESS */
 
   --ion-color-success: #16a34a;
   --ion-color-success-rgb: 22, 163, 74;
@@ -129,11 +133,17 @@
   --ion-color-success-shade: #138f41;
   --ion-color-success-tint: #2dad5c;
 
+
+  /* WARNING */
+
   --ion-color-warning: #d97706;
   --ion-color-warning-rgb: 217, 119, 6;
   --ion-color-warning-contrast: #ffffff;
   --ion-color-warning-shade: #bf6905;
   --ion-color-warning-tint: #dd851f;
+
+
+  /* DANGER */
 
   --ion-color-danger: #dc2626;
   --ion-color-danger-rgb: 220, 38, 38;
@@ -142,18 +152,14 @@
   --ion-color-danger-tint: #e03c3c;
 
 
-  /* =====================================================
-     GLOBAL IONIC BACKGROUND
-  ===================================================== */
+  /* GLOBAL IONIC */
 
-  --ion-background-color: #f4f7fb;
-
-  --ion-text-color: #0f172a;
+  --ion-background-color: #fffaf2;
+  --ion-text-color: #172033;
 
   --ion-card-background: #ffffff;
 
-  --ion-toolbar-background: #4f46e5;
-
+  --ion-toolbar-background: #f59e0b;
   --ion-toolbar-color: #ffffff;
 
 }
