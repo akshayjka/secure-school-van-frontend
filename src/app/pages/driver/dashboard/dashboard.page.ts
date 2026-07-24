@@ -346,23 +346,38 @@ async markDropped(student: any) {
 
   }
 
+  // async logout() {
+
+  //   const confirmed = await this.dialogService.confirmLogout();
+
+  //   if (!confirmed) return;
+
+  //   localStorage.removeItem('token');
+
+  //   localStorage.removeItem('role');
+
+  //   localStorage.removeItem('name');
+  //   localStorage.removeItem('driverId');
+  //   localStorage.removeItem('userName');
+
+  //   this.router.navigate(['/auth/login']);
+  // }
+
+
   async logout() {
+  console.log('LOGOUT CLICKED');
 
-    const confirmed = await this.dialogService.confirmLogout();
+  const confirmed = await this.dialogService.confirmLogout();
 
-    if (!confirmed) return;
+  console.log('LOGOUT RESULT:', confirmed);
 
-    localStorage.removeItem('token');
+  if (!confirmed) return;
 
-    localStorage.removeItem('role');
-
-    localStorage.removeItem('name');
-    localStorage.removeItem('driverId');
-    localStorage.removeItem('userName');
-
-    this.router.navigate(['/auth/login']);
-  }
-
+  localStorage.clear();
+  await this.router.navigateByUrl('/auth/login', {
+    replaceUrl: true
+  });
+}
   async openAddStudent() {
     const modal = await this.modalCtrl.create({
       component: AddStudentModalComponent,
