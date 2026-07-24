@@ -4,7 +4,7 @@ import {
   DriverMenuPopoverComponent
 } from '../driver-menu-popover/driver-menu-popover.component';
 import { FormsModule } from '@angular/forms';
-
+import { IonicModule } from '@ionic/angular';
 import {
   IonContent,
   IonHeader,
@@ -73,7 +73,7 @@ import {
     IonCardContent,
     IonButton,
     IonBadge,
-  
+  IonicModule
   
   ]
 })
