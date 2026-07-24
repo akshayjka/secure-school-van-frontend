@@ -364,16 +364,18 @@ async markDropped(student: any) {
   // }
 
 
-  async logout() {
-  console.log('LOGOUT CLICKED');
+async logout() {
 
   const confirmed = await this.dialogService.confirmLogout();
 
-  console.log('LOGOUT RESULT:', confirmed);
-
   if (!confirmed) return;
 
-  localStorage.clear();
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+  localStorage.removeItem('name');
+  localStorage.removeItem('driverId');
+  localStorage.removeItem('userName');
+
   await this.router.navigateByUrl('/auth/login', {
     replaceUrl: true
   });
