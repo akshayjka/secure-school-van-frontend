@@ -1,156 +1,457 @@
 <ion-header>
-  <ion-toolbar color="primary">
 
-    <ion-title>Parent Dashboard</ion-title>
+  <ion-toolbar>
+
+    <ion-title>
+      Parent Dashboard
+    </ion-title>
 
     <ion-buttons slot="end">
 
       <!-- Refresh -->
-      <ion-button (click)="refreshDashboard()" [disabled]="isLoading">
+      <ion-button
+        class="toolbar-action"
+        (click)="refreshDashboard()"
+        [disabled]="isLoading">
+
         <ion-icon
           slot="icon-only"
           name="refresh-outline">
         </ion-icon>
+
       </ion-button>
 
+
       <!-- Logout -->
-      <ion-button (click)="logout()">
+      <ion-button
+        class="toolbar-action"
+        (click)="logout()">
+
         <ion-icon
           slot="icon-only"
           name="log-out-outline">
         </ion-icon>
+
       </ion-button>
 
     </ion-buttons>
 
   </ion-toolbar>
+
 </ion-header>
 
-<ion-content [fullscreen]="false">
 
-  <ion-card>
+<ion-content>
 
-    <ion-card-header>
-      <ion-card-title>
-        Attendance
-      </ion-card-title>
-    </ion-card-header>
+  <main class="parent-dashboard">
 
-    <ion-card-content>
-      <!-- <ion-item>
-      <ion-label>
-        Present
-      </ion-label>
-      <ion-toggle  [(ngModel)]="isPresent" (ionChange)="updateAttendance()">
-      </ion-toggle>
-    </ion-item> -->
-      <ion-item>
 
-        <ion-label>
-          <h2>Today's Attendance</h2>
+    <!-- ================================================
+         ATTENDANCE
+    ================================================= -->
 
-          <p>
-            {{ isPresent ? 'Present' : 'Absent' }}
-          </p>
-        </ion-label>
+    <section class="attendance-card">
 
-        <ion-toggle slot="end" [checked]="isPresent" (ionChange)="updateAttendance($event)">
+      <div class="attendance-icon">
+
+        <ion-icon
+          name="calendar-outline">
+        </ion-icon>
+
+      </div>
+
+
+      <div class="attendance-content">
+
+        <span class="card-label">
+          Attendance
+        </span>
+
+        <h2>
+          Today's Attendance
+        </h2>
+
+        <div
+          class="attendance-status"
+          [class.present]="isPresent"
+          [class.absent]="!isPresent">
+
+          <span class="status-dot"></span>
+
+          {{ isPresent ? 'Present' : 'Absent' }}
+
+        </div>
+
+      </div>
+
+
+      <div class="attendance-toggle">
+
+        <ion-toggle
+          [checked]="isPresent"
+          (ionChange)="updateAttendance($event)">
         </ion-toggle>
 
-      </ion-item>
+      </div>
+
+    </section>
 
 
+    <!-- ================================================
+         STUDENT PROFILE
+    ================================================= -->
 
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Student Profile</ion-card-title>
-    </ion-card-header>
-
-    <ion-card-content>
-      <p>
-        <strong>Student Name:</strong>
-        {{ parent.studentName }}
-      </p>
-      <p>
-        <strong>School Name:</strong>
-        {{ parent.schoolName }}
-      </p>
-      <p>
-        <strong>Pickup Area:</strong>
-        {{ parent.pickupArea }}
-      </p>
-      <p>
-        <strong>Drop Area:</strong>
-        {{ parent.dropArea }}
-      </p>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Driver Details</ion-card-title>
-    </ion-card-header>
-
-    <ion-card-content>
-      <p>
-        <strong>Name:</strong>
-        {{ driver.name }}
-      </p>
-      <p>
-        <strong>Phone:</strong>
-        {{ driver.mobileNumber }}
-      </p>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card>
-
-    <ion-card-header>
-      <ion-card-title>Ride Status</ion-card-title>
-    </ion-card-header>
-
-    <ion-card-content>
-      <ion-chip *ngIf="rideStarted" color="success">
-        Ride Started
-      </ion-chip>
-      <ion-chip *ngIf="!rideStarted" color="danger">
-        Ride Ended
-      </ion-chip>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card>
-
-    <ion-card-header>
-      <ion-card-title>
-        Student Status
-      </ion-card-title>
-    </ion-card-header>
-
-    <ion-card-content>
-
-      <ion-chip *ngIf="studentStatus === 'waiting'" color="warning">
-        Waiting for Pickup
-      </ion-chip>
-
-      <ion-chip *ngIf="studentStatus === 'picked_up'" color="success">
-        Picked Up
-      </ion-chip>
-
-      <ion-chip *ngIf="studentStatus === 'dropped'" color="primary">
-        Dropped
-      </ion-chip>
-
-    </ion-card-content>
-
-  </ion-card>
+    <section class="student-profile-card">
 
 
+      <!-- HEADER -->
+
+      <div class="card-heading">
+
+        <div>
+
+          <span class="card-eyebrow">
+            STUDENT
+          </span>
+
+          <h2>
+            Student Profile
+          </h2>
+
+        </div>
+
+        <div class="student-avatar">
+
+          <ion-icon
+            name="person-outline">
+          </ion-icon>
+
+        </div>
+
+      </div>
+
+
+      <!-- MAIN STUDENT -->
+
+      <div class="student-main">
+
+        <div class="student-initial">
+
+          {{
+            parent.studentName
+              ? parent.studentName.charAt(0).toUpperCase()
+              : 'S'
+          }}
+
+        </div>
+
+        <div class="student-name">
+
+          <h3>
+            {{ parent.studentName || 'Student' }}
+          </h3>
+
+          <p>
+            {{ parent.schoolName || 'School not available' }}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- DETAILS -->
+
+      <div class="student-details-grid">
+
+
+        <!-- SCHOOL -->
+
+        <div class="detail-item">
+
+          <div class="detail-icon school-icon">
+
+            <ion-icon
+              name="school-outline">
+            </ion-icon>
+
+          </div>
+
+          <div>
+
+            <span>
+              School
+            </span>
+
+            <strong>
+              {{ parent.schoolName || '-' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- PICKUP -->
+
+        <div class="detail-item">
+
+          <div class="detail-icon pickup-icon">
+
+            <ion-icon
+              name="location-outline">
+            </ion-icon>
+
+          </div>
+
+          <div>
+
+            <span>
+              Pickup
+            </span>
+
+            <strong>
+              {{ parent.pickupArea || '-' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- DROP -->
+
+        <div class="detail-item">
+
+          <div class="detail-icon drop-icon">
+
+            <ion-icon
+              name="navigate-outline">
+            </ion-icon>
+
+          </div>
+
+          <div>
+
+            <span>
+              Drop
+            </span>
+
+            <strong>
+              {{ parent.dropArea || '-' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================================================
+         DRIVER + RIDE
+    ================================================= -->
+
+    <div class="dashboard-info-grid">
+
+
+      <!-- DRIVER -->
+
+      <section class="mini-info-card">
+
+        <div class="mini-card-header">
+
+          <div class="mini-icon driver-icon">
+
+            <ion-icon
+              name="person-outline">
+            </ion-icon>
+
+          </div>
+
+          <span>
+            Driver
+          </span>
+
+        </div>
+
+
+        <div class="mini-card-body">
+
+          <h3>
+            {{ driver.name || 'Not Assigned' }}
+          </h3>
+
+          <p>
+            {{ driver.mobileNumber || '-' }}
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- RIDE STATUS -->
+
+      <section class="mini-info-card">
+
+        <div class="mini-card-header">
+
+          <div class="mini-icon ride-icon">
+
+            <ion-icon
+              name="bus-outline">
+            </ion-icon>
+
+          </div>
+
+          <span>
+            Ride Status
+          </span>
+
+        </div>
+
+
+        <div class="mini-card-body">
+
+          <div
+            class="ride-status"
+            [class.ride-active]="rideStarted"
+            [class.ride-inactive]="!rideStarted">
+
+            <span class="status-dot"></span>
+
+            {{
+              rideStarted
+                ? 'Ride Started'
+                : 'Ride Ended'
+            }}
+
+          </div>
+
+          <p>
+
+            {{
+              rideStarted
+                ? 'Van is currently on route'
+                : 'No active ride'
+            }}
+
+          </p>
+
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- ================================================
+         STUDENT STATUS
+    ================================================= -->
+
+    <section
+      class="student-status-card"
+      [class.status-waiting]="studentStatus === 'waiting'"
+      [class.status-picked]="studentStatus === 'picked_up'"
+      [class.status-dropped]="studentStatus === 'dropped'">
+
+
+      <div class="student-status-icon">
+
+        <ion-icon
+          *ngIf="studentStatus === 'waiting'"
+          name="time-outline">
+        </ion-icon>
+
+        <ion-icon
+          *ngIf="studentStatus === 'picked_up'"
+          name="bus-outline">
+        </ion-icon>
+
+        <ion-icon
+          *ngIf="studentStatus === 'dropped'"
+          name="checkmark-circle-outline">
+        </ion-icon>
+
+      </div>
+
+
+      <div class="student-status-content">
+
+        <span>
+          Student Status
+        </span>
+
+        <strong>
+
+          <ng-container
+            *ngIf="studentStatus === 'waiting'">
+
+            Waiting for Pickup
+
+          </ng-container>
+
+          <ng-container
+            *ngIf="studentStatus === 'picked_up'">
+
+            Picked Up
+
+          </ng-container>
+
+          <ng-container
+            *ngIf="studentStatus === 'dropped'">
+
+            Dropped Safely
+
+          </ng-container>
+
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- Space for sticky bottom button -->
+
+    <div
+      class="bottom-space"
+      *ngIf="rideStarted">
+    </div>
+
+  </main>
 
 </ion-content>
-<ion-button *ngIf="rideStarted" expand="block" color="success" (click)="openTracking()">
-  Track School Van
-</ion-button>
+
+
+<!-- ================================================
+     TRACKING ACTION
+================================================= -->
+
+<div
+  class="tracking-footer"
+  *ngIf="rideStarted">
+
+  <ion-button
+    expand="block"
+    class="track-button"
+    (click)="openTracking()">
+
+    <ion-icon
+      slot="start"
+      name="location-outline">
+    </ion-icon>
+
+    Track School Van
+
+    <ion-icon
+      slot="end"
+      name="chevron-forward-outline">
+    </ion-icon>
+
+  </ion-button>
+
+</div>

@@ -1,20 +1,912 @@
-ion-content {
-  --background: #f5f7fb;
+/* =====================================================
+   PARENT DASHBOARD
+   MODERN CARD DESIGN
+===================================================== */
+
+
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+ion-toolbar {
+  --min-height: 64px;
 }
 
-ion-card {
-  margin: 12px;
-  border-radius: 16px;
+ion-title {
+  font-size: 20px;
+  font-weight: 750;
 }
 
-ion-card-content {
-  padding: 16px;
+.toolbar-action {
+  width: 46px;
+  height: 46px;
+
+  --border-radius: 50%;
+  --background: rgba(255, 255, 255, 0.10);
 }
 
-ion-chip {
-  margin-top: 8px;
+.toolbar-action ion-icon {
+  font-size: 23px;
 }
 
-ion-button {
-  margin: 16px;
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+.parent-dashboard {
+  position: relative;
+
+  min-height: 100%;
+
+  padding:
+    18px 16px 30px;
+}
+
+
+/* Soft background decoration */
+
+.parent-dashboard::before {
+  content: "";
+
+  position: absolute;
+
+  width: 280px;
+  height: 280px;
+
+  top: -120px;
+  right: -130px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(245, 158, 11, 0.10),
+      transparent 68%
+    );
+
+  pointer-events: none;
+}
+
+.parent-dashboard > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* =====================================================
+   SHARED CARD
+===================================================== */
+
+.attendance-card,
+.student-profile-card,
+.mini-info-card,
+.student-status-card {
+  background:
+    rgba(255, 255, 255, 0.97);
+
+  border:
+    1px solid rgba(245, 158, 11, 0.10);
+
+  box-shadow:
+    0 7px 22px rgba(15, 23, 42, 0.055);
+}
+
+
+/* =====================================================
+   ATTENDANCE
+===================================================== */
+
+.attendance-card {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  min-height: 110px;
+
+  padding: 17px;
+
+  border-radius: 20px;
+}
+
+
+.attendance-icon {
+  width: 50px;
+  height: 50px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff3d6,
+      #fff9ed
+    );
+
+  color:
+    var(--app-primary-dark);
+
+  font-size: 24px;
+}
+
+
+.attendance-content {
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+.card-label {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color:
+    var(--app-subtext);
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.8px;
+}
+
+
+.attendance-content h2 {
+  margin: 0 0 7px;
+
+  color:
+    var(--app-text);
+
+  font-size: 15px;
+
+  font-weight: 700;
+}
+
+
+.attendance-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+}
+
+
+.attendance-status.present {
+  color: #15803d;
+}
+
+.attendance-status.present .status-dot {
+  background: #22c55e;
+}
+
+
+.attendance-status.absent {
+  color: #dc2626;
+}
+
+.attendance-status.absent .status-dot {
+  background: #ef4444;
+}
+
+
+.attendance-toggle {
+  flex-shrink: 0;
+}
+
+
+.attendance-toggle ion-toggle {
+  --track-background: #e2e8f0;
+
+  --track-background-checked:
+    #fcd68a;
+
+  --handle-background:
+    #ffffff;
+
+  --handle-background-checked:
+    #f59e0b;
+}
+
+
+/* =====================================================
+   STUDENT PROFILE
+===================================================== */
+
+.student-profile-card {
+  margin-top: 14px;
+
+  padding: 19px;
+
+  border-radius: 20px;
+}
+
+
+.card-heading {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+
+.card-eyebrow {
+  color:
+    var(--app-primary-dark);
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+
+.card-heading h2 {
+  margin:
+    4px 0 0;
+
+  color:
+    var(--app-text);
+
+  font-size: 19px;
+
+  font-weight: 750;
+}
+
+
+.student-avatar {
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background:
+    #fff3d6;
+
+  color:
+    #d97706;
+
+  font-size: 23px;
+}
+
+
+/* Student identity */
+
+.student-main {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 18px;
+
+  padding-bottom: 16px;
+
+  border-bottom:
+    1px solid var(--app-border-light);
+}
+
+
+.student-initial {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #f97316
+    );
+
+  color: #ffffff;
+
+  font-size: 19px;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 6px 16px rgba(245, 158, 11, 0.20);
+}
+
+
+.student-name h3 {
+  margin: 0;
+
+  color:
+    var(--app-text);
+
+  font-size: 16px;
+
+  font-weight: 750;
+}
+
+
+.student-name p {
+  margin:
+    4px 0 0;
+
+  color:
+    var(--app-subtext);
+
+  font-size: 11px;
+}
+
+
+/* Student information */
+
+.student-details-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 8px;
+
+  margin-top: 16px;
+}
+
+
+.detail-item {
+  min-width: 0;
+
+  padding: 11px 7px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+
+  border-radius: 13px;
+
+  background:
+    #fafafa;
+}
+
+
+.detail-icon {
+  width: 32px;
+  height: 32px;
+
+  margin-bottom: 7px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  font-size: 16px;
+}
+
+
+.school-icon {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+
+
+.pickup-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+
+.drop-icon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+
+.detail-item span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color:
+    var(--app-text-muted);
+
+  font-size: 8px;
+}
+
+
+.detail-item strong {
+  display: block;
+
+  width: 100%;
+
+  overflow: hidden;
+
+  color:
+    var(--app-text);
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =====================================================
+   DRIVER + RIDE GRID
+===================================================== */
+
+.dashboard-info-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-top: 14px;
+}
+
+
+.mini-info-card {
+  min-width: 0;
+
+  min-height: 145px;
+
+  padding: 15px;
+
+  border-radius: 18px;
+}
+
+
+.mini-card-header {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+.mini-card-header > span {
+  color:
+    var(--app-text-secondary);
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+
+.mini-icon {
+  width: 34px;
+  height: 34px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  font-size: 17px;
+}
+
+
+.driver-icon {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+
+.ride-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+
+.mini-card-body {
+  margin-top: 14px;
+}
+
+
+.mini-card-body h3 {
+  margin: 0;
+
+  overflow: hidden;
+
+  color:
+    var(--app-text);
+
+  font-size: 14px;
+
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+.mini-card-body p {
+  margin:
+    5px 0 0;
+
+  color:
+    var(--app-subtext);
+
+  font-size: 10px;
+
+  line-height: 1.4;
+}
+
+
+/* =====================================================
+   RIDE STATUS
+===================================================== */
+
+.ride-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 12px;
+
+  font-weight: 750;
+}
+
+
+.ride-active {
+  color: #15803d;
+}
+
+
+.ride-active .status-dot {
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.10);
+}
+
+
+.ride-inactive {
+  color: #64748b;
+}
+
+
+.ride-inactive .status-dot {
+  background: #94a3b8;
+}
+
+
+/* =====================================================
+   STUDENT STATUS
+===================================================== */
+
+.student-status-card {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  margin-top: 14px;
+
+  padding: 15px;
+
+  min-height: 82px;
+
+  border-radius: 18px;
+}
+
+
+.student-status-icon {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  font-size: 21px;
+}
+
+
+.student-status-content span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color:
+    var(--app-subtext);
+
+  font-size: 10px;
+
+  font-weight: 600;
+}
+
+
+.student-status-content strong {
+  font-size: 13px;
+
+  font-weight: 750;
+}
+
+
+/* Waiting */
+
+.status-waiting {
+  background:
+    linear-gradient(
+      100deg,
+      #fffaf0,
+      #ffffff
+    );
+}
+
+
+.status-waiting .student-status-icon {
+  background: #fef3c7;
+
+  color: #d97706;
+}
+
+
+.status-waiting
+.student-status-content strong {
+  color: #c26100;
+}
+
+
+/* Picked */
+
+.status-picked {
+  background:
+    linear-gradient(
+      100deg,
+      #f0fdf4,
+      #ffffff
+    );
+}
+
+
+.status-picked .student-status-icon {
+  background: #dcfce7;
+
+  color: #16a34a;
+}
+
+
+.status-picked
+.student-status-content strong {
+  color: #15803d;
+}
+
+
+/* Dropped */
+
+.status-dropped {
+  background:
+    linear-gradient(
+      100deg,
+      #eff6ff,
+      #ffffff
+    );
+}
+
+
+.status-dropped .student-status-icon {
+  background: #dbeafe;
+
+  color: #2563eb;
+}
+
+
+.status-dropped
+.student-status-content strong {
+  color: #1d4ed8;
+}
+
+
+/* =====================================================
+   TRACKING FOOTER
+===================================================== */
+
+.tracking-footer {
+  position: fixed;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 100;
+
+  padding:
+    10px 16px
+    calc(10px + env(safe-area-inset-bottom));
+
+  background:
+    rgba(255, 250, 242, 0.96);
+
+  border-top:
+    1px solid rgba(245, 158, 11, 0.10);
+
+  backdrop-filter:
+    blur(12px);
+
+  box-shadow:
+    0 -6px 24px rgba(15, 23, 42, 0.06);
+}
+
+
+.track-button {
+  width: 100%;
+
+  max-width: 720px;
+
+  min-height: 54px;
+
+  margin: 0 auto;
+
+  display: block;
+
+  --background:
+    linear-gradient(
+      110deg,
+      #16a34a,
+      #15803d
+    );
+
+  --background-hover:
+    #15803d;
+
+  --background-activated:
+    #166534;
+
+  --color:
+    #ffffff;
+
+  --border-radius:
+    15px;
+
+  --box-shadow:
+    0 8px 20px rgba(22, 163, 74, 0.20);
+
+  font-weight: 700;
+}
+
+
+.bottom-space {
+  height: 80px;
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 370px) {
+
+  .parent-dashboard {
+    padding:
+      14px 12px 28px;
+  }
+
+
+  .attendance-card {
+    gap: 10px;
+
+    padding: 14px;
+  }
+
+
+  .attendance-icon {
+    width: 43px;
+    height: 43px;
+
+    font-size: 20px;
+  }
+
+
+  .attendance-content h2 {
+    font-size: 13px;
+  }
+
+
+  .student-profile-card {
+    padding: 16px;
+  }
+
+
+  .dashboard-info-grid {
+    gap: 8px;
+  }
+
+
+  .mini-info-card {
+    padding: 12px;
+
+    min-height: 135px;
+  }
+
+
+  .detail-item {
+    padding:
+      9px 4px;
+  }
+
+}
+
+
+/* =====================================================
+   TABLET / WEB
+===================================================== */
+
+@media (min-width: 768px) {
+
+  .parent-dashboard {
+    max-width: 760px;
+
+    margin: 0 auto;
+
+    padding-top: 28px;
+  }
+
 }

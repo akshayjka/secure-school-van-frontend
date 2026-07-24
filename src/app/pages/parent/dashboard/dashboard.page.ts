@@ -14,16 +14,9 @@ import {
 import {
   IonButton,
   IonButtons,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonChip,
   IonContent,
   IonHeader,
   IonIcon,
-  IonItem,
-  IonLabel,
   IonTitle,
   IonToolbar,
   IonToggle
@@ -47,7 +40,16 @@ import {
 
 import {
   logOutOutline,
-    refreshOutline
+  refreshOutline,
+  calendarOutline,
+  personOutline,
+  schoolOutline,
+  locationOutline,
+  navigateOutline,
+  busOutline,
+  timeOutline,
+  checkmarkCircleOutline,
+  chevronForwardOutline
 } from 'ionicons/icons';
 
 
@@ -64,39 +66,15 @@ import {
   imports: [
 
     CommonModule,
-
     FormsModule,
-
     IonContent,
-
     IonHeader,
-
     IonTitle,
-
     IonToolbar,
-
-    IonCard,
-
-    IonCardHeader,
-
-    IonCardTitle,
-
-    IonCardContent,
-
     IonButton,
-
     IonButtons,
-
     IonIcon,
-
-    IonChip,
-
-    IonItem,
-
-    IonLabel,
-
     IonToggle
-
   ]
 
 })
@@ -129,14 +107,29 @@ export class DashboardPage implements OnInit {
   ) {
 
     addIcons({
+
       logOutOutline,
-      refreshOutline
+      refreshOutline,
+
+      calendarOutline,
+      personOutline,
+      schoolOutline,
+
+      locationOutline,
+      navigateOutline,
+
+      busOutline,
+      timeOutline,
+
+      checkmarkCircleOutline,
+      chevronForwardOutline
+
     });
 
   }
-refreshDashboard() {
-  this.loadDashboard();
-}
+  refreshDashboard() {
+    this.loadDashboard();
+  }
 
   ngOnInit() {
 
@@ -173,28 +166,28 @@ refreshDashboard() {
       .getDashboard(parentId)
       .subscribe({
 
-      next: (res: any) => {
+        next: (res: any) => {
 
-  this.parent = {
-    studentName: res?.studentName || '',
-    schoolName: res?.schoolName || '',
-    pickupArea: res?.pickupArea || '',
-    dropArea: res?.dropArea || ''
-  };
+          this.parent = {
+            studentName: res?.studentName || '',
+            schoolName: res?.schoolName || '',
+            pickupArea: res?.pickupArea || '',
+            dropArea: res?.dropArea || ''
+          };
 
-  this.driver = res?.driver || {};
-  this.driverId = res?.driver?.driverId || null;
-  this.isPresent = res?.attendance ?? true;
-  this.studentStatus = res?.attendanceStatus || 'waiting';
-  this.rideStarted = res?.rideStarted ?? false;
+          this.driver = res?.driver || {};
+          this.driverId = res?.driver?.driverId || null;
+          this.isPresent = res?.attendance ?? true;
+          this.studentStatus = res?.attendanceStatus || 'waiting';
+          this.rideStarted = res?.rideStarted ?? false;
 
-  this.isLoading = false;
-},
+          this.isLoading = false;
+        },
 
-error: (error) => {
-  console.error('Failed to load dashboard:', error);
-  this.isLoading = false;
-},
+        error: (error) => {
+          console.error('Failed to load dashboard:', error);
+          this.isLoading = false;
+        },
 
 
         complete: () => {
@@ -208,56 +201,68 @@ error: (error) => {
   }
 
 
-updateAttendance(event: CustomEvent) {
+  updateAttendance(event: CustomEvent) {
 
-  const parentId =
-    localStorage.getItem('parentId');
+    const parentId =
+      localStorage.getItem('parentId');
 
-  if (!parentId) {
-    return;
+    if (!parentId) {
+      return;
+    }
+
+    const newAttendance =
+      event.detail.checked;
+
+    const previousAttendance =
+      this.isPresent;
+
+    // Optimistic UI
+    this.isPresent =
+      newAttendance;
+
+
+    const payload = {
+
+      parentId,
+
+      attendance:
+        newAttendance
+
+    };
+
+
+    this.parentService
+      .updateAttendance(payload)
+      .subscribe({
+
+        next: (response: any) => {
+
+          console.log(
+            'Attendance updated:',
+            response
+          );
+
+        },
+
+
+        error: (error) => {
+
+          console.error(
+            'Attendance update failed:',
+            error
+          );
+
+          /*
+           * Rollback toggle if API fails
+           */
+          this.isPresent =
+            previousAttendance;
+
+        }
+
+      });
+
   }
-
-  const attendance =
-    event.detail.checked;
-
-  this.isPresent =
-    attendance;
-
-  const payload = {
-    parentId,
-    attendance
-  };
-
-  console.log(
-    'Updating attendance:',
-    payload
-  );
-
-  this.parentService
-    .updateAttendance(payload)
-    .subscribe({
-
-      next: (response: any) => {
-
-        console.log(
-          'Attendance updated:',
-          response
-        );
-
-      },
-
-      error: (error) => {
-
-        console.error(
-          'Attendance update failed:',
-          error
-        );
-
-      }
-
-    });
-
-}
 
 
   openTracking() {

@@ -26,6 +26,7 @@ import {
   PopoverController
 
 } from '@ionic/angular/standalone';
+
 import { RideService }
   from '../../../core/services/ride';
 import { LocationService }
@@ -47,7 +48,24 @@ import {
   personOutline,
   schoolOutline,
   menuOutline,
-  arrowBackOutline
+  arrowBackOutline,
+
+  playOutline,
+  stopOutline,
+  locationOutline,
+  informationCircleOutline,
+
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  shieldCheckmarkOutline,
+
+  shareSocialOutline,
+  copyOutline,
+
+  personAddOutline,
+  checkmarkOutline,
+  chevronForwardOutline
+
 } from 'ionicons/icons';
 
 @Component({
@@ -119,15 +137,33 @@ export class DashboardPage implements OnInit {
     private popoverCtrl: PopoverController
     // private popoverController: PopoverController
   ) {
-    addIcons({
-      addOutline,
-      logOutOutline,
-      peopleOutline,
-      personOutline,
-      schoolOutline,
-      menuOutline,
-      arrowBackOutline
-    });
+   addIcons({
+
+  addOutline,
+  logOutOutline,
+  peopleOutline,
+  personOutline,
+  schoolOutline,
+  menuOutline,
+  arrowBackOutline,
+
+  playOutline,
+  stopOutline,
+  locationOutline,
+  informationCircleOutline,
+
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  shieldCheckmarkOutline,
+
+  shareSocialOutline,
+  copyOutline,
+
+  personAddOutline,
+  checkmarkOutline,
+  chevronForwardOutline
+
+});
 
   }
 
@@ -442,25 +478,25 @@ export class DashboardPage implements OnInit {
       }
     });
   }
-  canEndRide(): boolean {
+canEndRide(): boolean {
 
-    if (!this.rideStarted) {
-      return false;
-    }
-
-    const presentStudents = this.selectedStudents.length
-      ? this.selectedStudents
-      : this.presentStudents;
-
-    if (presentStudents.length === 0) {
-      return false;
-    }
-
-    return presentStudents.every(
-      student =>
-        this.studentStatuses[student.parentId] === 'Dropped'
-    );
+  if (!this.rideStarted) {
+    return false;
   }
+
+  const presentStudents = this.selectedStudents.length
+    ? this.selectedStudents
+    : this.presentStudents;
+
+  if (presentStudents.length === 0) {
+    return false;
+  }
+
+  return presentStudents.every(
+    student =>
+      this.studentStatuses[student.parentId] === 'Dropped'
+  );
+}
 
   openView(view: string) {
 
