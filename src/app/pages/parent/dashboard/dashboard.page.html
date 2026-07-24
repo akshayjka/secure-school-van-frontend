@@ -1,18 +1,32 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>
-      Parent Dashboard
-    </ion-title>
+
+    <ion-title>Parent Dashboard</ion-title>
+
     <ion-buttons slot="end">
-      <ion-button (click)="logout()">
-        <ion-icon slot="icon-only" name="log-out-outline">
+
+      <!-- Refresh -->
+      <ion-button (click)="refreshDashboard()" [disabled]="isLoading">
+        <ion-icon
+          slot="icon-only"
+          name="refresh-outline">
         </ion-icon>
       </ion-button>
+
+      <!-- Logout -->
+      <ion-button (click)="logout()">
+        <ion-icon
+          slot="icon-only"
+          name="log-out-outline">
+        </ion-icon>
+      </ion-button>
+
     </ion-buttons>
+
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="false">
 
   <ion-card>
 
@@ -46,7 +60,7 @@
       </ion-item>
 
 
-      
+
     </ion-card-content>
   </ion-card>
 

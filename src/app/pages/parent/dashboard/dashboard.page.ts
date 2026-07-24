@@ -46,7 +46,8 @@ import {
 } from 'ionicons';
 
 import {
-  logOutOutline
+  logOutOutline,
+    refreshOutline
 } from 'ionicons/icons';
 
 
@@ -128,11 +129,14 @@ export class DashboardPage implements OnInit {
   ) {
 
     addIcons({
-      logOutOutline
+      logOutOutline,
+      refreshOutline
     });
 
   }
-
+refreshDashboard() {
+  this.loadDashboard();
+}
 
   ngOnInit() {
 
@@ -169,61 +173,28 @@ export class DashboardPage implements OnInit {
       .getDashboard(parentId)
       .subscribe({
 
-        next: (res: any) => {
+      next: (res: any) => {
 
-          console.log(
-            'PARENT DASHBOARD RESPONSE:',
-            res
-          );
+  this.parent = {
+    studentName: res?.studentName || '',
+    schoolName: res?.schoolName || '',
+    pickupArea: res?.pickupArea || '',
+    dropArea: res?.dropArea || ''
+  };
 
-          this.parent = {
+  this.driver = res?.driver || {};
+  this.driverId = res?.driver?.driverId || null;
+  this.isPresent = res?.attendance ?? true;
+  this.studentStatus = res?.attendanceStatus || 'waiting';
+  this.rideStarted = res?.rideStarted ?? false;
 
-            studentName:
-              res?.studentName || '',
+  this.isLoading = false;
+},
 
-            schoolName:
-              res?.schoolName || '',
-
-            pickupArea:
-              res?.pickupArea || '',
-
-            dropArea:
-              res?.dropArea || ''
-
-          };
-
-
-          this.driver =
-            res?.driver || {};
-
-
-          this.driverId =
-            res?.driver?.driverId || null;
-
-
-          this.isPresent =
-            res?.attendance ?? true;
-
-
-          this.studentStatus =
-            res?.attendanceStatus ||
-            'waiting';
-
-
-          this.rideStarted =
-            res?.rideStarted ?? false;
-
-        },
-
-
-        error: (error) => {
-
-          console.error(
-            'Failed to load parent dashboard:',
-            error
-          );
-
-        },
+error: (error) => {
+  console.error('Failed to load dashboard:', error);
+  this.isLoading = false;
+},
 
 
         complete: () => {
