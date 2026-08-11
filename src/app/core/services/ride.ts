@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-
 import { HttpClient } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
-
 import { environment } from 'src/environments/environment.development';
 
 @Injectable({
@@ -15,32 +12,50 @@ export class RideService {
     private http: HttpClient
   ) {}
 
-  startRide(driverId: string): Observable<any> {
+  startRide(
+    driverId: string,
+    rideType: 'morning' | 'evening'
+  ): Observable<any> {
 
     return this.http.post(
       `${environment.apiUrl}/rides/start`,
       {
-        driverId
+        driverId,
+        rideType
       }
     );
 
   }
 
-  updateLocation(data: any): Observable<any> {
+  updateLocation(
+    driverId: string,
+    rideType: 'morning' | 'evening',
+    latitude: number,
+    longitude: number
+  ): Observable<any> {
 
     return this.http.post(
       `${environment.apiUrl}/rides/location`,
-      data
+      {
+        driverId,
+        rideType,
+        latitude,
+        longitude
+      }
     );
 
   }
 
-  endRide(driverId: string): Observable<any> {
+  endRide(
+    driverId: string,
+    rideType: 'morning' | 'evening'
+  ): Observable<any> {
 
     return this.http.post(
       `${environment.apiUrl}/rides/end`,
       {
-        driverId
+        driverId,
+        rideType
       }
     );
 

@@ -1,8 +1,17 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router }
+  from '@angular/router';
+
+import {
+  SocketService
+}
+  from
+  'src/app/core/services/socket';
 // import * as L from 'leaflet';
 import * as L from 'leaflet';
+
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -21,95 +30,153 @@ import { ParentService } from 'src/app/core/services/parent';
   standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonBackButton, IonButtons, IonToolbar, CommonModule, FormsModule]
 })
-export class LiveTrackingPage implements AfterViewInit  {
+export class LiveTrackingPage implements AfterViewInit {
 
-  constructor(private parentService:ParentService) { }
 
- map:any;
+  trackingInterval: any;
+  constructor(private parentService:
+    ParentService,
+
+    private socketService:
+      SocketService,
+
+    private router:
+      Router) { }
+
+  map: any;
 
   vanMarker: any;
 
-schoolMarker: any;
+  schoolMarker: any;
 
-schoolLat = 11.0168;
+  schoolLat = 11.0168;
 
-schoolLng = 76.9558;
+  schoolLng = 76.9558;
 
- ngAfterViewInit() {
+  ngAfterViewInit() {
 
-  setTimeout(() => {
+    setTimeout(() => {
 
-    this.loadMap();
+      this.loadMap();
 
-    this.map.invalidateSize();
+      this.map.invalidateSize();
 
-  }, 300);
+      const parentId = localStorage.getItem('parentId');
 
-}
+      if (parentId) {
+
+        this.socketService.connect();
+
+        this.socketService.joinParentRoom(parentId);
+
+        this.socketService
+          .listenDashboardUpdated()
+          .subscribe(() => {
+
+            const parentId = localStorage.getItem('parentId');
+
+            if (!parentId) {
+              return;
+            }
+
+            this.parentService
+              .getDashboard(parentId)
+              .subscribe((res: any) => {
+
+                if (!res.data.rideStarted) {
+
+                  clearInterval(this.trackingInterval);
+
+                  this.router.navigateByUrl(
+                    '/parent/dashboard'
+                  );
+
+                }
+
+              });
+
+          });
+
+      }
+
+    }, 300);
+
+  }
   loadMap() {
 
-    this.map = L.map('map').setView( [11.0168, 76.9558], 15);
+    this.map = L.map('map').setView([11.0168, 76.9558], 15);
+    const driverId =
+      localStorage.getItem('driverId');
 
-    L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',  { maxZoom: 19 } ).addTo(this.map);
+    if (!driverId) {
+      return;
+    }
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
 
     this.schoolMarker = L.marker(
-  [
-    this.schoolLat,
-    this.schoolLng
-  ]
-).addTo(this.map);
+      [
+        this.schoolLat,
+        this.schoolLng
+      ]
+    ).addTo(this.map);
 
-this.schoolMarker.bindPopup(
-  '🏫 Lisieux Matriculation School'
-);
+    this.schoolMarker.bindPopup(
+      '🏫 Lisieux Matriculation School'
+    );
 
-this.vanMarker = L.marker(
-  [
-    this.schoolLat,
-    this.schoolLng
-  ]
-).addTo(this.map);
+    this.vanMarker = L.marker(
+      [
+        this.schoolLat,
+        this.schoolLng
+      ]
+    ).addTo(this.map);
 
-this.vanMarker.bindPopup(
-  '🚐 School Van'
-);
+    this.vanMarker.bindPopup(
+      '🚐 School Van'
+    );
 
-    setInterval(() => {
+    this.trackingInterval =
+      setInterval(() => {
 
-  this.parentService
+        this.parentService
 
-  .getLiveLocation(
+          .getLiveLocation(driverId)
 
-    'DRV1782128739598'
+          .subscribe((res: any) => {
 
-  )
+            this.vanMarker.setLatLng([
+              res.latitude,
+              res.longitude
+            ]);
+            const bounds = L.latLngBounds([
+              [
+                res.latitude,
+                res.longitude
+              ],
+              [
+                this.schoolLat,
+                this.schoolLng
+              ]
+            ]);
 
-  .subscribe((res:any)=>{
+            this.map.fitBounds(
+              bounds,
+              {
+                padding: [50, 50]
+              }
+            );
+          });
 
-   this.vanMarker.setLatLng([
-  res.latitude,
-  res.longitude
-]);
-    const bounds = L.latLngBounds([
-  [
-    res.latitude,
-    res.longitude
-  ],
-  [
-    this.schoolLat,
-    this.schoolLng
-  ]
-]);
+      }, 15000);
 
-this.map.fitBounds(
-  bounds,
-  {
-    padding: [50, 50]
   }
-);
-  });
 
-},15000);
+  ngOnDestroy() {
+
+    clearInterval(this.trackingInterval);
+
+    clearInterval(this.trackingInterval);
 
   }
 }

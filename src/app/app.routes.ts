@@ -62,6 +62,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/parent/dashboard/dashboard.page').then( m => m.DashboardPage)
   },
   {
+  path: 'parent/attendance/:parentId',
+  loadComponent: () =>
+    import('./pages/parent/attendance/attendance.page')
+      .then(m => m.AttendancePage)
+},
+  {
     path: 'admin/dashboard',
     loadComponent: () => import('./pages/admin/dashboard/dashboard.page').then( m => m.DashboardPage)
   },
@@ -103,5 +109,19 @@ export const routes: Routes = [
   {
     path: 'live-tracking',
     loadComponent: () => import('./pages/parent/live-tracking/live-tracking.page').then( m => m.LiveTrackingPage)
+  },
+  // {
+  //   path: 'attendance',
+  //   loadComponent: () => import('./admin/parents/attendance/attendance.page').then( m => m.AttendancePage)
+  // },
+  {
+  path: 'admin/parents/attendance/:parentId',
+  loadComponent: () =>
+    import('./pages/admin/parents/attendance/attendance.page')
+      .then(m => m.AttendancePage)
+},
+  {
+    path: 'attendance',
+    loadComponent: () => import('./pages/parent/attendance/attendance.page').then( m => m.AttendancePage)
   },
 ];

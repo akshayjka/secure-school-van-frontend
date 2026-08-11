@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-
 import { RideService } from '../services/ride';
 
 @Injectable({
@@ -13,7 +12,12 @@ export class LocationService {
     private rideService: RideService
   ) {}
 
-  startTracking(driverId: string) {
+  startTracking(
+    driverId: string,
+    rideType: 'morning' | 'evening'
+  ) {
+
+    this.stopTracking();
 
     this.watchId = setInterval(() => {
 
@@ -21,33 +25,28 @@ export class LocationService {
 
         (position) => {
 
-          this.rideService
-            .updateLocation({
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
 
-              driverId,
-
-              latitude:
-                position.coords.latitude,
-
-              longitude:
-                position.coords.longitude,
-
-              timestamp:
-                new Date()
-
-            })
-
-            .subscribe();
+          this.rideService.updateLocation(
+            driverId,
+            rideType,
+            latitude,
+            longitude
+          ).subscribe({
+            error: (err) => console.error('Location update failed', err)
+          });
 
         },
 
         (error) => {
+          console.error('GPS Error', error);
+        },
 
-          console.error(
-            'GPS Error',
-            error
-          );
-
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
 
       );
@@ -59,11 +58,8 @@ export class LocationService {
   stopTracking() {
 
     if (this.watchId) {
-
       clearInterval(this.watchId);
-
       this.watchId = null;
-
     }
 
   }

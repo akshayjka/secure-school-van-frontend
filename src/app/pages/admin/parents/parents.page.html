@@ -1,81 +1,284 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar color="warning">
+
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/admin/dashboard">
-      </ion-back-button>
+      <ion-back-button defaultHref="/admin/dashboard"></ion-back-button>
     </ion-buttons>
+
     <ion-title>
       Parents
     </ion-title>
+
   </ion-toolbar>
 </ion-header>
 
+
 <ion-content>
 
-  <div class="container">
+  <div class="page-container">
 
-    <div class="top-section">
-      <ion-button color="success" (click)="openAddParent()">
-        <ion-icon slot="start" name="add">
-        </ion-icon>
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+    <div class="page-header">
+
+      <div>
+        <h1>Parents & Students</h1>
+
+        <p>
+          Manage parents, students and attendance
+        </p>
+      </div>
+
+      <ion-button
+        color="success"
+        (click)="openAddParent()"
+      >
+
+        <ion-icon
+          slot="start"
+          name="add"
+        ></ion-icon>
+
         Add Parent
 
       </ion-button>
+
     </div>
 
 
-    <ion-card *ngFor="let parent of parents">
+    <!-- ============================= -->
+    <!-- PARENT CARDS -->
+    <!-- ============================= -->
 
-      <ion-card-header>
+    <div class="parents-grid">
 
-        <ion-card-title>
-          {{ parent.name }}
-        </ion-card-title>
+      <ion-card
+        *ngFor="let parent of parents"
+        class="parent-card"
+      >
 
-      </ion-card-header>
+        <!-- CARD HEADER -->
 
-      <ion-card-content>
+        <ion-card-header>
 
-        <p>
-          Parent ID :
-          {{ parent.parentId }}
-        </p>
+          <div class="student-header">
 
-        <p>
-          Mobile :
-          {{ parent.mobileNumber }}
-        </p>
+            <div class="student-avatar">
 
-        <p>
-          Student :
-          {{ parent.studentName }}
-        </p>
+              {{ getInitials(parent.studentName) }}
 
-        <p>
-          School :
-          {{ parent.schoolName }}
-        </p>
+            </div>
 
-        <p>
-          Driver :
-          {{ parent.driverId }}
-        </p>
+            <div>
 
-        <ion-button size="small" color="warning" (click)="openEditParent(parent)">
+              <ion-card-title>
+                {{ parent.studentName }}
+              </ion-card-title>
 
-          Edit
+              <span class="active-badge">
+                Active Student
+              </span>
 
-        </ion-button>
+            </div>
 
-        <ion-button size="small" color="danger" (click)="deleteParent(parent)">
+          </div>
 
-          Delete
+        </ion-card-header>
 
-        </ion-button>
 
-      </ion-card-content>
+        <!-- CARD CONTENT -->
 
-    </ion-card>
+        <ion-card-content>
+
+          <div class="details-grid">
+
+            <div class="detail-item">
+
+              <span class="label">
+                Parent
+              </span>
+
+              <span class="value">
+                {{ parent.name }}
+              </span>
+
+            </div>
+
+
+            <div class="detail-item">
+
+              <span class="label">
+                Parent ID
+              </span>
+
+              <span class="value">
+                {{ parent.parentId }}
+              </span>
+
+            </div>
+
+
+            <div class="detail-item">
+
+              <span class="label">
+                Mobile
+              </span>
+
+              <span class="value">
+                {{ parent.mobileNumber }}
+              </span>
+
+            </div>
+
+
+            <div class="detail-item">
+
+              <span class="label">
+                School
+              </span>
+
+              <span class="value">
+                {{ parent.schoolName }}
+              </span>
+
+            </div>
+
+
+            <div class="detail-item full-width">
+
+              <span class="label">
+                Driver
+              </span>
+
+              <span class="value">
+                {{ parent.driverId || 'Not Assigned' }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================= -->
+          <!-- ATTENDANCE -->
+          <!-- ============================= -->
+
+          <div class="attendance-section">
+
+            <div class="attendance-title">
+
+              <ion-icon
+                name="calendar-outline"
+              ></ion-icon>
+
+              <span>
+                Student Attendance
+              </span>
+
+            </div>
+
+
+            <ion-button
+              expand="block"
+              color="success"
+              class="attendance-button"
+              (click)="openAttendance(parent)"
+            >
+
+              <ion-icon
+                slot="start"
+                name="calendar-outline"
+              ></ion-icon>
+
+              Manage Attendance
+
+            </ion-button>
+
+          </div>
+
+
+          <!-- ============================= -->
+          <!-- ACTIONS -->
+          <!-- ============================= -->
+
+          <div class="card-actions">
+
+            <ion-button
+              size="small"
+              color="warning"
+              (click)="openEditParent(parent)"
+            >
+
+              <ion-icon
+                slot="start"
+                name="create-outline"
+              ></ion-icon>
+
+              Edit
+
+            </ion-button>
+
+
+            <ion-button
+              size="small"
+              color="danger"
+              (click)="deleteParent(parent)"
+            >
+
+              <ion-icon
+                slot="start"
+                name="trash-outline"
+              ></ion-icon>
+
+              Delete
+
+            </ion-button>
+
+          </div>
+
+        </ion-card-content>
+
+      </ion-card>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- EMPTY STATE -->
+    <!-- ============================= -->
+
+    <div
+      class="empty-state"
+      *ngIf="parents.length === 0"
+    >
+
+      <ion-icon
+        name="people-outline"
+      ></ion-icon>
+
+      <h2>No Parents Found</h2>
+
+      <p>
+        Add a parent to start managing students.
+      </p>
+
+      <ion-button
+        color="success"
+        (click)="openAddParent()"
+      >
+
+        <ion-icon
+          slot="start"
+          name="add"
+        ></ion-icon>
+
+        Add Parent
+
+      </ion-button>
+
+    </div>
 
   </div>
 

@@ -26,49 +26,42 @@ export class Driver {
   }
 
    getDrivers() {
-
-    return this.http.get(
-      `${environment.apiUrl}/drivers`
-    );
-
+    return this.http.get(`${environment.apiUrl}/drivers`);
   }
 
   deleteDriver(id: string) {
-
-    return this.http.delete(
-      `${environment.apiUrl}/drivers/${id}`
-    );
-
+    return this.http.delete(`${environment.apiUrl}/drivers/${id}`);
   }
 
   getDriver(id: string) {
-
-    return this.http.get(
-      `${environment.apiUrl}/drivers/${id}`
-    );
-
+    return this.http.get(`${environment.apiUrl}/drivers/${id}`);
   }
 
   updateDriver(id: string, body: any) {
-
-    return this.http.put(
-      `${environment.apiUrl}/drivers/${id}`, body );
-
+    return this.http.put(`${environment.apiUrl}/drivers/${id}`, body );
   }
 
-
-
 getReferredDrivers(driverId: string): Observable<any> {
-
-  return this.http.get(
-    `${environment.apiUrl}/drivers/referrals/${driverId}` );
-
+  return this.http.get( `${environment.apiUrl}/drivers/referrals/${driverId}` );
 }
 
 getReferralDetails(driverId: string) {
+  return this.http.get<any>(`${environment.apiUrl}/drivers/referral/${driverId}`);
+}
 
-  return this.http.get<any>(
-    `${environment.apiUrl}/drivers/referral/${driverId}`
+updateStudentStatus(
+  parentId: string,
+  rideType: 'morning' | 'evening',
+  status: string
+): Observable<any> {
+
+  return this.http.put(
+    `${environment.apiUrl}/parents/update-status`,
+    {
+      parentId,
+      rideType,
+      status
+    }
   );
 
 }

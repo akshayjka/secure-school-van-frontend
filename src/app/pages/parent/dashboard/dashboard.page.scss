@@ -870,9 +870,6 @@ ion-title {
   }
 
 
-  .student-profile-card {
-    padding: 16px;
-  }
 
 
   .dashboard-info-grid {
@@ -907,6 +904,1023 @@ ion-title {
     margin: 0 auto;
 
     padding-top: 28px;
+  }
+
+}
+.ride-notification{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    margin-top:16px;
+
+    padding:16px;
+
+    border-radius:18px;
+
+    background:#ffffff;
+
+    border-left:5px solid #16a34a;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.05);
+
+    animation:slideDown .35s ease;
+}
+
+.notification-ended{
+
+    border-left-color:#ef4444;
+}
+
+.notification-icon{
+
+    width:46px;
+
+    height:46px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    border-radius:14px;
+
+    background:#dcfce7;
+
+    color:#16a34a;
+
+    font-size:24px;
+}
+
+.notification-ended .notification-icon{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+}
+
+.notification-content{
+
+    flex:1;
+}
+
+.notification-content h3{
+
+    margin:0;
+
+    font-size:15px;
+
+    font-weight:800;
+}
+
+.notification-content p{
+
+    margin-top:4px;
+
+    font-size:12px;
+
+    color:#64748b;
+}
+
+.live-badge{
+
+    background:#16a34a;
+
+    color:#fff;
+
+    padding:4px 8px;
+
+    border-radius:20px;
+
+    font-size:10px;
+
+    font-weight:700;
+
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+
+50%{
+
+opacity:.55;
+
+}
+
+}
+
+@keyframes slideDown{
+
+from{
+
+opacity:0;
+
+transform:translateY(-10px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:none;
+
+}
+
+}
+/* =====================================================
+   STUDENT PROFILE
+   COMPACT DASHBOARD CARD
+===================================================== */
+
+.student-profile-card {
+
+  margin-top: 14px;
+
+  padding: 18px;
+
+  border-radius: 20px;
+
+  background:
+    rgba(255, 255, 255, 0.97);
+
+  border:
+    1px solid rgba(245, 158, 11, 0.10);
+
+  box-shadow:
+    0 7px 22px rgba(15, 23, 42, 0.055);
+}
+
+
+/* =====================================================
+   PROFILE HEADER
+===================================================== */
+
+.student-profile-header {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 14px;
+}
+
+
+/* =====================================================
+   STUDENT INFORMATION
+===================================================== */
+
+.student-profile-info {
+
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.card-eyebrow {
+
+  display: block;
+
+  margin-bottom: 5px;
+
+  color:
+    var(--app-primary-dark);
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+
+.student-profile-info h2 {
+
+  margin: 0;
+
+  overflow: hidden;
+
+  color:
+    var(--app-text);
+
+  font-size: 18px;
+
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+.student-profile-info p {
+
+  margin:
+    4px 0 0;
+
+  overflow: hidden;
+
+  color:
+    var(--app-subtext);
+
+  font-size: 11px;
+
+  font-weight: 500;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =====================================================
+   PROFILE ICON
+===================================================== */
+
+.student-avatar {
+
+  width: 54px;
+  height: 54px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff3d6,
+      #fff8e9
+    );
+
+  color:
+    #d97706;
+
+  font-size: 25px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 14px
+    rgba(245, 158, 11, 0.08);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+
+.student-avatar:active {
+
+  transform:
+    scale(0.93);
+
+  box-shadow:
+    0 2px 8px
+    rgba(245, 158, 11, 0.12);
+}
+
+
+.student-avatar ion-icon {
+
+  font-size: 25px;
+}
+.student-avatar:hover {
+  box-shadow:
+    0 6px 18px rgba(245, 158, 11, 0.18);
+}
+/* =====================================================
+   STUDENT PROFILE POPUP
+   DESIGN 3 - MODERN GRADIENT
+===================================================== */
+
+
+/* =====================================================
+   OVERLAY
+===================================================== */
+
+.student-popup-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 18px;
+
+  background:
+    rgba(15, 23, 42, 0.62);
+
+  backdrop-filter:
+    blur(7px);
+
+  -webkit-backdrop-filter:
+    blur(7px);
+
+  animation:
+    popupOverlayIn 0.2s ease;
+}
+
+
+/* =====================================================
+   POPUP CARD
+===================================================== */
+
+.student-popup-card {
+
+  width: 100%;
+
+  max-width: 390px;
+
+  max-height: 92vh;
+
+  overflow: hidden;
+
+  border-radius: 27px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 25px 70px
+    rgba(15, 23, 42, 0.30);
+
+  animation:
+    popupCardIn
+    0.28s
+    cubic-bezier(.22, 1, .36, 1);
+}
+
+
+/* =====================================================
+   GRADIENT HEADER
+===================================================== */
+
+.student-popup-header {
+
+  position: relative;
+
+  padding:
+    30px
+    20px
+    29px;
+
+  text-align: center;
+
+  overflow: hidden;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ff9a3c 0%,
+      #ff7a59 52%,
+      #ff647c 100%
+    );
+}
+
+
+/* Decorative shape */
+
+.student-popup-header::before {
+
+  content: "";
+
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  top: -105px;
+  right: -55px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.13);
+
+  pointer-events: none;
+}
+
+
+.student-popup-header::after {
+
+  content: "";
+
+  position: absolute;
+
+  width: 140px;
+  height: 140px;
+
+  bottom: -100px;
+  left: -45px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.10);
+
+  pointer-events: none;
+}
+
+
+/* =====================================================
+   CLOSE
+===================================================== */
+
+.popup-close {
+
+  position: absolute;
+
+  top: 15px;
+  right: 15px;
+
+  z-index: 5;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.18);
+
+  color: #ffffff;
+
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+
+.popup-close:active {
+
+  transform:
+    scale(0.9);
+
+  background:
+    rgba(255, 255, 255, 0.30);
+}
+
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+.popup-avatar {
+
+  position: relative;
+
+  z-index: 3;
+
+  width: 62px;
+  height: 62px;
+
+  margin:
+    0 auto
+    12px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    #ffffff;
+
+  color:
+    #f97316;
+
+  border:
+    3px solid
+    rgba(255, 255, 255, 0.45);
+
+  font-size: 24px;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 8px 22px
+    rgba(0, 0, 0, 0.14);
+}
+
+
+/* =====================================================
+   NAME
+===================================================== */
+
+.student-popup-header h2 {
+
+  position: relative;
+
+  z-index: 3;
+
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: 20px;
+
+  font-weight: 800;
+}
+
+
+.student-popup-header p {
+
+  position: relative;
+
+  z-index: 3;
+
+  margin:
+    5px 0 0;
+
+  color:
+    rgba(255, 255, 255, 0.90);
+
+  font-size: 12px;
+}
+
+
+/* =====================================================
+   POPUP BODY
+===================================================== */
+
+.student-popup-body {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  padding: 17px;
+
+  max-height: calc(92vh - 170px);
+
+  overflow-y: auto;
+
+  scrollbar-width: none;
+}
+
+
+.student-popup-body::-webkit-scrollbar {
+
+  display: none;
+}
+
+
+/* =====================================================
+   DETAIL CARD
+===================================================== */
+
+.popup-detail-card {
+
+  min-width: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 11px;
+
+  border:
+    1px solid #eef2f7;
+
+  border-radius: 15px;
+
+  background:
+    #ffffff;
+
+  box-shadow:
+    0 3px 12px
+    rgba(15, 23, 42, 0.035);
+}
+
+
+/* =====================================================
+   FULL WIDTH
+===================================================== */
+
+.popup-full-width {
+
+  grid-column:
+    1 / -1;
+}
+
+
+/* =====================================================
+   ICON
+===================================================== */
+
+.popup-detail-icon {
+
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  font-size: 18px;
+}
+
+
+/* School */
+
+.popup-school {
+
+  background:
+    #f3e8ff;
+
+  color:
+    #9333ea;
+}
+
+
+/* Pickup */
+
+.popup-pickup {
+
+  background:
+    #dcfce7;
+
+  color:
+    #16a34a;
+}
+
+
+/* Drop */
+
+.popup-drop {
+
+  background:
+    #fee2e2;
+
+  color:
+    #dc2626;
+}
+
+
+/* Attendance */
+
+.popup-attendance {
+
+  background:
+    #dbeafe;
+
+  color:
+    #2563eb;
+}
+
+
+/* Driver */
+
+.popup-driver {
+
+  background:
+    #fff3d6;
+
+  color:
+    #d97706;
+}
+
+
+/* Phone */
+
+.popup-phone {
+
+  background:
+    #e0f2fe;
+
+  color:
+    #0284c7;
+}
+
+
+/* Ride active */
+
+.popup-ride-active {
+
+  background:
+    #dcfce7;
+
+  color:
+    #16a34a;
+}
+
+
+/* Ride ended */
+
+.popup-ride-ended {
+
+  background:
+    #fee2e2;
+
+  color:
+    #dc2626;
+}
+
+
+/* =====================================================
+   CONTENT
+===================================================== */
+
+.popup-detail-content {
+
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.popup-detail-content span {
+
+  display: block;
+
+  margin-bottom: 3px;
+
+  color:
+    #94a3b8;
+
+  font-size: 9px;
+
+  font-weight: 600;
+}
+
+
+.popup-detail-content strong {
+
+  display: block;
+
+  overflow: hidden;
+
+  color:
+    #1e293b;
+
+  font-size: 11px;
+
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+.popup-detail-content small {
+
+  display: block;
+
+  margin-top: 3px;
+
+  color:
+    #64748b;
+
+  font-size: 9px;
+
+  line-height: 1.3;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.popup-present {
+
+  color:
+    #16a34a !important;
+}
+
+
+.popup-absent {
+
+  color:
+    #dc2626 !important;
+}
+
+
+.popup-ended {
+
+  color:
+    #dc2626 !important;
+}
+
+
+/* =====================================================
+   CLOSE BUTTON
+===================================================== */
+
+.popup-close-button {
+
+  grid-column:
+    1 / -1;
+
+  width: 100%;
+
+  margin:
+    3px 0 0;
+
+  --background:
+    linear-gradient(
+      110deg,
+      #ff7043,
+      #ff5f6d
+    );
+
+  --background-hover:
+    #f97316;
+
+  --background-activated:
+    #ea580c;
+
+  --color:
+    #ffffff;
+
+  --border-radius:
+    15px;
+
+  --box-shadow:
+    0 8px 20px
+    rgba(249, 115, 22, 0.20);
+
+  min-height: 48px;
+
+  font-size: 13px;
+
+  font-weight: 750;
+}
+
+
+/* =====================================================
+   ANIMATION
+===================================================== */
+
+@keyframes popupOverlayIn {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
+
+
+@keyframes popupCardIn {
+
+  from {
+
+    opacity: 0;
+
+    transform:
+      translateY(25px)
+      scale(0.94);
+
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 370px) {
+
+  .student-profile-card {
+
+    padding:
+      16px;
+
+  }
+
+
+  .student-avatar {
+
+    width: 50px;
+    height: 50px;
+
+    border-radius: 15px;
+
+  }
+
+
+  .student-profile-info h2 {
+
+    font-size: 16px;
+
+  }
+
+
+  .student-popup-overlay {
+
+    padding:
+      12px;
+
+  }
+
+
+  .student-popup-card {
+
+    border-radius:
+      23px;
+
+  }
+
+
+  .student-popup-header {
+
+    padding:
+      26px
+      16px
+      25px;
+
+  }
+
+
+  .student-popup-body {
+
+    gap: 8px;
+
+    padding:
+      13px;
+
+  }
+
+
+  .popup-detail-card {
+
+    padding:
+      9px;
+
+    gap:
+      7px;
+
+  }
+
+
+  .popup-detail-icon {
+
+    width: 34px;
+    height: 34px;
+
+    font-size: 16px;
+
   }
 
 }

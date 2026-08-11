@@ -1,0 +1,434 @@
+<ion-header>
+
+  <ion-toolbar color="warning">
+
+    <ion-buttons slot="start">
+
+      <ion-button (click)="goBack()">
+
+        <ion-icon name="arrow-back-outline"></ion-icon>
+
+      </ion-button>
+
+    </ion-buttons>
+
+
+    <ion-title>
+      Attendance
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+
+<ion-content>
+
+  <div class="attendance-container">
+
+
+    <!-- ================================================= -->
+    <!-- STUDENT HEADER -->
+    <!-- ================================================= -->
+
+    <ion-card class="student-card">
+
+      <ion-card-content>
+
+        <div class="student-info">
+
+          <div class="student-avatar">
+
+            {{ parent?.studentName?.charAt(0)?.toUpperCase() }}
+
+          </div>
+
+
+          <div class="student-details">
+
+            <h1>
+              {{ parent?.studentName }}
+            </h1>
+
+            <p>
+              {{ parent?.schoolName }}
+            </p>
+
+            <span>
+              Parent ID :
+              {{ parent?.parentId }}
+            </span>
+
+          </div>
+
+
+          <div class="sync-badge">
+
+            <ion-icon name="checkmark-circle"></ion-icon>
+
+            Parent App Sync Ready
+
+          </div>
+
+        </div>
+
+      </ion-card-content>
+
+    </ion-card>
+
+
+
+    <!-- ================================================= -->
+    <!-- MONTH HEADER -->
+    <!-- ================================================= -->
+
+    <div class="month-section">
+
+      <ion-button fill="clear" (click)="previousMonth()">
+
+        <ion-icon name="chevron-back-outline"></ion-icon>
+
+      </ion-button>
+
+
+      <div class="month-title">
+
+        <ion-icon name="calendar-outline"></ion-icon>
+
+        <strong>
+          {{ monthName }}
+        </strong>
+
+      </div>
+
+
+      <ion-button fill="clear" (click)="nextMonth()">
+
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+
+      </ion-button>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- BULK ACTIONS -->
+    <!-- ================================================= -->
+
+    <div class="bulk-actions">
+
+      <ion-button color="success" (click)="markAllPresent()">
+
+        <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+
+        Mark All Present
+        (Except Sundays)
+
+      </ion-button>
+
+
+      <ion-button fill="outline" color="medium" (click)="resetMonth()">
+
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+
+        Reset Month
+
+      </ion-button>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- LEGEND -->
+    <!-- ================================================= -->
+
+    <div class="legend">
+
+      <div>
+
+        <span class="legend-dot present"></span>
+
+        Present
+
+      </div>
+
+
+      <div>
+
+        <span class="legend-dot absent"></span>
+
+        Absent
+
+      </div>
+
+
+      <div>
+
+        <span class="legend-dot sunday"></span>
+
+        Sunday
+
+      </div>
+
+
+      <div>
+
+        <span class="legend-dot unmarked"></span>
+
+        Not Marked
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- CALENDAR -->
+    <!-- ================================================= -->
+
+<!-- ================================================= -->
+<!-- CALENDAR -->
+<!-- ================================================= -->
+
+<ion-card class="calendar-card">
+
+  <ion-card-content>
+
+    <div class="calendar-grid">
+
+
+      <!-- WEEK DAYS -->
+
+      <div
+        class="weekday"
+        *ngFor="let day of weekDays"
+      >
+
+        {{ day }}
+
+      </div>
+
+
+      <!-- ============================================= -->
+      <!-- EMPTY CELLS BEFORE FIRST DAY -->
+      <!-- ============================================= -->
+
+      <div
+        class="calendar-day empty"
+        *ngFor="
+          let empty of calendarLeadingDays
+        "
+      ></div>
+
+
+      <!-- ============================================= -->
+      <!-- MONTH DAYS -->
+      <!-- ============================================= -->
+
+      <button
+        class="calendar-day"
+
+        *ngFor="
+          let day of attendanceDays
+        "
+
+        [class.present]="
+          day.status === 'present'
+        "
+
+        [class.absent]="
+          day.status === 'absent'
+        "
+
+        [class.sunday]="
+          day.isSunday
+        "
+
+        [class.unmarked]="
+          day.status === 'not_marked'
+          && !day.isSunday
+        "
+
+        [disabled]="
+          day.isSunday
+        "
+
+        (click)="
+          toggleAttendance(day)
+        "
+      >
+
+        <!-- DATE -->
+
+        <span class="date-number">
+
+          {{ day.day }}
+
+        </span>
+
+
+        <!-- PRESENT -->
+
+        <span
+          class="status-text"
+
+          *ngIf="
+            day.status === 'present'
+          "
+        >
+
+          P
+
+        </span>
+
+
+        <!-- ABSENT -->
+
+        <span
+          class="status-text"
+
+          *ngIf="
+            day.status === 'absent'
+          "
+        >
+
+          A
+
+        </span>
+
+
+        <!-- SUNDAY -->
+
+        <span
+          class="status-text sunday-text"
+
+          *ngIf="
+            day.isSunday
+          "
+        >
+
+          -
+
+        </span>
+
+      </button>
+
+    </div>
+
+  </ion-card-content>
+
+</ion-card>
+
+
+
+    <!-- ================================================= -->
+    <!-- SUMMARY -->
+    <!-- ================================================= -->
+
+    <div class="summary-grid">
+
+
+      <div class="summary-card">
+
+        <span class="summary-label">
+          Working Days
+        </span>
+
+        <strong>
+          {{ workingDays }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card present-summary">
+
+        <span class="summary-label">
+          Present
+        </span>
+
+        <strong>
+          {{ presentCount }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card absent-summary">
+
+        <span class="summary-label">
+          Absent
+        </span>
+
+        <strong>
+          {{ absentCount }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span class="summary-label">
+          Not Marked
+        </span>
+
+        <strong>
+          {{ unmarkedCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- INFORMATION -->
+    <!-- ================================================= -->
+
+    <div class="info-box">
+
+      <ion-icon name="calendar-outline"></ion-icon>
+
+      <div>
+
+        <strong>
+          Attendance Rules
+        </strong>
+
+        <p>
+          Sundays are automatically excluded.
+          Use "Mark All Present" to mark every
+          working day as present, then change
+          individual days to absent when required.
+        </p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- SAVE -->
+    <!-- ================================================= -->
+
+    <ion-button expand="block" color="success" class="save-button" [disabled]="saving" (click)="saveAttendance()">
+
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+
+      {{ saving
+      ? 'Saving...'
+      : 'Save Attendance'
+      }}
+
+    </ion-button>
+
+
+  </div>
+
+</ion-content>

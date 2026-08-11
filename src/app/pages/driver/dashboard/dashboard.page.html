@@ -2,7 +2,7 @@
 
   <ion-toolbar>
 
-    <!-- Back Button -->
+    <!-- BACK -->
     <ion-buttons
       slot="start"
       *ngIf="currentView !== 'dashboard'">
@@ -21,7 +21,7 @@
     </ion-buttons>
 
 
-    <!-- Dashboard Menu -->
+    <!-- MENU -->
     <ion-buttons
       slot="start"
       *ngIf="currentView === 'dashboard'">
@@ -40,7 +40,7 @@
     </ion-buttons>
 
 
-    <!-- Title -->
+    <!-- TITLE -->
     <ion-title>
 
       {{
@@ -52,7 +52,7 @@
     </ion-title>
 
 
-    <!-- Logout -->
+    <!-- LOGOUT -->
     <ion-buttons
       slot="end"
       *ngIf="currentView === 'dashboard'">
@@ -86,7 +86,9 @@
     class="dashboard-page">
 
 
-    <!-- DRIVER IDENTITY CARD -->
+    <!-- ===================================================
+         DRIVER CARD
+    ==================================================== -->
 
     <section class="driver-card">
 
@@ -114,13 +116,16 @@
     </section>
 
 
-    <!-- CURRENT STATUS -->
+    <!-- ===================================================
+         RIDE STATUS
+    ==================================================== -->
 
     <section class="status-section">
 
       <span class="status-label">
         Current Status
       </span>
+
 
       <div
         class="status-pill"
@@ -129,14 +134,20 @@
 
         <span class="status-dot"></span>
 
-        {{ rideStarted ? 'Ride Running' : 'Stopped' }}
+        {{
+          rideStarted
+            ? 'Ride Running'
+            : 'Stopped'
+        }}
 
       </div>
 
     </section>
 
 
-    <!-- PRIMARY ACTIONS -->
+    <!-- ===================================================
+         PRIMARY ACTIONS
+    ==================================================== -->
 
     <section class="action-grid">
 
@@ -164,32 +175,6 @@
 
         <span class="action-subtitle">
           Begin today's trip
-        </span>
-
-      </button>
-
-
-      <!-- ROUTE / LIVE RIDE -->
-
-      <button
-        type="button"
-        class="action-card location-action"
-        (click)="openView('route')">
-
-        <div class="action-icon location-icon">
-
-          <ion-icon
-            name="location-outline">
-          </ion-icon>
-
-        </div>
-
-        <span class="action-title">
-          Today's Route
-        </span>
-
-        <span class="action-subtitle">
-          View students
         </span>
 
       </button>
@@ -225,7 +210,9 @@
     </section>
 
 
-    <!-- END RIDE INFORMATION -->
+    <!-- ===================================================
+         END RIDE HINT
+    ==================================================== -->
 
     <div
       class="ride-hint"
@@ -242,7 +229,353 @@
     </div>
 
 
-    <!-- OVERVIEW -->
+    <!-- ===================================================
+         TODAY'S STUDENTS
+         SHOW ONLY AFTER RIDE START
+    ==================================================== -->
+
+    <section
+      class="route-dashboard"
+      *ngIf="rideStarted">
+
+
+      <!-- SECTION HEADER -->
+
+      <div class="section-heading">
+
+        <div>
+
+          <h2>
+            Today's Students
+          </h2>
+
+          <p>
+            Pickup & Drop Management
+          </p>
+
+        </div>
+
+
+        <div class="today-student-count">
+
+          {{ selectedStudents.length }}
+
+          <span>
+            Present
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           PICKED STUDENTS
+      ================================================== -->
+
+      <div
+        class="student-group"
+        *ngIf="pickedStudents.length > 0">
+
+
+        <div class="student-group-header picked-header">
+
+          <div>
+
+            <div class="student-group-title">
+
+              <span class="group-dot picked-dot"></span>
+
+              Picked Students
+
+            </div>
+
+            <p>
+              Students already picked from home
+            </p>
+
+          </div>
+
+
+          <span class="group-count picked-count">
+            {{ pickedStudents.length }}
+          </span>
+
+        </div>
+
+
+        <!-- PICKED STUDENT CARDS -->
+
+        <div
+          class="student-route-card picked-card"
+          *ngFor="let student of pickedStudents">
+
+
+          <div class="student-top">
+
+            <div class="student-avatar picked-avatar">
+
+              {{
+                student.studentName?.charAt(0)
+                || 'S'
+              }}
+
+            </div>
+
+
+            <div class="student-info">
+
+              <h3>
+                {{ student.studentName }}
+              </h3>
+
+
+              <div class="student-location">
+
+                <span>
+                  Pickup:
+                </span>
+
+                {{ student.pickupArea }}
+
+              </div>
+
+
+              <div class="student-location">
+
+                <span>
+                  Drop:
+                </span>
+
+                {{ student.dropArea }}
+
+              </div>
+
+
+              <span
+                class="student-status"
+                [class.picked]="
+                  studentStatuses[student.parentId]
+                  === 'Picked'
+                "
+                [class.dropped]="
+                  studentStatuses[student.parentId]
+                  === 'Dropped'
+                ">
+
+                {{
+                  studentStatuses[student.parentId]
+                  || 'Pending'
+                }}
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="student-actions">
+
+
+            <!-- DROP -->
+
+            <ion-button
+              size="small"
+              color="primary"
+              fill="solid"
+              [disabled]="
+                studentStatuses[student.parentId]
+                !== 'Picked'
+              "
+              (click)="markDropped(student)">
+
+              Drop
+
+            </ion-button>
+
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           PENDING STUDENTS
+      ================================================== -->
+
+      <div
+        class="student-group"
+        *ngIf="pendingStudents.length > 0">
+
+
+        <div class="student-group-header pending-header">
+
+          <div>
+
+            <div class="student-group-title">
+
+              <span class="group-dot pending-dot"></span>
+
+              Pending Students
+
+            </div>
+
+            <p>
+              Students waiting for pickup
+            </p>
+
+          </div>
+
+
+          <span class="group-count pending-count">
+            {{ pendingStudents.length }}
+          </span>
+
+        </div>
+
+
+        <!-- PENDING STUDENT CARDS -->
+
+        <div
+          class="student-route-card pending-card"
+          *ngFor="let student of pendingStudents">
+
+
+          <div class="student-top">
+
+            <div class="student-avatar pending-avatar">
+
+              {{
+                student.studentName?.charAt(0)
+                || 'S'
+              }}
+
+            </div>
+
+
+            <div class="student-info">
+
+              <h3>
+                {{ student.studentName }}
+              </h3>
+
+
+              <div class="student-location">
+
+                <span>
+                  Pickup:
+                </span>
+
+                {{ student.pickupArea }}
+
+              </div>
+
+
+              <div class="student-location">
+
+                <span>
+                  Drop:
+                </span>
+
+                {{ student.dropArea }}
+
+              </div>
+
+
+              <span class="student-status pending">
+                Pending
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="student-actions">
+
+
+            <!-- PICK -->
+
+            <ion-button
+              size="small"
+              color="success"
+              fill="solid"
+              (click)="markPicked(student)">
+
+              Pick
+
+            </ion-button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           NO STUDENTS
+      ================================================== -->
+
+      <div
+        class="empty-state"
+        *ngIf="selectedStudents.length === 0">
+
+        <div class="empty-icon">
+
+          <ion-icon
+            name="people-outline">
+          </ion-icon>
+
+        </div>
+
+        <h3>
+          No Students Today
+        </h3>
+
+        <p>
+          No present students are available for today's ride.
+        </p>
+
+      </div>
+
+
+    </section>
+
+
+    <!-- ===================================================
+         BEFORE RIDE MESSAGE
+    ==================================================== -->
+
+    <section
+      class="pre-ride-student-state"
+      *ngIf="!rideStarted">
+
+      <div class="pre-ride-icon">
+
+        <ion-icon
+          name="school-outline">
+        </ion-icon>
+
+      </div>
+
+      <h3>
+        Today's Students
+      </h3>
+
+      <p>
+        Start the ride to view today's student pickup list.
+      </p>
+
+    </section>
+
+
+    <!-- ===================================================
+         TODAY'S OVERVIEW
+    ==================================================== -->
 
     <section class="overview-section">
 
@@ -339,7 +672,9 @@
     </section>
 
 
-    <!-- SAFETY MESSAGE -->
+    <!-- ===================================================
+         SAFETY
+    ==================================================== -->
 
     <div class="safety-card">
 
@@ -536,6 +871,7 @@
 
     <section class="content-card">
 
+
       <div class="content-card-header">
 
         <div>
@@ -550,6 +886,7 @@
 
         </div>
 
+
         <div class="student-count">
 
           {{ selectedStudents.length }}
@@ -563,128 +900,250 @@
       </div>
 
 
-      <!-- STUDENTS -->
+      <!-- RIDE NOT STARTED -->
 
       <div
-        class="route-list"
-        *ngIf="selectedStudents.length > 0">
-
-
-        <div
-          class="student-route-card"
-          *ngFor="let student of selectedStudents">
-
-
-          <div class="student-top">
-
-            <div class="student-avatar">
-
-              {{ student.studentName?.charAt(0) || 'S' }}
-
-            </div>
-
-
-            <div class="student-info">
-
-              <h3>
-                {{ student.studentName }}
-              </h3>
-
-              <span
-                class="student-status"
-                [class.picked]="studentStatuses[student.parentId] === 'Picked'"
-                [class.dropped]="studentStatuses[student.parentId] === 'Dropped'">
-
-                {{
-                  studentStatuses[student.parentId]
-                  || 'Pending'
-                }}
-
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <div class="student-actions">
-
-
-            <ion-button
-              size="small"
-              fill="outline"
-              [disabled]="
-                (studentStatuses[student.parentId] || 'Pending')
-                !== 'Pending'
-              "
-              (click)="markPicked(student)">
-
-              <ion-icon
-                slot="start"
-                name="person-add-outline">
-              </ion-icon>
-
-              Picked
-
-            </ion-button>
-
-
-            <ion-button
-              size="small"
-              fill="outline"
-              [disabled]="
-                studentStatuses[student.parentId]
-                !== 'Picked'
-              "
-              (click)="markDropped(student)">
-
-              <ion-icon
-                slot="start"
-                name="checkmark-outline">
-              </ion-icon>
-
-              Dropped
-
-            </ion-button>
-
-
-            <ion-button
-              size="small"
-              fill="clear"
-              (click)="editStatus(student)">
-
-              Edit
-
-            </ion-button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- EMPTY -->
-
-      <div
-        *ngIf="selectedStudents.length === 0"
+        *ngIf="!rideStarted"
         class="empty-state">
 
         <div class="empty-icon">
 
           <ion-icon
-            name="school-outline">
+            name="play-outline">
           </ion-icon>
 
         </div>
 
         <h3>
-          No Students Today
+          Ride Not Started
         </h3>
 
         <p>
-          No present students are available for today's route.
+          Start today's ride from the dashboard to manage students.
         </p>
+
+      </div>
+
+
+      <!-- ROUTE GROUPS -->
+
+      <div
+        class="route-list"
+        *ngIf="rideStarted">
+
+
+        <!-- PICKED -->
+
+        <div
+          class="student-group"
+          *ngIf="pickedStudents.length > 0">
+
+          <div class="student-group-header picked-header">
+
+            <div>
+
+              <div class="student-group-title">
+
+                <span class="group-dot picked-dot"></span>
+
+                Picked Students
+
+              </div>
+
+            </div>
+
+            <span class="group-count picked-count">
+              {{ pickedStudents.length }}
+            </span>
+
+          </div>
+
+
+          <div
+            class="student-route-card picked-card"
+            *ngFor="let student of pickedStudents">
+
+            <div class="student-top">
+
+              <div class="student-avatar picked-avatar">
+
+                {{
+                  student.studentName?.charAt(0)
+                  || 'S'
+                }}
+
+              </div>
+
+
+              <div class="student-info">
+
+                <h3>
+                  {{ student.studentName }}
+                </h3>
+
+                <div class="student-location">
+
+                  <span>Drop:</span>
+
+                  {{ student.dropArea }}
+
+                </div>
+
+
+                <span
+                  class="student-status"
+                  [class.picked]="
+                    studentStatuses[student.parentId]
+                    === 'Picked'
+                  "
+                  [class.dropped]="
+                    studentStatuses[student.parentId]
+                    === 'Dropped'
+                  ">
+
+                  {{
+                    studentStatuses[student.parentId]
+                    || 'Pending'
+                  }}
+
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="student-actions">
+
+              <ion-button
+                size="small"
+                color="primary"
+                [disabled]="
+                  studentStatuses[student.parentId]
+                  !== 'Picked'
+                "
+                (click)="markDropped(student)">
+
+                Drop
+
+              </ion-button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PENDING -->
+
+        <div
+          class="student-group"
+          *ngIf="pendingStudents.length > 0">
+
+          <div class="student-group-header pending-header">
+
+            <div>
+
+              <div class="student-group-title">
+
+                <span class="group-dot pending-dot"></span>
+
+                Pending Students
+
+              </div>
+
+            </div>
+
+            <span class="group-count pending-count">
+              {{ pendingStudents.length }}
+            </span>
+
+          </div>
+
+
+          <div
+            class="student-route-card pending-card"
+            *ngFor="let student of pendingStudents">
+
+            <div class="student-top">
+
+              <div class="student-avatar pending-avatar">
+
+                {{
+                  student.studentName?.charAt(0)
+                  || 'S'
+                }}
+
+              </div>
+
+
+              <div class="student-info">
+
+                <h3>
+                  {{ student.studentName }}
+                </h3>
+
+
+                <div class="student-location">
+
+                  <span>
+                    Pickup:
+                  </span>
+
+                  {{ student.pickupArea }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="student-actions">
+
+              <ion-button
+                size="small"
+                color="success"
+                (click)="markPicked(student)">
+
+                Pick
+
+              </ion-button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          *ngIf="
+            pickedStudents.length === 0 &&
+            pendingStudents.length === 0
+          "
+          class="empty-state">
+
+          <div class="empty-icon">
+
+            <ion-icon
+              name="school-outline">
+            </ion-icon>
+
+          </div>
+
+          <h3>
+            No Students Today
+          </h3>
+
+          <p>
+            No present students are available for today's route.
+          </p>
+
+        </div>
 
       </div>
 
@@ -730,7 +1189,10 @@
 
           <div class="student-avatar">
 
-            {{ student.studentName?.charAt(0) || 'S' }}
+            {{
+              student.studentName?.charAt(0)
+              || 'S'
+            }}
 
           </div>
 

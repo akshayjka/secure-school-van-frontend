@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  OnDestroy
 } from '@angular/core';
 
 import {
@@ -27,12 +28,20 @@ import {
 } from '@angular/router';
 
 import {
+  Subscription
+} from 'rxjs';
+
+import {
   ParentService
 } from 'src/app/core/services/parent';
 
 import {
   DialogService
 } from 'src/app/core/services/dialog';
+
+import {
+  SocketService
+} from 'src/app/core/services/socket';
 
 import {
   addIcons
@@ -67,25 +76,62 @@ import {
 
     CommonModule,
     FormsModule,
+
     IonContent,
     IonHeader,
     IonTitle,
     IonToolbar,
+
     IonButton,
     IonButtons,
     IonIcon,
     IonToggle
+
   ]
 
 })
 
-export class DashboardPage implements OnInit {
+
+export class DashboardPage
+  implements OnInit, OnDestroy {
+
+
+  /**
+   * =====================================================
+   * RIDE STATE
+   * =====================================================
+   */
 
   rideStarted = false;
 
+  rideType: string | null = null;
+
+
+  /**
+   * =====================================================
+   * ATTENDANCE
+   * =====================================================
+   */
+
   isPresent = true;
 
+
+  /**
+   * =====================================================
+   * IDENTIFIERS
+   * =====================================================
+   */
+
   driverId: string | null = null;
+
+  parentId: string | null = null;
+
+
+  /**
+   * =====================================================
+   * DASHBOARD DATA
+   * =====================================================
+   */
 
   parent: any = {};
 
@@ -93,8 +139,40 @@ export class DashboardPage implements OnInit {
 
   studentStatus = 'waiting';
 
+
+  /**
+   * =====================================================
+   * UI STATE
+   * =====================================================
+   */
+
   isLoading = false;
 
+  notificationTitle = '';
+
+  notificationMessage = '';
+
+
+  /**
+   * =====================================================
+   * SOCKET SUBSCRIPTIONS
+   * =====================================================
+   */
+
+  private rideStartedSubscription?: Subscription;
+
+  private rideEndedSubscription?: Subscription;
+
+  private dashboardSubscription?: Subscription;
+
+  private studentStatusSubscription?: Subscription;
+
+
+  /**
+   * =====================================================
+   * CONSTRUCTOR
+   * =====================================================
+   */
 
   constructor(
 
@@ -102,7 +180,9 @@ export class DashboardPage implements OnInit {
 
     private router: Router,
 
-    private dialogService: DialogService
+    private dialogService: DialogService,
+
+    private socketService: SocketService
 
   ) {
 
@@ -110,44 +190,38 @@ export class DashboardPage implements OnInit {
 
       logOutOutline,
       refreshOutline,
-
       calendarOutline,
       personOutline,
       schoolOutline,
-
       locationOutline,
       navigateOutline,
-
       busOutline,
       timeOutline,
-
       checkmarkCircleOutline,
       chevronForwardOutline
 
     });
 
   }
-  refreshDashboard() {
-    this.loadDashboard();
-  }
-
-  ngOnInit() {
-
-    this.loadDashboard();
-
-  }
 
 
-  loadDashboard() {
+  /**
+   * =====================================================
+   * INIT
+   * =====================================================
+   */
 
-    const parentId =
+  ngOnInit(): void {
+
+    this.parentId =
       localStorage.getItem('parentId');
 
-    if (!parentId) {
 
-      console.error(
-        'Parent ID not found in localStorage'
-      );
+    /**
+     * Parent ID is required.
+     */
+
+    if (!this.parentId) {
 
       this.router.navigateByUrl(
         '/auth/login',
@@ -160,37 +234,456 @@ export class DashboardPage implements OnInit {
 
     }
 
+
+    /**
+     * ===================================================
+     * CONNECT SOCKET FIRST
+     * ===================================================
+     */
+
+    this.socketService.connect();
+
+
+    /**
+     * ===================================================
+     * JOIN PARENT PERSONAL ROOM
+     * ===================================================
+     */
+
+    this.socketService.joinParentRoom(
+      this.parentId
+    );
+
+
+    /**
+     * ===================================================
+     * INITIAL DASHBOARD LOAD
+     *
+     * HTTP is used only for initial state.
+     * ===================================================
+     */
+
+    this.loadDashboard();
+
+
+    /**
+     * ===================================================
+     * RIDE STARTED
+     *
+     * THIS IS THE IMPORTANT PART.
+     *
+     * No refresh.
+     * No HTTP request.
+     *
+     * Directly update UI.
+     * ===================================================
+     */
+
+    this.rideStartedSubscription =
+      this.socketService
+        .listenRideStarted()
+        .subscribe(
+          (data: any) => {
+
+            console.log(
+              '🚌 Ride Started Socket Event:',
+              data
+            );
+
+
+            /**
+             * Ignore events for another driver.
+             */
+
+            if (
+
+              this.driverId &&
+
+              data?.driverId &&
+
+              data.driverId !== this.driverId
+
+            ) {
+
+              return;
+
+            }
+
+
+            /**
+             * Update state immediately.
+             */
+
+            this.rideStarted = true;
+
+            this.rideType =
+              data?.rideType || this.rideType;
+
+
+            /**
+             * Update notification.
+             */
+
+            this.notificationTitle =
+              '🚌 Ride Started';
+
+            this.notificationMessage =
+              'The school van has started the trip.';
+
+
+            /**
+             * Make sure tracking button
+             * becomes available immediately.
+             */
+
+            console.log(
+              '✅ Parent dashboard updated without refresh'
+            );
+
+          }
+        );
+
+
+    /**
+     * ===================================================
+     * RIDE ENDED
+     * ===================================================
+     */
+
+    this.rideEndedSubscription =
+      this.socketService
+        .listenRideEnded()
+        .subscribe(
+          (data: any) => {
+
+            console.log(
+              '🛑 Ride Ended Socket Event:',
+              data
+            );
+
+
+            /**
+             * Ignore another driver's event.
+             */
+
+            if (
+
+              this.driverId &&
+
+              data?.driverId &&
+
+              data.driverId !== this.driverId
+
+            ) {
+
+              return;
+
+            }
+
+
+            /**
+             * Update UI immediately.
+             */
+
+            this.rideStarted = false;
+
+
+            this.notificationTitle =
+              '✅ Ride Ended';
+
+            this.notificationMessage =
+              'The school van has completed the trip.';
+
+          }
+        );
+
+
+    /**
+     * ===================================================
+     * STUDENT STATUS
+     * ===================================================
+     */
+
+    this.studentStatusSubscription =
+      this.socketService
+        .listenStudentStatusUpdated()
+        .subscribe(
+          (data: any) => {
+
+            console.log(
+              '👨‍🎓 Student Status Socket Event:',
+              data
+            );
+
+
+            if (
+
+              this.parentId &&
+
+              data?.parentId &&
+
+              data.parentId !== this.parentId
+
+            ) {
+
+              return;
+
+            }
+
+
+            this.studentStatus =
+              data?.status || this.studentStatus;
+
+          }
+        );
+
+
+    /**
+     * ===================================================
+     * GENERIC DASHBOARD EVENT
+     *
+     * Keep this for non-ride dashboard changes.
+     *
+     * Ride start/end is handled directly above,
+     * therefore don't reload dashboard for those events.
+     * ===================================================
+     */
+
+    this.dashboardSubscription =
+      this.socketService
+        .listenDashboardUpdated()
+        .subscribe(
+          (data: any) => {
+
+            console.log(
+              '📡 Dashboard Socket Event:',
+              data
+            );
+
+
+            /**
+             * Ride start/end are already handled
+             * directly by their socket events.
+             */
+
+            if (
+
+              data?.type === 'ride_started' ||
+
+              data?.type === 'ride_ended'
+
+            ) {
+
+              return;
+
+            }
+
+
+            /**
+             * For other dashboard changes,
+             * refresh the server state.
+             */
+
+            this.loadDashboard();
+
+          }
+        );
+
+  }
+
+
+  /**
+   * =====================================================
+   * LOAD DASHBOARD
+   *
+   * Used for:
+   * 1. Initial page load
+   * 2. Manual refresh
+   * 3. Non-ride dashboard synchronization
+   * =====================================================
+   */
+
+  loadDashboard(): void {
+
+    const parentId =
+      localStorage.getItem('parentId');
+
+
+    if (!parentId) {
+
+      this.router.navigateByUrl(
+        '/auth/login',
+        {
+          replaceUrl: true
+        }
+      );
+
+      return;
+
+    }
+
+
     this.isLoading = true;
+
 
     this.parentService
       .getDashboard(parentId)
       .subscribe({
 
-        next: (res: any) => {
+        next: (response: any) => {
+
+          const res =
+            response?.data;
+
+
+          if (!res) {
+
+            this.isLoading = false;
+
+            return;
+
+          }
+
+
+          /**
+           * =============================================
+           * STUDENT
+           * =============================================
+           */
 
           this.parent = {
-            studentName: res?.studentName || '',
-            schoolName: res?.schoolName || '',
-            pickupArea: res?.pickupArea || '',
-            dropArea: res?.dropArea || ''
+
+            studentName:
+              res.studentName || '',
+
+            schoolName:
+              res.schoolName || '',
+
+            pickupArea:
+              res.pickupArea || '',
+
+            dropArea:
+              res.dropArea || ''
+
           };
 
-          this.driver = res?.driver || {};
-          this.driverId = res?.driver?.driverId || null;
-          this.isPresent = res?.attendance ?? true;
-          this.studentStatus = res?.attendanceStatus || 'waiting';
-          this.rideStarted = res?.rideStarted ?? false;
+
+          /**
+           * =============================================
+           * DRIVER
+           * =============================================
+           */
+
+          this.driver =
+            res.driver || {};
+
+
+          this.driverId =
+            res.driver?.driverId || null;
+
+
+          /**
+           * =============================================
+           * IMPORTANT
+           *
+           * Once driverId is received from dashboard,
+           * join the driver's Socket.IO channel.
+           *
+           * Backend rideStarted/rideEnded events are
+           * emitted to:
+           *
+           * driver_${driverId}
+           * =============================================
+           */
+
+          if (this.driverId) {
+
+            this.socketService
+              .joinParentChannel(
+                this.driverId
+              );
+
+          }
+
+
+          /**
+           * =============================================
+           * ATTENDANCE
+           * =============================================
+           */
+
+          this.isPresent =
+            res.attendance ?? true;
+
+
+          /**
+           * =============================================
+           * RIDE STATE
+           * =============================================
+           */
+
+          this.rideStarted =
+            res.rideStarted ?? false;
+
+
+          this.rideType =
+            res.rideType || null;
+
+
+          /**
+           * =============================================
+           * STUDENT STATUS
+           * =============================================
+           */
+
+          if (
+            res.rideType === 'morning'
+          ) {
+
+            this.studentStatus =
+              res.morningStatus ||
+              'waiting';
+
+          }
+
+          else if (
+            res.rideType === 'evening'
+          ) {
+
+            this.studentStatus =
+              res.eveningStatus ||
+              'waiting';
+
+          }
+
+          else {
+
+            this.studentStatus =
+              'waiting';
+
+          }
+
+
+          /**
+           * =============================================
+           * NOTIFICATION
+           * =============================================
+           */
+
+          this.updateRideNotification();
+
 
           this.isLoading = false;
-        },
 
-        error: (error) => {
-          console.error('Failed to load dashboard:', error);
-          this.isLoading = false;
         },
 
 
-        complete: () => {
+        error: (err) => {
+
+          console.error(
+            'Dashboard Error',
+            err
+          );
 
           this.isLoading = false;
 
@@ -201,60 +694,116 @@ export class DashboardPage implements OnInit {
   }
 
 
-  updateAttendance(event: CustomEvent) {
+  /**
+   * =====================================================
+   * RIDE NOTIFICATION
+   * =====================================================
+   */
+
+  private updateRideNotification(): void {
+
+    if (this.rideStarted) {
+
+      this.notificationTitle =
+        '🚌 Ride Started';
+
+      this.notificationMessage =
+        'The school van has started the trip.';
+
+    }
+
+    else {
+
+      this.notificationTitle =
+        '✅ Ride Ended';
+
+      this.notificationMessage =
+        'No active ride.';
+
+    }
+
+  }
+
+
+  /**
+   * =====================================================
+   * MANUAL REFRESH
+   * =====================================================
+   */
+
+  refreshDashboard(): void {
+
+    this.loadDashboard();
+
+  }
+
+
+  /**
+   * =====================================================
+   * ATTENDANCE
+   * =====================================================
+   */
+
+  updateAttendance(
+    event: CustomEvent
+  ): void {
 
     const parentId =
       localStorage.getItem('parentId');
+
 
     if (!parentId) {
       return;
     }
 
+
     const newAttendance =
       event.detail.checked;
+
 
     const previousAttendance =
       this.isPresent;
 
-    // Optimistic UI
+
+    /**
+     * Optimistic UI
+     */
+
     this.isPresent =
       newAttendance;
 
 
-    const payload = {
-
-      parentId,
-
-      attendance:
-        newAttendance
-
-    };
-
-
     this.parentService
-      .updateAttendance(payload)
+      .updateAttendance({
+
+        parentId,
+
+        attendance:
+          newAttendance
+
+      })
       .subscribe({
 
-        next: (response: any) => {
+        next: () => {
 
           console.log(
-            'Attendance updated:',
-            response
+            '✅ Attendance Updated'
           );
 
         },
 
-
-        error: (error) => {
+        error: (err) => {
 
           console.error(
-            'Attendance update failed:',
-            error
+            'Attendance Update Error',
+            err
           );
 
-          /*
-           * Rollback toggle if API fails
+
+          /**
+           * Rollback UI
            */
+
           this.isPresent =
             previousAttendance;
 
@@ -265,7 +814,13 @@ export class DashboardPage implements OnInit {
   }
 
 
-  openTracking() {
+  /**
+   * =====================================================
+   * TRACK SCHOOL VAN
+   * =====================================================
+   */
+
+  openTracking(): void {
 
     this.router.navigate([
       '/live-tracking'
@@ -274,15 +829,31 @@ export class DashboardPage implements OnInit {
   }
 
 
-  async logout() {
+  /**
+   * =====================================================
+   * LOGOUT
+   * =====================================================
+   */
+
+  async logout(): Promise<void> {
 
     const confirmed =
       await this.dialogService
         .confirmLogout();
 
+
     if (!confirmed) {
       return;
     }
+
+
+    /**
+     * Disconnect socket before clearing
+     * authentication/session information.
+     */
+
+    this.socketService.disconnect();
+
 
     localStorage.removeItem(
       'token'
@@ -304,6 +875,7 @@ export class DashboardPage implements OnInit {
       'parentId'
     );
 
+
     this.router.navigateByUrl(
       '/auth/login',
       {
@@ -312,5 +884,54 @@ export class DashboardPage implements OnInit {
     );
 
   }
+
+
+  /**
+   * =====================================================
+   * DESTROY
+   * =====================================================
+   */
+
+  ngOnDestroy(): void {
+
+    this.rideStartedSubscription
+      ?.unsubscribe();
+
+    this.rideEndedSubscription
+      ?.unsubscribe();
+
+    this.dashboardSubscription
+      ?.unsubscribe();
+
+    this.studentStatusSubscription
+      ?.unsubscribe();
+
+
+    this.socketService.disconnect();
+
+  }
+
+  showStudentProfile = false;
+
+
+openStudentProfile(): void {
+
+  this.showStudentProfile = true;
+
+}
+openAttendance(): void {
+
+  this.router.navigate([
+    '/parent/attendance',
+    this.parentId
+  ]);
+
+}
+
+closeStudentProfile(): void {
+
+  this.showStudentProfile = false;
+
+}
 
 }

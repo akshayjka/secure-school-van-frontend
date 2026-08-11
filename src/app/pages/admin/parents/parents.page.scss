@@ -1,36 +1,424 @@
-.container {
-
-  padding: 16px;
+ion-content {
+  --background: #fffaf0;
 }
 
-.top-section {
+
+/* =====================================================
+   PAGE CONTAINER
+===================================================== */
+
+.page-container {
+
+  padding: 24px;
+
+  max-width: 1400px;
+
+  margin: auto;
+
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.page-header {
 
   display: flex;
 
-  justify-content: flex-end;
+  justify-content: space-between;
 
   align-items: center;
 
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+
 }
 
-.top-section ion-button {
+.page-header h1 {
 
   margin: 0;
+
+  font-size: 28px;
+
+  font-weight: 700;
+
+  color: #172033;
+
 }
 
-ion-card {
+.page-header p {
 
-  border-radius: 12px;
+  margin: 6px 0 0;
 
-  margin-bottom: 12px;
+  color: #777;
+
+  font-size: 14px;
+
 }
 
-@media (max-width: 768px) {
 
-  .top-section {
+.page-header ion-button {
 
-    justify-content: flex-end;
+  --border-radius: 12px;
+
+  height: 50px;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   PARENT GRID
+===================================================== */
+
+.parents-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 20px;
+
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.parent-card {
+
+  margin: 0;
+
+  border-radius: 18px;
+
+  background: white;
+
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.08);
+
+  overflow: hidden;
+
+}
+
+
+/* =====================================================
+   STUDENT HEADER
+===================================================== */
+
+.student-header {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+}
+
+
+.student-avatar {
+
+  width: 52px;
+
+  height: 52px;
+
+  border-radius: 50%;
+
+  background: #fff0c2;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #172033;
+
+  font-weight: 700;
+
+  font-size: 18px;
+
+}
+
+
+ion-card-title {
+
+  font-size: 21px;
+
+  font-weight: 700;
+
+  color: #172033;
+
+}
+
+
+.active-badge {
+
+  display: inline-block;
+
+  margin-top: 5px;
+
+  padding: 4px 9px;
+
+  border-radius: 20px;
+
+  background: #dff7e8;
+
+  color: #148642;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   DETAILS
+===================================================== */
+
+.details-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 14px;
+
+}
+
+
+.detail-item {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+
+}
+
+
+.detail-item.full-width {
+
+  grid-column: 1 / -1;
+
+}
+
+
+.label {
+
+  font-size: 12px;
+
+  color: #999;
+
+}
+
+
+.value {
+
+  font-size: 14px;
+
+  color: #343b4a;
+
+  font-weight: 500;
+
+  word-break: break-word;
+
+}
+
+
+/* =====================================================
+   ATTENDANCE
+===================================================== */
+
+.attendance-section {
+
+  margin-top: 20px;
+
+  padding-top: 16px;
+
+  border-top: 1px solid #eee;
+
+}
+
+
+.attendance-title {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 10px;
+
+  color: #172033;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+}
+
+
+.attendance-title ion-icon {
+
+  font-size: 20px;
+
+  color: #16a05d;
+
+}
+
+
+.attendance-button {
+
+  --border-radius: 10px;
+
+  height: 44px;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.card-actions {
+
+  display: flex;
+
+  gap: 8px;
+
+  margin-top: 14px;
+
+}
+
+
+.card-actions ion-button {
+
+  --border-radius: 10px;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty-state {
+
+  text-align: center;
+
+  padding: 80px 20px;
+
+  color: #777;
+
+}
+
+
+.empty-state ion-icon {
+
+  font-size: 70px;
+
+  color: #ccc;
+
+}
+
+
+.empty-state h2 {
+
+  color: #333;
+
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .parents-grid {
+
+    grid-template-columns: 1fr;
+
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .page-container {
+
+    padding: 16px;
+
+  }
+
+
+  .page-header {
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+  }
+
+
+  .page-header h1 {
+
+    font-size: 22px;
+
+  }
+
+
+  .page-header p {
+
+    font-size: 12px;
+
+  }
+
+
+  .page-header ion-button {
+
+    height: 44px;
+
+    font-size: 13px;
+
+  }
+
+
+  .details-grid {
+
+    grid-template-columns: 1fr;
+
+  }
+
+
+  .detail-item.full-width {
+
+    grid-column: auto;
+
+  }
+
+
+  .parent-card {
+
+    border-radius: 16px;
+
   }
 
 }

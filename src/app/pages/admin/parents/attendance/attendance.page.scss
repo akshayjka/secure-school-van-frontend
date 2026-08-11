@@ -1,0 +1,735 @@
+ion-content {
+  --background: #fffaf0;
+}
+
+
+.attendance-container {
+
+  max-width: 1100px;
+
+  margin: auto;
+
+  padding: 24px;
+
+}
+
+
+/* =====================================================
+   STUDENT CARD
+===================================================== */
+
+.student-card {
+
+  margin: 0 0 20px;
+
+  border-radius: 18px;
+
+  background: white;
+
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.07);
+
+}
+
+
+.student-info {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 16px;
+
+}
+
+
+.student-avatar {
+
+  width: 62px;
+
+  height: 62px;
+
+  border-radius: 50%;
+
+  background: #fff0bd;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 24px;
+
+  font-weight: 700;
+
+}
+
+
+.student-details {
+
+  flex: 1;
+
+}
+
+
+.student-details h1 {
+
+  margin: 0;
+
+  font-size: 24px;
+
+  color: #172033;
+
+}
+
+
+.student-details p {
+
+  margin: 4px 0;
+
+  color: #666;
+
+}
+
+
+.student-details span {
+
+  font-size: 12px;
+
+  color: #999;
+
+}
+
+
+.sync-badge {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 10px 14px;
+
+  border-radius: 10px;
+
+  background: #e1f7e9;
+
+  color: #128343;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+}
+
+
+.sync-badge ion-icon {
+
+  font-size: 18px;
+
+}
+
+
+/* =====================================================
+   MONTH
+===================================================== */
+
+.month-section {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 20px;
+
+  margin-bottom: 14px;
+
+}
+
+
+.month-section ion-button {
+
+  --color: #172033;
+
+}
+
+
+.month-title {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 20px;
+
+  color: #172033;
+
+}
+
+
+.month-title ion-icon {
+
+  color: #f6a000;
+
+  font-size: 23px;
+
+}
+
+
+/* =====================================================
+   BULK ACTIONS
+===================================================== */
+
+.bulk-actions {
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-bottom: 16px;
+
+}
+
+
+.bulk-actions ion-button {
+
+  --border-radius: 10px;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   LEGEND
+===================================================== */
+
+.legend {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 18px;
+
+  margin-bottom: 10px;
+
+  font-size: 12px;
+
+  color: #555;
+
+}
+
+
+.legend > div {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+}
+
+
+.legend-dot {
+
+  width: 10px;
+
+  height: 10px;
+
+  border-radius: 50%;
+
+}
+
+
+.legend-dot.present {
+  background: #16a05d;
+}
+
+.legend-dot.absent {
+  background: #e52a2a;
+}
+
+.legend-dot.sunday {
+  background: #b8bcc5;
+}
+
+.legend-dot.unmarked {
+  background: #e8eaee;
+}
+
+
+/* =====================================================
+   CALENDAR
+===================================================== */
+
+.calendar-card {
+
+  margin: 0;
+
+  border-radius: 18px;
+
+  background: white;
+
+}
+
+
+.calendar-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  border: 1px solid #e5e5e5;
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+}
+
+
+.weekday {
+
+  text-align: center;
+
+  padding: 12px 4px;
+
+  background: #f7f7f7;
+
+  color: #555;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  border-right: 1px solid #e5e5e5;
+
+}
+
+
+.calendar-day {
+
+  min-height: 78px;
+
+  border: none;
+
+  border-top: 1px solid #e5e5e5;
+
+  border-right: 1px solid #e5e5e5;
+
+  background: white;
+
+  position: relative;
+
+  cursor: pointer;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 6px;
+
+}
+
+
+.calendar-day:hover {
+
+  background: #f7faf8;
+
+}
+
+
+.calendar-day.empty {
+
+  background: #fafafa;
+
+  cursor: default;
+
+}
+
+
+.date-number {
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  color: #333;
+
+}
+
+
+.status-text {
+
+  width: 28px;
+
+  height: 28px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+}
+
+
+/* PRESENT */
+
+.calendar-day.present {
+
+  background: #f0fbf5;
+
+}
+
+
+.calendar-day.present
+.status-text {
+
+  background: #16a05d;
+
+  color: white;
+
+}
+
+
+/* ABSENT */
+
+.calendar-day.absent {
+
+  background: #fff3f3;
+
+}
+
+
+.calendar-day.absent
+.status-text {
+
+  background: #e52a2a;
+
+  color: white;
+
+}
+
+
+/* SUNDAY */
+
+.calendar-day.sunday {
+
+  background: #f0f1f3;
+
+  cursor: not-allowed;
+
+}
+
+
+.sunday-text {
+
+  background: #b8bcc5;
+
+  color: white;
+
+}
+
+
+/* NOT MARKED */
+
+.calendar-day.unmarked {
+
+  background: white;
+
+}
+
+
+.calendar-day.unmarked
+.status-text {
+
+  background: #e8eaee;
+
+  color: #888;
+
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+.summary-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 14px;
+
+  margin-top: 20px;
+
+}
+
+
+.summary-card {
+
+  background: white;
+
+  border-radius: 14px;
+
+  padding: 18px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.05);
+
+}
+
+
+.summary-label {
+
+  font-size: 12px;
+
+  color: #888;
+
+}
+
+
+.summary-card strong {
+
+  font-size: 25px;
+
+  color: #172033;
+
+}
+
+
+.present-summary strong {
+
+  color: #16a05d;
+
+}
+
+
+.absent-summary strong {
+
+  color: #e52a2a;
+
+}
+
+
+/* =====================================================
+   INFO
+===================================================== */
+
+.info-box {
+
+  display: flex;
+
+  gap: 12px;
+
+  padding: 16px;
+
+  margin-top: 20px;
+
+  border-radius: 12px;
+
+  background: #fff7d9;
+
+  color: #69551c;
+
+}
+
+
+.info-box ion-icon {
+
+  font-size: 22px;
+
+  color: #e7a000;
+
+}
+
+
+.info-box strong {
+
+  font-size: 14px;
+
+}
+
+
+.info-box p {
+
+  margin: 5px 0 0;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+}
+
+
+/* =====================================================
+   SAVE
+===================================================== */
+
+.save-button {
+
+  margin-top: 20px;
+
+  --border-radius: 12px;
+
+  height: 52px;
+
+  font-weight: 700;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .attendance-container {
+
+    padding: 14px;
+
+  }
+
+
+  .student-info {
+
+    align-items: flex-start;
+
+  }
+
+
+  .student-avatar {
+
+    width: 48px;
+
+    height: 48px;
+
+    font-size: 18px;
+
+  }
+
+
+  .student-details h1 {
+
+    font-size: 19px;
+
+  }
+
+
+  .sync-badge {
+
+    display: none;
+
+  }
+
+
+  .month-title {
+
+    font-size: 17px;
+
+  }
+
+
+  .bulk-actions {
+
+    flex-direction: column;
+
+  }
+
+
+  .bulk-actions ion-button {
+
+    width: 100%;
+
+    margin: 0;
+
+  }
+
+
+  .legend {
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+  }
+
+
+  .calendar-day {
+
+    min-height: 52px;
+
+  }
+
+
+  .date-number {
+
+    font-size: 12px;
+
+  }
+
+
+  .status-text {
+
+    width: 22px;
+
+    height: 22px;
+
+    font-size: 10px;
+
+  }
+
+
+  .summary-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+
+  }
+
+
+  .summary-card {
+
+    padding: 14px;
+
+  }
+
+
+  .summary-card strong {
+
+    font-size: 21px;
+
+  }
+
+}
