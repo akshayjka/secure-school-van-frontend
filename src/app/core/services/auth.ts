@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { HttpClient } from '@angular/common/http';
-
+import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -12,7 +12,8 @@ import { Observable } from 'rxjs';
 
 export class AuthService {
 
-  private apiUrl = 'http://localhost:5000/api';
+  // private apiUrl = 'http://localhost:5000/api';
+   private apiUrl = environment.apiUrl;
 
   constructor(
 
