@@ -4,9 +4,10 @@
 
 export const environment = {
 
-  production: false,
+  production: true,
 
-  apiUrl: 'http://localhost:5000/api'
+  // apiUrl: 'http://localhost:5000/api'
+  apiUrl :'https://secure-school-van-backend.onrender.com'
 
 };
 /*
