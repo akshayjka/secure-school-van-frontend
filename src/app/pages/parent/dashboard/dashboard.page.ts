@@ -744,75 +744,49 @@ export class DashboardPage
    * =====================================================
    */
 
-  updateAttendance(
-    event: CustomEvent
-  ): void {
+//  updateAttendance(event: CustomEvent): void {
 
-    const parentId =
-      localStorage.getItem('parentId');
+//   const attendance = event.detail.checked;
 
+//   const now = new Date();
 
-    if (!parentId) {
-      return;
-    }
+//   const payload = {
+//     parentId: this.parentId,
+//     attendance,
+//     year: now.getFullYear(),
+//     month: now.getMonth() + 1
+//   };
 
+//   console.log('Updating attendance:', payload);
 
-    const newAttendance =
-      event.detail.checked;
+//   this.parentService.updateAttendance(payload).subscribe({
 
+//     next: (response) => {
 
-    const previousAttendance =
-      this.isPresent;
+//       console.log(
+//         'Attendance updated successfully:',
+//         response
+//       );
 
+//       this.isPresent = attendance;
 
-    /**
-     * Optimistic UI
-     */
+//     },
 
-    this.isPresent =
-      newAttendance;
+//     error: (error) => {
 
+//       console.error(
+//         'Attendance update failed:',
+//         error
+//       );
 
-    this.parentService
-      .updateAttendance({
+//       // Revert toggle if API fails
+//       this.isPresent = !attendance;
 
-        parentId,
+//     }
 
-        attendance:
-          newAttendance
+//   });
 
-      })
-      .subscribe({
-
-        next: () => {
-
-          console.log(
-            '✅ Attendance Updated'
-          );
-
-        },
-
-        error: (err) => {
-
-          console.error(
-            'Attendance Update Error',
-            err
-          );
-
-
-          /**
-           * Rollback UI
-           */
-
-          this.isPresent =
-            previousAttendance;
-
-        }
-
-      });
-
-  }
-
+// }
 
   /**
    * =====================================================
@@ -922,8 +896,7 @@ openStudentProfile(): void {
 openAttendance(): void {
 
   this.router.navigate([
-    '/parent/attendance',
-    this.parentId
+    '/parent/attendance',  this.parentId
   ]);
 
 }

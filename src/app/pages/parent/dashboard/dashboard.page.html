@@ -41,45 +41,68 @@
          ATTENDANCE
     ================================================= -->
 
-    <section class="attendance-card" (click)="openAttendance()">
+    <!-- ================================================
+     ATTENDANCE
+================================================= -->
 
-      <div class="attendance-icon">
+<section class="attendance-card">
 
-        <ion-icon name="calendar-outline">
-        </ion-icon>
+  <!-- CALENDAR = ONLY CLICKABLE ACTION -->
 
-      </div>
+  <button
+    type="button"
+    class="attendance-icon-button"
+    (click)="openAttendance()"
+    aria-label="Open attendance">
 
+    <ion-icon name="calendar-outline"></ion-icon>
 
-      <div class="attendance-content">
-
-        <span class="card-label">
-          Attendance
-        </span>
-
-        <h2>
-          Today's Attendance
-        </h2>
-
-        <div class="attendance-status" [class.present]="isPresent" [class.absent]="!isPresent">
-
-          <span class="status-dot"></span>
-
-          {{ isPresent ? 'Present' : 'Absent' }}
-
-        </div>
-
-      </div>
+  </button>
 
 
-      <div class="attendance-toggle">
+  <div class="attendance-content">
 
-        <ion-toggle [checked]="isPresent" (ionChange)="updateAttendance($event)">
-        </ion-toggle>
+    <span class="card-label">
+      ATTENDANCE
+    </span>
 
-      </div>
+    <h2>
+      Today's Attendance
+    </h2>
 
-    </section>
+    <div
+      class="attendance-status"
+      [class.present]="isPresent"
+      [class.absent]="!isPresent">
+
+      <span class="status-dot"></span>
+
+      {{ isPresent ? 'Present' : 'Absent' }}
+
+    </div>
+
+    <div class="attendance-hint">
+
+      <ion-icon name="calendar-outline"></ion-icon>
+
+      <span>
+        Tap calendar to manage attendance
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <div class="attendance-arrow">
+
+    <ion-icon
+      name="chevron-forward-outline">
+    </ion-icon>
+
+  </div>
+
+</section>
 
 
     <!-- LIVE RIDE NOTIFICATION -->
@@ -119,8 +142,6 @@
 
   <div class="student-profile-header">
 
-    <!-- STUDENT INFORMATION -->
-
     <div class="student-profile-info">
 
       <span class="card-eyebrow">
@@ -135,20 +156,29 @@
         {{ parent.schoolName || 'School not available' }}
       </p>
 
+      <!-- UX HINT -->
+      <div class="student-profile-hint">
+
+        <ion-icon name="person-outline"></ion-icon>
+
+        <span>
+          Tap profile to view student details
+        </span>
+
+      </div>
+
     </div>
 
 
-    <!-- PROFILE ICON -->
+    <!-- PROFILE ACTION -->
 
     <button
       type="button"
       class="student-avatar"
       (click)="openStudentProfile()"
-      aria-label="View student profile">
+      aria-label="View student details">
 
-      <ion-icon
-        name="person-outline">
-      </ion-icon>
+      <ion-icon name="person-outline"></ion-icon>
 
     </button>
 
@@ -525,37 +555,68 @@
 
       </div>
 
+<!-- ================================================
+     ATTENDANCE
+================================================= -->
 
-      <!-- ATTENDANCE -->
+<section class="attendance-card">
 
-      <div class="popup-detail-card">
+  <!-- CALENDAR ACTION -->
+  <button
+    type="button"
+    class="attendance-icon-button"
+    (click)="openAttendance()"
+    aria-label="Manage today's attendance">
 
-        <div class="popup-detail-icon popup-attendance">
+    <ion-icon name="calendar-outline"></ion-icon>
 
-          <ion-icon
-            name="checkmark-circle-outline">
-          </ion-icon>
+  </button>
 
-        </div>
 
-        <div class="popup-detail-content">
+  <!-- ATTENDANCE INFORMATION -->
+  <div class="attendance-content">
 
-          <span>
-            Attendance
-          </span>
+    <span class="card-label">
+      ATTENDANCE
+    </span>
 
-          <strong
-            [class.popup-present]="isPresent"
-            [class.popup-absent]="!isPresent">
+    <h2>
+      Today's Attendance
+    </h2>
 
-            {{ isPresent ? 'Present' : 'Absent' }}
+    <div
+      class="attendance-status"
+      [class.present]="isPresent"
+      [class.absent]="!isPresent">
 
-          </strong>
+      <span class="status-dot"></span>
 
-        </div>
+      {{ isPresent ? 'Present' : 'Absent' }}
 
-      </div>
+    </div>
 
+    <!-- UX HINT -->
+    <div class="attendance-hint">
+
+      <ion-icon name="calendar-outline"></ion-icon>
+
+      <span>
+        Tap calendar to manage attendance
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- READ-ONLY ARROW -->
+  <div class="attendance-arrow">
+
+    <ion-icon name="chevron-forward-outline"></ion-icon>
+
+  </div>
+
+</section>
 
       <!-- DRIVER -->
 

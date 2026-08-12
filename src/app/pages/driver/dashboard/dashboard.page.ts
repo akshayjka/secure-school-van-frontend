@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SocketService } from 'src/app/core/services/socket';
 
 import {
   IonContent,
@@ -177,7 +178,8 @@ export class DashboardPage implements OnInit {
     private modalCtrl: ModalController,
     private rideService: RideService,
     private locationService: LocationService,
-    private popoverCtrl: PopoverController
+    private popoverCtrl: PopoverController,
+      private socketService: SocketService
   ) {
 
     addIcons({
@@ -221,34 +223,213 @@ export class DashboardPage implements OnInit {
   // INIT
   // =====================================================
 
-  ngOnInit(): void {
+ngOnInit(): void {
 
-    this.driverId =
-      localStorage.getItem('driverId') || '';
+  this.driverId =
+    localStorage.getItem('driverId') || '';
 
-
-    /*
-     * IMPORTANT:
-     *
-     * Read ride state BEFORE loading dashboard.
-     *
-     * This prevents students from being displayed
-     * before Start Ride.
-     */
-    this.rideStarted =
-      localStorage.getItem('rideStarted') === 'true';
+  this.rideStarted =
+    localStorage.getItem('rideStarted') === 'true';
 
 
-    if (!this.driverId) {
-      return;
-    }
-
-
-    this.loadDashboard();
-
-    this.loadReferralDetails();
-
+  if (!this.driverId) {
+    return;
   }
+
+
+  // ==========================================
+  // SOCKET
+  // ==========================================
+
+  this.socketService.connect();
+
+
+  /*
+   * IMPORTANT:
+   *
+   * Attendance is broadcast to:
+   *
+   * driver_${driverId}
+   *
+   */
+
+  this.socketService.joinDriverChannel(
+    this.driverId
+  );
+
+
+  this.listenForAttendanceUpdates();
+
+
+  // ==========================================
+  // INITIAL DATA
+  // ==========================================
+
+  this.loadDashboard();
+
+  this.loadReferralDetails();
+
+}
+// =====================================================
+// REAL-TIME ATTENDANCE
+// =====================================================
+
+private listenForAttendanceUpdates(): void {
+
+  this.socketService
+    .listenAttendanceUpdated()
+    .subscribe({
+
+      next: (event) => {
+
+        console.log(
+          '📅 Driver received attendance update:',
+          event
+        );
+
+
+        /*
+         * Make sure this event belongs
+         * to this driver's students.
+         */
+
+        if (
+          event.driverId &&
+          event.driverId !== this.driverId
+        ) {
+
+          return;
+
+        }
+
+
+        /*
+         * Find the student.
+         */
+
+        const student =
+          this.students.find(
+            s =>
+              s.parentId === event.parentId
+          );
+
+
+        if (!student) {
+
+          console.warn(
+            'Attendance update received but student not found:',
+            event.parentId
+          );
+
+          /*
+           * Reload dashboard as a fallback.
+           *
+           * This is NOT a hard refresh.
+           * It is simply an API synchronization
+           * when the student is not currently loaded.
+           */
+
+          this.loadDashboard();
+
+          return;
+
+        }
+
+
+        // ==========================================
+        // UPDATE ATTENDANCE
+        // ==========================================
+
+        student.attendance =
+          event.attendance;
+
+
+        // ==========================================
+        // REBUILD PRESENT / ABSENT GROUPS
+        // ==========================================
+
+        this.presentStudents =
+          this.students.filter(
+            s =>
+              s.attendance === true
+          );
+
+
+        this.absentStudents =
+          this.students.filter(
+            s =>
+              s.attendance === false
+          );
+
+
+        // ==========================================
+        // UPDATE STATISTICS
+        // ==========================================
+
+        this.todayStats = {
+
+          total:
+            this.students.length,
+
+          present:
+            this.presentStudents.length,
+
+          absent:
+            this.absentStudents.length
+
+        };
+
+
+        // ==========================================
+        // UPDATE ROUTE
+        // ==========================================
+
+        this.refreshStudentGroups();
+
+
+        /*
+         * Force Angular change detection
+         * through new array references.
+         */
+
+        this.students = [
+          ...this.students
+        ];
+
+        this.presentStudents = [
+          ...this.presentStudents
+        ];
+
+        this.absentStudents = [
+          ...this.absentStudents
+        ];
+
+
+        console.log(
+          'Updated Driver Attendance:',
+          {
+            present:
+              this.presentStudents.length,
+
+            absent:
+              this.absentStudents.length
+          }
+        );
+
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Driver attendance socket error:',
+          error
+        );
+
+      }
+
+    });
+
+}
 
 
   // =====================================================
