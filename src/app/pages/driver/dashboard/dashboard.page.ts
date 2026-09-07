@@ -1,52 +1,81 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SocketService } from 'src/app/core/services/socket';
+import { Subscription } from 'rxjs';
 
 import {
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
   IonButton,
   IonButtons,
+  IonContent,
+  IonHeader,
   IonIcon,
+  IonTitle,
+  IonToolbar,
   ModalController,
   PopoverController
 } from '@ionic/angular/standalone';
 
-import { DriverMenuPopoverComponent } from '../driver-menu-popover/driver-menu-popover.component';
-
-import { RideService } from '../../../core/services/ride';
-import { LocationService } from '../../../core/services/location';
-import { Driver } from 'src/app/core/services/driver';
-import { ToastService } from 'src/app/core/services/toast';
 import { Router } from '@angular/router';
-import { DialogService } from 'src/app/core/services/dialog';
-
-import { StudentDetailsModalComponent } from '../student-details-modal/student-details-modal.component';
-import { AddStudentModalComponent } from '../add-student-modal/add-student-modal.component';
-
 import { addIcons } from 'ionicons';
 
 import {
+  arrowBackOutline,
+  checkmarkCircleOutline,
+  chevronForwardOutline,
+  closeCircleOutline,
+  copyOutline,
+  homeOutline,
+  informationCircleOutline,
   logOutOutline,
+  menuOutline,
   peopleOutline,
   personOutline,
-  schoolOutline,
-  menuOutline,
-  arrowBackOutline,
   playOutline,
-  stopOutline,
-  informationCircleOutline,
-  checkmarkCircleOutline,
-  closeCircleOutline,
-  shieldCheckmarkOutline,
+  schoolOutline,
   shareSocialOutline,
-  copyOutline,
-  chevronForwardOutline
+  shieldCheckmarkOutline,
+  stopOutline,
+  timeOutline
 } from 'ionicons/icons';
 
+import {
+  Driver,
+  RideType
+} from 'src/app/core/services/driver';
+
+import { SocketService } from 'src/app/core/services/socket';
+import { ToastService } from 'src/app/core/services/toast';
+import { DialogService } from 'src/app/core/services/dialog';
+import { RideService } from 'src/app/core/services/ride';
+import { LocationService } from 'src/app/core/services/location';
+
+import { DriverMenuPopoverComponent } from '../driver-menu-popover/driver-menu-popover.component';
+import { StudentDetailsModalComponent } from '../student-details-modal/student-details-modal.component';
+import { AddStudentModalComponent } from '../add-student-modal/add-student-modal.component';
+
+type DriverStage =
+  | 'morning-ready'
+  | 'morning-pickup'
+  | 'morning-school-drop'
+  | 'morning-complete'
+  | 'return-ready'
+  | 'return-boarding'
+  | 'return-home-drop'
+  | 'return-complete'
+  | 'day-complete';
+
+type StudentUiStatus =
+  | 'Pending'
+  | 'Picked'
+  | 'DroppedAtSchool'
+  | 'Waiting'
+  | 'PickedFromSchool'
+  | 'DroppedAtHome';
 
 @Component({
   selector: 'app-dashboard',
@@ -65,110 +94,38 @@ import {
     IonButton
   ]
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage implements OnInit, OnDestroy {
 
-  // =====================================================
-  // DRIVER
-  // =====================================================
+  // private readonly STAGE_KEY = 'driverStage';
+  private readonly MORNING_STATUS_KEY =
+    'driverMorningStudentStatuses';
+  private readonly EVENING_STATUS_KEY =
+    'driverEveningStudentStatuses';
+
+  private attendanceSubscription?: Subscription;
 
   driverId = '';
-
   currentView = 'dashboard';
-
   pageTitle = 'Driver Dashboard';
 
-
-  // =====================================================
-  // REFERRAL
-  // =====================================================
-
   referralCode = '';
-
   referralCount = 0;
-
   referredByCode = '';
 
-
-  // =====================================================
-  // RIDE
-  // =====================================================
-
-  rideStarted = false;
-
-  routeMode = false;
-
-
-  // =====================================================
-  // STUDENTS
-  // =====================================================
+  stage: DriverStage = 'morning-ready';
 
   students: any[] = [];
-
-  /*
-   * Today's students means only PRESENT students.
-   *
-   * Absent students are never shown in the
-   * Today's Students section.
-   */
   presentStudents: any[] = [];
-
   absentStudents: any[] = [];
 
-
-  /*
-   * Students currently displayed in the route.
-   *
-   * This will contain students ONLY when
-   * the ride has started.
-   */
-  selectedStudents: any[] = [];
-
-
-  /*
-   * Picked students.
-   *
-   * Includes:
-   * - Picked
-   * - Dropped
-   */
-  pickedStudents: any[] = [];
-
-
-  /*
-   * Students who are still waiting to be picked.
-   */
-  pendingStudents: any[] = [];
-
-
-  showStudentList = false;
-
-
-  /*
-   * Student status:
-   *
-   * Pending
-   * Picked
-   * Dropped
-   */
-  studentStatuses: {
-    [parentId: string]: string
-  } = {};
-
-
-  // =====================================================
-  // TODAY STATS
-  // =====================================================
+  morningStatuses: Record<string, StudentUiStatus> = {};
+  eveningStatuses: Record<string, StudentUiStatus> = {};
 
   todayStats = {
     present: 0,
     absent: 0,
     total: 0
   };
-
-
-  // =====================================================
-  // CONSTRUCTOR
-  // =====================================================
 
   constructor(
     private driverService: Driver,
@@ -179,251 +136,221 @@ export class DashboardPage implements OnInit {
     private rideService: RideService,
     private locationService: LocationService,
     private popoverCtrl: PopoverController,
-      private socketService: SocketService
+    private socketService: SocketService
   ) {
-
     addIcons({
-
-      logOutOutline,
-
-      peopleOutline,
-
-      personOutline,
-
-      schoolOutline,
-
-      menuOutline,
-
       arrowBackOutline,
-
-      playOutline,
-
-      stopOutline,
-
-      informationCircleOutline,
-
       checkmarkCircleOutline,
-
+      chevronForwardOutline,
       closeCircleOutline,
-
-      shieldCheckmarkOutline,
-
-      shareSocialOutline,
-
       copyOutline,
-
-      chevronForwardOutline
-
+      homeOutline,
+      informationCircleOutline,
+      logOutOutline,
+      menuOutline,
+      peopleOutline,
+      personOutline,
+      playOutline,
+      schoolOutline,
+      shareSocialOutline,
+      shieldCheckmarkOutline,
+      stopOutline,
+      timeOutline
     });
-
   }
-
-
-  // =====================================================
-  // INIT
-  // =====================================================
 
 ngOnInit(): void {
 
   this.driverId =
     localStorage.getItem('driverId') || '';
 
-  this.rideStarted =
-    localStorage.getItem('rideStarted') === 'true';
+  // IMPORTANT:
+  // Never restore ride workflow from localStorage.
+  this.stage = 'morning-ready';
 
+  this.morningStatuses =
+    this.restoreStatuses(
+      this.MORNING_STATUS_KEY
+    );
+
+  this.eveningStatuses =
+    this.restoreStatuses(
+      this.EVENING_STATUS_KEY
+    );
 
   if (!this.driverId) {
     return;
   }
 
-
-  // ==========================================
-  // SOCKET
-  // ==========================================
-
   this.socketService.connect();
-
-
-  /*
-   * IMPORTANT:
-   *
-   * Attendance is broadcast to:
-   *
-   * driver_${driverId}
-   *
-   */
 
   this.socketService.joinDriverChannel(
     this.driverId
   );
 
-
   this.listenForAttendanceUpdates();
-
-
-  // ==========================================
-  // INITIAL DATA
-  // ==========================================
 
   this.loadDashboard();
 
   this.loadReferralDetails();
 
+  this.restoreRideFromBackend();
 }
-// =====================================================
-// REAL-TIME ATTENDANCE
-// =====================================================
 
-private listenForAttendanceUpdates(): void {
+  ngOnDestroy(): void {
+    this.attendanceSubscription?.unsubscribe();
+  }
 
-  this.socketService
-    .listenAttendanceUpdated()
+private restoreRideFromBackend(): void {
+
+  this.rideService
+    .getRideStatus(
+      this.driverId,
+      'morning'
+    )
     .subscribe({
 
-      next: (event) => {
+      next: response => {
 
-        console.log(
-          '📅 Driver received attendance update:',
-          event
-        );
+        const data = response?.data;
 
-
-        /*
-         * Make sure this event belongs
-         * to this driver's students.
+        /**
+         * No active morning ride.
+         *
+         * Driver MUST see START RIDE.
          */
-
         if (
-          event.driverId &&
-          event.driverId !== this.driverId
+          !data ||
+          data.rideStarted !== true ||
+          data.status !== 'started'
         ) {
 
-          return;
+          this.locationService.stopTracking();
 
-        }
+          this.stage =
+            'morning-ready';
 
-
-        /*
-         * Find the student.
-         */
-
-        const student =
-          this.students.find(
-            s =>
-              s.parentId === event.parentId
-          );
-
-
-        if (!student) {
-
-          console.warn(
-            'Attendance update received but student not found:',
-            event.parentId
-          );
-
-          /*
-           * Reload dashboard as a fallback.
-           *
-           * This is NOT a hard refresh.
-           * It is simply an API synchronization
-           * when the student is not currently loaded.
-           */
-
-          this.loadDashboard();
+          // localStorage.setItem(
+          //   this.STAGE_KEY,
+          //   'morning-ready'
+          // );
 
           return;
-
         }
 
-
-        // ==========================================
-        // UPDATE ATTENDANCE
-        // ==========================================
-
-        student.attendance =
-          event.attendance;
-
-
-        // ==========================================
-        // REBUILD PRESENT / ABSENT GROUPS
-        // ==========================================
-
-        this.presentStudents =
-          this.students.filter(
-            s =>
-              s.attendance === true
-          );
-
-
-        this.absentStudents =
-          this.students.filter(
-            s =>
-              s.attendance === false
-          );
-
-
-        // ==========================================
-        // UPDATE STATISTICS
-        // ==========================================
-
-        this.todayStats = {
-
-          total:
-            this.students.length,
-
-          present:
-            this.presentStudents.length,
-
-          absent:
-            this.absentStudents.length
-
-        };
-
-
-        // ==========================================
-        // UPDATE ROUTE
-        // ==========================================
-
-        this.refreshStudentGroups();
-
-
-        /*
-         * Force Angular change detection
-         * through new array references.
+        /**
+         * Active ride really exists in backend.
+         *
+         * Only now allow pickup.
          */
+        this.stage =
+          'morning-pickup';
 
-        this.students = [
-          ...this.students
-        ];
+        // localStorage.setItem(
+        //   this.STAGE_KEY,
+        //   'morning-pickup'
+        // );
 
-        this.presentStudents = [
-          ...this.presentStudents
-        ];
-
-        this.absentStudents = [
-          ...this.absentStudents
-        ];
-
-
-        console.log(
-          'Updated Driver Attendance:',
-          {
-            present:
-              this.presentStudents.length,
-
-            absent:
-              this.absentStudents.length
-          }
+        this.locationService.startTracking(
+          this.driverId,
+          'morning'
         );
 
       },
 
-      error: (error) => {
+      error: error => {
 
         console.error(
-          'Driver attendance socket error:',
+          'Ride status error:',
           error
         );
+
+        /**
+         * Fail safely.
+         *
+         * If backend cannot confirm an active ride,
+         * do NOT allow pickup.
+         */
+        this.locationService.stopTracking();
+
+        this.stage =
+          'morning-ready';
+
+      }
+
+    });
+
+}
+
+private restoreEveningRide(): void {
+
+  this.rideService
+    .getRideStatus(
+      this.driverId,
+      'evening'
+    )
+    .subscribe({
+
+      next: response => {
+
+        const data =
+          response?.data;
+
+        if (
+          data?.rideStarted === true &&
+          data?.status === 'started'
+        ) {
+
+          if (
+            this.stage === 'return-ready'
+          ) {
+
+            this.setStage(
+              'return-boarding'
+            );
+
+          }
+
+          this.locationService.startTracking(
+            this.driverId,
+            'evening'
+          );
+
+          return;
+
+        }
+
+        /**
+         * No active ride.
+         *
+         * If the locally stored stage says
+         * that a ride is running, it is stale.
+         */
+        if (
+          this.isMorningRideActive ||
+          this.isReturnRideActive
+        ) {
+
+          this.locationService.stopTracking();
+
+          this.setStage(
+            this.stage.startsWith('return')
+              ? 'return-ready'
+              : 'morning-ready'
+          );
+
+        }
+
+      },
+
+      error: error => {
+
+        console.error(
+          'Evening ride status error:',
+          error
+        );
+
+        this.locationService.stopTracking();
 
       }
 
@@ -433,502 +360,502 @@ private listenForAttendanceUpdates(): void {
 
 
   // =====================================================
-  // MENU
+  // DERIVED UI STATE
   // =====================================================
 
-  async openMenu(event: Event) {
+  get isMorningRideActive(): boolean {
+    return [
+      'morning-pickup',
+      'morning-school-drop',
+      'morning-complete'
+    ].includes(this.stage);
+  }
 
-    const popover =
-      await this.popoverCtrl.create({
+  get isReturnRideActive(): boolean {
+    return [
+      'return-boarding',
+      'return-home-drop',
+      'return-complete'
+    ].includes(this.stage);
+  }
 
-        component:
-          DriverMenuPopoverComponent,
+  get rideRunning(): boolean {
+    return (
+      this.isMorningRideActive ||
+      this.isReturnRideActive
+    );
+  }
 
-        event,
-
-        side: 'bottom',
-
-        alignment: 'end'
-
-      });
-
-
-    await popover.present();
-
-
-    const result =
-      await popover.onDidDismiss();
-
-
-    const view =
-      result.data?.view;
-
-
-    if (view) {
-
-      this.openView(view);
-
+  get activeRideType(): RideType | null {
+    if (this.isMorningRideActive) {
+      return 'morning';
     }
 
+    if (this.isReturnRideActive) {
+      return 'evening';
+    }
+
+    return null;
   }
 
-
-  select(view: string) {
-
-    this.popoverCtrl.dismiss({
-      view
-    });
-
+  get morningPendingStudents(): any[] {
+    return this.presentStudents.filter(
+      student =>
+        this.getMorningStatus(student)
+        === 'Pending'
+    );
   }
 
+  get morningPickedStudents(): any[] {
+    return this.presentStudents.filter(
+      student =>
+        this.getMorningStatus(student)
+        === 'Picked'
+    );
+  }
+
+  get morningDroppedStudents(): any[] {
+    return this.presentStudents.filter(
+      student =>
+        this.getMorningStatus(student)
+        === 'DroppedAtSchool'
+    );
+  }
+
+  get returnWaitingStudents(): any[] {
+    return this.presentStudents.filter(
+      student =>
+        this.getEveningStatus(student)
+        === 'Waiting'
+    );
+  }
+
+  get returnOnboardStudents(): any[] {
+    return this.presentStudents.filter(
+      student =>
+        this.getEveningStatus(student)
+        === 'PickedFromSchool'
+    );
+  }
+
+  get returnDroppedStudents(): any[] {
+    return this.presentStudents.filter(
+      student =>
+        this.getEveningStatus(student)
+        === 'DroppedAtHome'
+    );
+  }
+
+  get nextMorningPickup(): any | null {
+    return this.morningPendingStudents[0] || null;
+  }
+
+  get nextSchoolDrop(): any | null {
+    return this.morningPickedStudents[0] || null;
+  }
+
+  get nextReturnBoarding(): any | null {
+    return this.returnWaitingStudents[0] || null;
+  }
+
+  get nextHomeDrop(): any | null {
+    return this.returnOnboardStudents[0] || null;
+  }
+
+  get currentSequence(): number {
+    if (
+      this.stage === 'morning-pickup' &&
+      this.nextMorningPickup
+    ) {
+      return (
+        this.presentStudents.findIndex(
+          s =>
+            s.parentId ===
+            this.nextMorningPickup.parentId
+        ) + 1
+      );
+    }
+
+    if (
+      this.stage === 'morning-school-drop' &&
+      this.nextSchoolDrop
+    ) {
+      return (
+        this.presentStudents.findIndex(
+          s =>
+            s.parentId ===
+            this.nextSchoolDrop.parentId
+        ) + 1
+      );
+    }
+
+    if (
+      this.stage === 'return-boarding' &&
+      this.nextReturnBoarding
+    ) {
+      return (
+        this.presentStudents.findIndex(
+          s =>
+            s.parentId ===
+            this.nextReturnBoarding.parentId
+        ) + 1
+      );
+    }
+
+    if (
+      this.stage === 'return-home-drop' &&
+      this.nextHomeDrop
+    ) {
+      return (
+        this.presentStudents.findIndex(
+          s =>
+            s.parentId ===
+            this.nextHomeDrop.parentId
+        ) + 1
+      );
+    }
+
+    return 0;
+  }
+
+  get dashboardTitle(): string {
+    switch (this.stage) {
+      case 'morning-ready':
+        return 'Driver Dashboard';
+      case 'morning-pickup':
+        return 'Morning Pickup';
+      case 'morning-school-drop':
+        return 'School Drop';
+      case 'morning-complete':
+        return 'Morning Complete';
+      case 'return-ready':
+        return 'Return Journey';
+      case 'return-boarding':
+        return 'Return Boarding';
+      case 'return-home-drop':
+        return 'Return Ride';
+      case 'return-complete':
+        return 'Return Complete';
+      case 'day-complete':
+        return 'Ride Complete';
+    }
+  }
 
   // =====================================================
-  // LOAD DASHBOARD
+  // ATTENDANCE SOCKET
+  // =====================================================
+
+  private listenForAttendanceUpdates(): void {
+    this.attendanceSubscription =
+      this.socketService
+        .listenAttendanceUpdated()
+        .subscribe({
+          next: event => {
+            if (
+              event.driverId &&
+              event.driverId !== this.driverId
+            ) {
+              return;
+            }
+
+            const student =
+              this.students.find(
+                s =>
+                  s.parentId === event.parentId
+              );
+
+            if (!student) {
+              this.loadDashboard();
+              return;
+            }
+
+            student.attendance =
+              event.attendance;
+
+            this.rebuildAttendanceGroups();
+          },
+          error: error =>
+            console.error(
+              'Driver attendance socket error:',
+              error
+            )
+        });
+  }
+
+  // =====================================================
+  // LOAD
   // =====================================================
 
   loadDashboard(): void {
-
     this.driverService
       .getDashboard(this.driverId)
       .subscribe({
-
-        next: (res) => {
-
-          console.log(
-            'Dashboard Response:',
-            res
-          );
-
-
+        next: res => {
           this.students =
             res.students || [];
 
+          this.rebuildAttendanceGroups();
 
           /*
-           * TODAY'S STUDENTS
-           *
-           * Only attendance === true.
+           * Initialize only missing states.
            */
-          this.presentStudents =
-            this.students.filter(
-              student =>
-                student.attendance === true
-            );
-
-
-          /*
-           * Absent students are kept separately
-           * for attendance screen.
-           */
-          this.absentStudents =
-            this.students.filter(
-              student =>
-                student.attendance === false
-            );
-
-
-          /*
-           * Initialize status.
-           *
-           * Do not show students yet if ride
-           * has not started.
-           */
-          this.presentStudents.forEach(
-            student => {
-
-              if (
-                !this.studentStatuses[
-                  student.parentId
-                ]
-              ) {
-
-                this.studentStatuses[
-                  student.parentId
-                ] = 'Pending';
-
-              }
-
+          this.presentStudents.forEach(student => {
+            if (
+              !this.morningStatuses[
+                student.parentId
+              ]
+            ) {
+              this.morningStatuses[
+                student.parentId
+              ] = 'Pending';
             }
-          );
 
+            if (
+              !this.eveningStatuses[
+                student.parentId
+              ]
+            ) {
+              this.eveningStatuses[
+                student.parentId
+              ] = 'Waiting';
+            }
+          });
 
-          this.todayStats =
-            res.todayStats || {
-
-              present: 0,
-
-              absent: 0,
-
-              total: 0
-
-            };
-
-
-          /*
-           * IMPORTANT:
-           *
-           * Students are displayed ONLY
-           * when rideStarted === true.
-           */
-          this.refreshStudentGroups();
-
-
-          console.log(
-            'Today Present Students:',
-            this.presentStudents
-          );
-
-          console.log(
-            'Picked Students:',
-            this.pickedStudents
-          );
-
-          console.log(
-            'Pending Students:',
-            this.pendingStudents
-          );
-
+          this.persistStatuses();
+          this.advanceStageIfNeeded();
         },
-
-
-        error: (err) => {
-
+        error: err => {
           console.error(
             'Dashboard loading error:',
             err
           );
 
-
           this.toastService.showToast(
             'Unable to load dashboard',
             'danger'
           );
-
         }
-
       });
-
   }
 
-
-  // =====================================================
-  // REFRESH STUDENT GROUPS
-  // =====================================================
-
-  refreshStudentGroups(): void {
-
-    /*
-     * If ride is NOT started:
-     *
-     * Hide all route students.
-     */
-    if (!this.rideStarted) {
-
-      this.selectedStudents = [];
-
-      this.pickedStudents = [];
-
-      this.pendingStudents = [];
-
-      return;
-
-    }
-
-
-    /*
-     * Ride started.
-     *
-     * Show only today's PRESENT students.
-     */
-    this.selectedStudents = [
-      ...this.presentStudents
-    ];
-
-
-    /*
-     * PICKED SECTION
-     *
-     * Picked and Dropped students belong
-     * to this section.
-     */
-    this.pickedStudents =
-      this.selectedStudents.filter(
-        student => {
-
-          const status =
-            this.studentStatuses[
-              student.parentId
-            ] || 'Pending';
-
-
-          return (
-            status === 'Picked' ||
-            status === 'Dropped'
-          );
-
-        }
+  private rebuildAttendanceGroups(): void {
+    this.presentStudents =
+      this.students.filter(
+        s => s.attendance === true
       );
 
-
-    /*
-     * PENDING SECTION
-     */
-    this.pendingStudents =
-      this.selectedStudents.filter(
-        student => {
-
-          const status =
-            this.studentStatuses[
-              student.parentId
-            ] || 'Pending';
-
-
-          return status === 'Pending';
-
-        }
+    this.absentStudents =
+      this.students.filter(
+        s => s.attendance === false
       );
 
+    this.todayStats = {
+      total: this.students.length,
+      present: this.presentStudents.length,
+      absent: this.absentStudents.length
+    };
 
-    this.showStudentList =
-      this.selectedStudents.length > 0;
-
+    this.students = [...this.students];
+    this.presentStudents =
+      [...this.presentStudents];
+    this.absentStudents =
+      [...this.absentStudents];
   }
 
-
   // =====================================================
-  // START RIDE
+  // MORNING
   // =====================================================
 
-  startRide(): void {
+async confirmStartMorning(): Promise<void> {
 
-    if (this.rideStarted) {
+  if (this.presentStudents.length === 0) {
+
+    this.toastService.showToast(
+      'No present students available for pickup',
+      'warning'
+    );
+
+    return;
+  }
+
+  const confirmed =
+    await this.dialogService.confirm(
+      'Start Morning Ride?',
+      `${this.presentStudents.length} student(s) are present. Start the ride before picking up students?`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  this.startRide('morning');
+}
+
+private startRide(
+  rideType: RideType
+): void {
+
+  this.rideService
+    .startRide(
+      this.driverId,
+      rideType
+    )
+    .subscribe({
+
+      next: response => {
+
+        console.log(
+          'START RIDE SUCCESS:',
+          response
+        );
+
+        /**
+         * Backend confirmed ride started.
+         */
+
+        this.setStage(
+          rideType === 'morning'
+            ? 'morning-pickup'
+            : 'return-boarding'
+        );
+
+        /**
+         * Start GPS ONLY after backend
+         * confirms the ride.
+         */
+        this.locationService.startTracking(
+          this.driverId,
+          rideType
+        );
+
+        this.toastService.showToast(
+          rideType === 'morning'
+            ? 'Ride started. You can now pick up students.'
+            : 'Return ride started. You can now pick up students.',
+          'success'
+        );
+
+      },
+
+      error: error => {
+
+        console.error(
+          'START RIDE ERROR:',
+          error
+        );
+
+        /**
+         * IMPORTANT:
+         *
+         * Do NOT change stage.
+         * Do NOT start GPS.
+         * Do NOT allow pickup.
+         */
+
+        this.stage =
+          rideType === 'morning'
+            ? 'morning-ready'
+            : 'return-ready';
+
+        this.locationService.stopTracking();
+
+        this.toastService.showToast(
+          'Ride could not be started',
+          'danger'
+        );
+
+      }
+
+    });
+
+}
+
+async markMorningPicked(
+  student: any
+): Promise<void> {
+
+  if (!this.isMorningRideActive) {
+
+    this.toastService.showToast(
+      'Please start the ride first',
+      'warning'
+    );
+
+    return;
+  }
+
+  if (
+    this.getMorningStatus(student)
+    !== 'Pending'
+  ) {
+    return;
+  }
+
+  const confirmed =
+    await this.dialogService.confirm(
+      'Picked Up?',
+      `Confirm ${student.studentName} has been picked up.`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  this.updateStudentAction(
+    student,
+    'morning',
+    'picked_up',
+    'Picked',
+    `${student.studentName} picked up`
+  );
+
+}
+  async markDroppedAtSchool(
+    student: any
+  ): Promise<void> {
+    if (
+      this.getMorningStatus(student)
+      !== 'Picked'
+    ) {
       return;
     }
-
-
-    this.rideService
-      .startRide(
-        this.driverId,
-        'morning'
-      )
-      .subscribe({
-
-        next: () => {
-
-          /*
-           * Ride state
-           */
-          this.rideStarted = true;
-
-
-          localStorage.setItem(
-            'rideStarted',
-            'true'
-          );
-
-
-          /*
-           * Start GPS tracking
-           */
-          this.locationService.startTracking(
-            this.driverId,
-            'morning'
-          );
-
-
-          /*
-           * NOW show today's students.
-           *
-           * Only present students.
-           */
-          this.refreshStudentGroups();
-
-
-          this.toastService.showToast(
-            'Ride Started',
-            'success'
-          );
-
-        },
-
-
-        error: (error) => {
-
-          console.error(
-            'Start ride error:',
-            error
-          );
-
-
-          this.toastService.showToast(
-            'Unable to start ride',
-            'danger'
-          );
-
-        }
-
-      });
-
-  }
-
-
-  // =====================================================
-  // MARK PICKED
-  // =====================================================
-
-  async markPicked(student: any) {
 
     const confirmed =
       await this.dialogService.confirm(
-        'Mark Picked',
-        `Mark ${student.studentName} as Picked?`
+        'Dropped At School?',
+        `Confirm ${student.studentName} has reached school. Live tracking for this parent will end.`
       );
-
 
     if (!confirmed) {
       return;
     }
 
-
-    this.driverService
-      .updateStudentStatus(
-        student.parentId,
-        'morning',
-        'picked_up'
-      )
-      .subscribe({
-
-        next: () => {
-
-          /*
-           * Change local status.
-           */
-          this.studentStatuses[
-            student.parentId
-          ] = 'Picked';
-
-
-          /*
-           * Rebuild groups.
-           *
-           * Student automatically moves:
-           *
-           * Pending
-           *      ↓
-           * Picked
-           */
-          this.refreshStudentGroups();
-
-
-          this.toastService.showToast(
-            'Student Picked',
-            'success'
-          );
-
-        },
-
-
-        error: (error) => {
-
-          console.error(
-            'Pick student error:',
-            error
-          );
-
-
-          this.toastService.showToast(
-            'Unable to update',
-            'danger'
-          );
-
-        }
-
-      });
-
+    this.updateStudentAction(
+      student,
+      'morning',
+      'dropped_at_school',
+      'DroppedAtSchool',
+      `${student.studentName} reached school`
+    );
   }
 
-
-  // =====================================================
-  // MARK DROPPED
-  // =====================================================
-
-  async markDropped(student: any) {
+  async endMorningRide(): Promise<void> {
+    if (
+      this.morningDroppedStudents.length !==
+      this.presentStudents.length
+    ) {
+      return;
+    }
 
     const confirmed =
       await this.dialogService.confirm(
-        'Mark Dropped',
-        `Mark ${student.studentName} as Dropped?`
+        'End Morning Ride?',
+        'All student school drop-offs are complete. Driver GPS and admin live tracking will stop.'
       );
-
 
     if (!confirmed) {
       return;
     }
-
-
-    this.driverService
-      .updateStudentStatus(
-        student.parentId,
-        'morning',
-        'dropped_at_school'
-      )
-      .subscribe({
-
-        next: () => {
-
-          /*
-           * Picked → Dropped
-           */
-          this.studentStatuses[
-            student.parentId
-          ] = 'Dropped';
-
-
-          /*
-           * Student remains inside
-           * Picked Students section.
-           */
-          this.refreshStudentGroups();
-
-
-          this.toastService.showToast(
-            'Student Dropped',
-            'success'
-          );
-
-        },
-
-
-        error: (error) => {
-
-          console.error(
-            'Drop student error:',
-            error
-          );
-
-
-          this.toastService.showToast(
-            'Unable to update',
-            'danger'
-          );
-
-        }
-
-      });
-
-  }
-
-
-  // =====================================================
-  // END RIDE
-  // =====================================================
-
-  endRide(): void {
-
-    if (!this.canEndRide()) {
-      return;
-    }
-
 
     this.rideService
       .endRide(
@@ -936,387 +863,497 @@ private listenForAttendanceUpdates(): void {
         'morning'
       )
       .subscribe({
-
         next: () => {
-
-          this.rideStarted = false;
-
-
-          localStorage.removeItem(
-            'rideStarted'
-          );
-
           this.locationService.stopTracking();
-          this.selectedStudents = [];
-          this.pickedStudents = [];
-          this.pendingStudents = [];
-          this.showStudentList = false;
+          this.setStage('return-ready');
+
           this.toastService.showToast(
-            'Ride Ended',
+            'Morning ride ended',
             'success'
           );
         },
+        error: error => {
+          console.error(error);
 
-
-        error: (error) => {
-
-          console.error('End ride error:',error);
-          this.toastService.showToast('Unable to end ride', 'danger');
+          this.toastService.showToast(
+            'Unable to end morning ride',
+            'danger'
+          );
         }
-
       });
-
   }
 
-  canEndRide(): boolean {
+  // =====================================================
+  // RETURN
+  // =====================================================
 
-    if (!this.rideStarted) {
-      return false;
-    }
-
+  async confirmStartReturn(): Promise<void> {
     if (this.presentStudents.length === 0) {
-      return false;
+      this.toastService.showToast(
+        'No students available for return journey',
+        'warning'
+      );
+      return;
     }
-
-    return this.presentStudents.every(
-      student =>
-        this.studentStatuses[
-          student.parentId
-        ] === 'Dropped');
-
-  }
-  async editStatus(student: any) {
 
     const confirmed =
-      await this.dialogService.confirm('Edit Status', `Edit status for ${student.studentName}?`);
+      await this.dialogService.confirm(
+        'Start Return Journey?',
+        'Start driver GPS/admin tracking. Parent tracking starts individually after each child boards.'
+      );
 
     if (!confirmed) {
       return;
     }
 
-
-    this.studentStatuses[
-      student.parentId
-    ] = 'Pending';
-
-
-    this.refreshStudentGroups();
-
+    this.startRide('evening');
   }
 
+  async markPickedFromSchool(
+    student: any
+  ): Promise<void> {
+    if (
+      this.getEveningStatus(student)
+      !== 'Waiting'
+    ) {
+      return;
+    }
+
+    const confirmed =
+      await this.dialogService.confirm(
+        'Picked Up From School?',
+        `Confirm ${student.studentName} has boarded the van.`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.updateStudentAction(
+      student,
+      'evening',
+      'picked_up',
+      'PickedFromSchool',
+      `${student.studentName} picked up from school`
+    );
+  }
+
+  async markDroppedAtHome(
+    student: any
+  ): Promise<void> {
+    if (
+      this.getEveningStatus(student)
+      !== 'PickedFromSchool'
+    ) {
+      return;
+    }
+
+    const confirmed =
+      await this.dialogService.confirm(
+        'Dropped At Home?',
+        `Confirm ${student.studentName} has been dropped home. Live tracking for this parent will end.`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.updateStudentAction(
+      student,
+      'evening',
+      'dropped_at_home',
+      'DroppedAtHome',
+      `${student.studentName} dropped home`
+    );
+  }
+
+  async endReturnRide(): Promise<void> {
+    const boardedCount =
+      this.returnOnboardStudents.length +
+      this.returnDroppedStudents.length;
+
+    if (
+      boardedCount === 0 ||
+      this.returnOnboardStudents.length > 0
+    ) {
+      return;
+    }
+
+    const confirmed =
+      await this.dialogService.confirm(
+        'End Today\'s Ride?',
+        'All boarded students have been dropped home. Live location sharing will stop.'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.rideService
+      .endRide(
+        this.driverId,
+        'evening'
+      )
+      .subscribe({
+        next: () => {
+          this.locationService.stopTracking();
+
+          /*
+           * Stay on complete screen.
+           * resetDay() is available if you want a manual
+           * test/reset button during development.
+           */
+          this.setStage('day-complete');
+
+          this.toastService.showToast(
+            'Return ride ended',
+            'success'
+          );
+        },
+        error: error => {
+          console.error(error);
+
+          this.toastService.showToast(
+            'Unable to end return ride',
+            'danger'
+          );
+        }
+      });
+  }
+
+  // =====================================================
+  // ACTION API + STATE ADVANCE
+  // =====================================================
+
+  private updateStudentAction(
+    student: any,
+    rideType: RideType,
+    apiStatus:
+      | 'picked_up'
+      | 'dropped_at_school'
+      | 'dropped_at_home',
+    uiStatus: StudentUiStatus,
+    successMessage: string
+  ): void {
+    this.driverService
+      .updateStudentStatus(
+        student.parentId,
+        rideType,
+        apiStatus
+      )
+      .subscribe({
+        next: () => {
+          if (rideType === 'morning') {
+            this.morningStatuses[
+              student.parentId
+            ] = uiStatus;
+          } else {
+            this.eveningStatuses[
+              student.parentId
+            ] = uiStatus;
+          }
+
+          this.persistStatuses();
+          this.advanceStageIfNeeded();
+
+          this.toastService.showToast(
+            successMessage,
+            'success'
+          );
+        },
+        error: error => {
+          console.error(
+            'Student action error:',
+            error
+          );
+
+          this.toastService.showToast(
+            'Unable to update student',
+            'danger'
+          );
+        }
+      });
+  }
+
+  private advanceStageIfNeeded(): void {
+    if (
+      this.stage === 'morning-pickup' &&
+      this.morningPendingStudents.length === 0
+    ) {
+      this.setStage('morning-school-drop');
+      return;
+    }
+
+    if (
+      this.stage === 'morning-school-drop' &&
+      this.morningPickedStudents.length === 0 &&
+      this.presentStudents.length > 0
+    ) {
+      this.setStage('morning-complete');
+      return;
+    }
+
+    if (
+      this.stage === 'return-boarding' &&
+      this.returnWaitingStudents.length === 0
+    ) {
+      this.setStage('return-home-drop');
+      return;
+    }
+
+    if (
+      this.stage === 'return-home-drop' &&
+      this.returnOnboardStudents.length === 0 &&
+      this.returnDroppedStudents.length > 0
+    ) {
+      this.setStage('return-complete');
+    }
+  }
+
+private setStage(stage: DriverStage): void {
+  this.stage = stage;
+}
+
+  private getMorningStatus(
+    student: any
+  ): StudentUiStatus {
+    return (
+      this.morningStatuses[
+        student.parentId
+      ] || 'Pending'
+    );
+  }
+
+  private getEveningStatus(
+    student: any
+  ): StudentUiStatus {
+    return (
+      this.eveningStatuses[
+        student.parentId
+      ] || 'Waiting'
+    );
+  }
+
+  private restoreStatuses(
+    key: string
+  ): Record<string, StudentUiStatus> {
+    try {
+      return JSON.parse(
+        localStorage.getItem(key) || '{}'
+      );
+    } catch {
+      return {};
+    }
+  }
+
+  private persistStatuses(): void {
+    localStorage.setItem(
+      this.MORNING_STATUS_KEY,
+      JSON.stringify(
+        this.morningStatuses
+      )
+    );
+
+    localStorage.setItem(
+      this.EVENING_STATUS_KEY,
+      JSON.stringify(
+        this.eveningStatuses
+      )
+    );
+  }
+
+  // =====================================================
+  // MENU / SECONDARY SCREENS
+  // =====================================================
+
+  async openMenu(event: Event) {
+    const popover =
+      await this.popoverCtrl.create({
+        component:
+          DriverMenuPopoverComponent,
+        event,
+        side: 'bottom',
+        alignment: 'end'
+      });
+
+    await popover.present();
+
+    const result =
+      await popover.onDidDismiss();
+
+    const view =
+      result.data?.view;
+
+    if (view) {
+      this.openView(view);
+    }
+  }
+
+  select(view: string) {
+    this.popoverCtrl.dismiss({
+      view
+    });
+  }
+
+  openView(view: string) {
+    this.currentView = view;
+
+    const titles: Record<string, string> = {
+      referral: 'Referral Program',
+      attendance: 'Today Attendance',
+      students: 'Students',
+      addStudent: 'Add Student'
+    };
+
+    this.pageTitle =
+      titles[view]
+      || 'Driver Dashboard';
+  }
+
+  goBack() {
+    this.currentView = 'dashboard';
+    this.pageTitle = 'Driver Dashboard';
+  }
 
   // =====================================================
   // REFERRAL
   // =====================================================
 
   loadReferralDetails(): void {
-
     this.driverService
       .getReferralDetails(
         this.driverId
       )
       .subscribe({
-
-        next: (response) => {
-
+        next: response => {
           const data =
             response.data;
-
 
           this.referralCode =
             data?.referralCode || '';
 
-
           this.referralCount =
             data?.referralCount || 0;
 
-
           this.referredByCode =
             data?.referredByCode || '';
-
         },
-
-
-        error: (error) => {
-
+        error: error =>
           console.error(
+            'Referral details error:',
             error
-          );
-
-
-          this.toastService.showToast(
-            'Unable to load referral details',
-            'danger'
-          );
-
-        }
-
+          )
       });
-
   }
 
-
   async shareReferralCode(): Promise<void> {
-
     try {
-
       await navigator.clipboard.writeText(
         this.referralCode
       );
 
-
       this.toastService.showToast(
-        'Referral code copied successfully',
+        'Referral code copied',
         'success'
       );
-
-    }
-
-    catch {
-
+    } catch {
       this.toastService.showToast(
         'Unable to copy referral code',
         'danger'
       );
-
     }
-
   }
 
-
   // =====================================================
-  // STUDENT VIEW
+  // STUDENTS
   // =====================================================
 
   async openStudent(student: any) {
-
     const modal =
       await this.modalCtrl.create({
-
         component:
           StudentDetailsModalComponent,
-
         componentProps: {
           student
         }
-
       });
 
-
     await modal.present();
-
   }
 
-
   async openAddStudent() {
-
     const modal =
       await this.modalCtrl.create({
-
         component:
           AddStudentModalComponent,
-
         componentProps: {
           driverId: this.driverId
         }
-
       });
-
 
     modal.onDidDismiss()
-      .then(() => {
-
-        this.loadDashboard();
-
-      });
-
+      .then(() => this.loadDashboard());
 
     await modal.present();
-
   }
 
-
   // =====================================================
-  // PRESENT / ABSENT MENU
-  // =====================================================
-
-  showPresentStudents() {
-
-    /*
-     * Only useful for Today Route.
-     */
-    this.routeMode = true;
-
-
-    if (this.rideStarted) {
-
-      this.selectedStudents =
-        [...this.presentStudents];
-
-      this.refreshStudentGroups();
-
-    }
-
-  }
-
-
-  showAbsentStudents() {
-
-    this.selectedStudents =
-      [...this.absentStudents];
-
-    this.showStudentList = true;
-
-    this.routeMode = false;
-
-  }
-
-
-  // =====================================================
-  // PAGE NAVIGATION
+  // DEV / NEXT-DAY RESET
   // =====================================================
 
-  openView(view: string) {
+resetDay(): void {
 
-    this.currentView = view;
+  this.locationService.stopTracking();
 
+  this.morningStatuses = {};
+  this.eveningStatuses = {};
 
-    const titles: any = {
+  localStorage.removeItem(
+    this.MORNING_STATUS_KEY
+  );
 
-      referral:
-        'Referral Program',
+  localStorage.removeItem(
+    this.EVENING_STATUS_KEY
+  );
 
-      attendance:
-        'Today Attendance',
+  this.stage = 'morning-ready';
 
-      route:
-        'Today Route',
-
-      students:
-        'Students',
-
-      addStudent:
-        'Add Student'
-
-    };
-
-
-    this.pageTitle =
-      titles[view] ||
-      'Driver Dashboard';
-
-
-    /*
-     * TODAY ROUTE
-     */
-    if (view === 'route') {
-
-      this.routeMode = true;
-
-
-      /*
-       * Route students should be visible
-       * only when ride has started.
-       */
-      if (this.rideStarted) {
-
-        this.selectedStudents =
-          [...this.presentStudents];
-
-        this.refreshStudentGroups();
-
-      }
-      else {
-
-        this.selectedStudents = [];
-
-        this.pickedStudents = [];
-
-        this.pendingStudents = [];
-
-      }
-
-    }
-
-  }
-
-
-  // =====================================================
-  // BACK
-  // =====================================================
-
-  goBack() {
-
-    this.currentView =
-      'dashboard';
-
-
-    this.pageTitle =
-      'Driver Dashboard';
-
-  }
-
+  this.loadDashboard();
+}
 
   // =====================================================
   // LOGOUT
   // =====================================================
 
   async logout() {
+    const confirmed =
+      await this.dialogService.confirmLogout();
 
-    try {
+    if (!confirmed) {
+      return;
+    }
 
-      const confirmed =
-        await this.dialogService.confirmLogout();
+    this.locationService.stopTracking();
 
+    [
+      'token',
+      'role',
+      'name',
+      'driverId',
+      'userName',
+      'rideStarted',
+      // this.STAGE_KEY,
+      this.MORNING_STATUS_KEY,
+      this.EVENING_STATUS_KEY
+    ].forEach(
+      key => localStorage.removeItem(key)
+    );
 
-      if (!confirmed) {
-        return;
+    await this.router.navigateByUrl(
+      '/auth/login',
+      {
+        replaceUrl: true
       }
-
-
-      /*
-       * Stop location tracking.
-       */
-      this.locationService.stopTracking();
-
-
-      localStorage.removeItem('token');
-
-      localStorage.removeItem('role');
-
-      localStorage.removeItem('name');
-
-      localStorage.removeItem('driverId');
-
-      localStorage.removeItem('userName');
-
-      localStorage.removeItem('rideStarted');
-
-
-      await this.router.navigateByUrl(
-        '/auth/login',
-        {
-          replaceUrl: true
-        }
-      );
-
-    }
-
-    catch (error) {
-
-      console.error(
-        'Logout dialog error:',
-        error
-      );
-
-
-      this.toastService.showToast(
-        'Unable to logout',
-        'danger'
-      );
-
-    }
-
+    );
   }
-
 }

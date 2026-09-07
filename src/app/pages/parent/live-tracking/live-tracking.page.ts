@@ -1,47 +1,75 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router }
-  from '@angular/router';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy
+} from '@angular/core';
+
+import {
+  CommonModule
+} from '@angular/common';
+
+import {
+  FormsModule
+} from '@angular/forms';
+
+import {
+  Router
+} from '@angular/router';
+
+import {
+  IonBackButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar
+} from '@ionic/angular/standalone';
+
+import {
+  Subscription
+} from 'rxjs';
 
 import {
   SocketService
-}
-  from
-  'src/app/core/services/socket';
-// import * as L from 'leaflet';
-import * as L from 'leaflet';
+} from 'src/app/core/services/socket';
 
+import {
+  ParentService
+} from 'src/app/core/services/parent';
+
+import * as L from 'leaflet';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
-  iconUrl: 'assets/leaflet/marker-icon.png',
-  shadowUrl: 'assets/leaflet/marker-shadow.png'
+  iconRetinaUrl:
+    'assets/leaflet/marker-icon-2x.png',
+
+  iconUrl:
+    'assets/leaflet/marker-icon.png',
+
+  shadowUrl:
+    'assets/leaflet/marker-shadow.png'
 });
-import { IonBackButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
-import { ParentService } from 'src/app/core/services/parent';
 
 @Component({
   selector: 'app-live-tracking',
   templateUrl: './live-tracking.page.html',
   styleUrls: ['./live-tracking.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonBackButton, IonButtons, IonToolbar, CommonModule, FormsModule]
+  imports: [
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonBackButton,
+    IonButtons,
+    IonToolbar,
+    CommonModule,
+    FormsModule
+  ]
 })
-export class LiveTrackingPage implements AfterViewInit {
-
-
-  trackingInterval: any;
-  constructor(private parentService:
-    ParentService,
-
-    private socketService:
-      SocketService,
-
-    private router:
-      Router) { }
+export class LiveTrackingPage
+  implements AfterViewInit, OnDestroy {
 
   map: any;
 
@@ -49,134 +77,404 @@ export class LiveTrackingPage implements AfterViewInit {
 
   schoolMarker: any;
 
+  trackingInterval: any;
+
+  studentStatusSubscription?:
+    Subscription;
+
+  dashboardSubscription?:
+    Subscription;
+
   schoolLat = 11.0168;
 
   schoolLng = 76.9558;
 
-  ngAfterViewInit() {
+  parentId = '';
 
-    setTimeout(() => {
+  driverId = '';
 
-      this.loadMap();
+  rideType:
+    | 'morning'
+    | 'evening'
+    | null = null;
 
-      this.map.invalidateSize();
+  trackingAvailable = false;
 
-      const parentId = localStorage.getItem('parentId');
+  constructor(
+    private parentService: ParentService,
+    private socketService: SocketService,
+    private router: Router
+  ) {}
 
-      if (parentId) {
+  // =====================================================
+  // INIT
+  // =====================================================
 
-        this.socketService.connect();
+  ngAfterViewInit(): void {
 
-        this.socketService.joinParentRoom(parentId);
+    this.parentId =
+      localStorage.getItem('parentId') || '';
 
-        this.socketService
-          .listenDashboardUpdated()
-          .subscribe(() => {
+    if (!this.parentId) {
 
-            const parentId = localStorage.getItem('parentId');
+      this.router.navigateByUrl(
+        '/auth/login'
+      );
 
-            if (!parentId) {
-              return;
-            }
-
-            this.parentService
-              .getDashboard(parentId)
-              .subscribe((res: any) => {
-
-                if (!res.data.rideStarted) {
-
-                  clearInterval(this.trackingInterval);
-
-                  this.router.navigateByUrl(
-                    '/parent/dashboard'
-                  );
-
-                }
-
-              });
-
-          });
-
-      }
-
-    }, 300);
-
-  }
-  loadMap() {
-
-    this.map = L.map('map').setView([11.0168, 76.9558], 15);
-    const driverId =
-      localStorage.getItem('driverId');
-
-    if (!driverId) {
       return;
     }
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
+    this.socketService.connect();
 
-    this.schoolMarker = L.marker(
-      [
+    this.socketService.joinParentRoom(
+      this.parentId
+    );
+
+    this.checkTrackingAccess();
+
+  }
+
+  // =====================================================
+  // CHECK TRACKING ACCESS
+  // =====================================================
+
+  checkTrackingAccess(): void {
+
+    this.parentService
+      .getDashboard(this.parentId)
+      .subscribe({
+
+        next: (response: any) => {
+
+          const data =
+            response?.data;
+
+          if (!data) {
+
+            this.stopTracking();
+
+            return;
+          }
+
+          this.driverId =
+            data.driver?.driverId || '';
+
+          this.rideType =
+            data.rideType || null;
+
+          this.trackingAvailable =
+            data.trackingAvailable === true;
+
+          if (
+            !this.trackingAvailable ||
+            !this.driverId ||
+            !this.rideType
+          ) {
+
+            this.stopTracking();
+
+            this.router.navigateByUrl(
+              '/parent/dashboard'
+            );
+
+            return;
+          }
+
+          this.loadMap();
+
+          this.listenForStudentStatus();
+
+          this.startLocationPolling();
+
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Tracking access check failed',
+            error
+          );
+
+          this.stopTracking();
+
+          this.router.navigateByUrl(
+            '/parent/dashboard'
+          );
+
+        }
+
+      });
+
+  }
+
+  // =====================================================
+  // MAP
+  // =====================================================
+
+  loadMap(): void {
+
+    if (this.map) {
+      return;
+    }
+
+    this.map =
+      L.map('map')
+        .setView(
+          [
+            this.schoolLat,
+            this.schoolLng
+          ],
+          15
+        );
+
+    L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        maxZoom: 19
+      }
+    ).addTo(this.map);
+
+    this.schoolMarker =
+      L.marker([
         this.schoolLat,
         this.schoolLng
-      ]
-    ).addTo(this.map);
+      ])
+      .addTo(this.map);
 
     this.schoolMarker.bindPopup(
       '🏫 Lisieux Matriculation School'
     );
 
-    this.vanMarker = L.marker(
-      [
+    this.vanMarker =
+      L.marker([
         this.schoolLat,
         this.schoolLng
-      ]
-    ).addTo(this.map);
+      ])
+      .addTo(this.map);
 
     this.vanMarker.bindPopup(
       '🚐 School Van'
     );
 
+    setTimeout(() => {
+
+      this.map.invalidateSize();
+
+    }, 300);
+
+  }
+
+  // =====================================================
+  // LOCATION
+  // =====================================================
+
+  startLocationPolling(): void {
+
+    this.stopLocationPolling();
+
+    this.fetchLocation();
+
     this.trackingInterval =
       setInterval(() => {
 
-        this.parentService
-
-          .getLiveLocation(driverId)
-
-          .subscribe((res: any) => {
-
-            this.vanMarker.setLatLng([
-              res.latitude,
-              res.longitude
-            ]);
-            const bounds = L.latLngBounds([
-              [
-                res.latitude,
-                res.longitude
-              ],
-              [
-                this.schoolLat,
-                this.schoolLng
-              ]
-            ]);
-
-            this.map.fitBounds(
-              bounds,
-              {
-                padding: [50, 50]
-              }
-            );
-          });
+        this.fetchLocation();
 
       }, 15000);
 
   }
 
-  ngOnDestroy() {
+  fetchLocation(): void {
 
-    clearInterval(this.trackingInterval);
+    if (
+      !this.trackingAvailable ||
+      !this.driverId ||
+      !this.rideType ||
+      !this.parentId
+    ) {
 
-    clearInterval(this.trackingInterval);
+      return;
+    }
+
+    this.parentService
+      .getLiveLocation(
+        this.driverId,
+        this.rideType,
+        this.parentId
+      )
+      .subscribe({
+
+        next: (response: any) => {
+
+          const data =
+            response?.data;
+
+          if (
+            !data ||
+            data.latitude === undefined ||
+            data.longitude === undefined
+          ) {
+
+            return;
+          }
+
+          if (!this.vanMarker) {
+            return;
+          }
+
+          this.vanMarker.setLatLng([
+            data.latitude,
+            data.longitude
+          ]);
+
+          const bounds =
+            L.latLngBounds([
+
+              [
+                data.latitude,
+                data.longitude
+              ],
+
+              [
+                this.schoolLat,
+                this.schoolLng
+              ]
+
+            ]);
+
+          this.map.fitBounds(
+            bounds,
+            {
+              padding: [50, 50]
+            }
+          );
+
+        },
+
+        error: (error) => {
+
+          if (
+            error?.status === 403 ||
+            error?.status === 404
+          ) {
+
+            this.stopTracking();
+
+            this.router.navigateByUrl(
+              '/parent/dashboard'
+            );
+
+          }
+
+        }
+
+      });
 
   }
+
+  // =====================================================
+  // STUDENT STATUS SOCKET
+  // =====================================================
+
+  listenForStudentStatus(): void {
+
+    this.studentStatusSubscription =
+      this.socketService
+        .listenStudentStatusUpdated()
+        .subscribe((event: any) => {
+
+          if (
+            event?.parentId !==
+            this.parentId
+          ) {
+
+            return;
+          }
+
+          const status =
+            event?.status;
+
+          if (
+            status === 'picked_up' &&
+            event.rideType === 'morning'
+          ) {
+
+            this.trackingAvailable = true;
+
+            return;
+          }
+
+          if (
+            status ===
+            'picked_from_school' &&
+            event.rideType === 'evening'
+          ) {
+
+            this.trackingAvailable = true;
+
+            return;
+          }
+
+          if (
+            status ===
+            'dropped_at_school' ||
+            status ===
+            'dropped_at_home'
+          ) {
+
+            this.trackingAvailable = false;
+
+            this.stopTracking();
+
+            this.router.navigateByUrl(
+              '/parent/dashboard'
+            );
+
+          }
+
+        });
+
+  }
+
+  // =====================================================
+  // STOP
+  // =====================================================
+
+  stopLocationPolling(): void {
+
+    if (this.trackingInterval) {
+
+      clearInterval(
+        this.trackingInterval
+      );
+
+      this.trackingInterval = null;
+
+    }
+
+  }
+
+  stopTracking(): void {
+
+    this.trackingAvailable = false;
+
+    this.stopLocationPolling();
+
+  }
+
+  // =====================================================
+  // DESTROY
+  // =====================================================
+
+  ngOnDestroy(): void {
+
+    this.stopTracking();
+
+    this.studentStatusSubscription
+      ?.unsubscribe();
+
+    this.dashboardSubscription
+      ?.unsubscribe();
+
+  }
+
 }

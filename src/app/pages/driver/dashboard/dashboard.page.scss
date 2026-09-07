@@ -1,1156 +1,535 @@
-/* =====================================================
-   DRIVER DASHBOARD
-===================================================== */
 
 ion-toolbar {
   --min-height: 62px;
+  --background: #ff9800;
+  --color: #ffffff;
 }
 
 ion-title {
   text-align: center;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .toolbar-icon-btn {
+  --color: #ffffff;
   --border-radius: 12px;
   width: 44px;
   height: 44px;
 }
 
-
-/* =====================================================
-   DASHBOARD
-===================================================== */
-
-.dashboard-page {
+.driver-workflow {
   min-height: 100%;
-  padding: 20px 16px 32px;
-  position: relative;
-}
-
-.dashboard-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.35;
-
-  background-image:
-    radial-gradient(
-      circle at 15% 15%,
-      rgba(245, 158, 11, 0.10),
-      transparent 22%
-    ),
-    radial-gradient(
-      circle at 90% 75%,
-      rgba(249, 115, 22, 0.07),
-      transparent 25%
+  padding: 16px 16px 34px;
+  background:
+    linear-gradient(
+      180deg,
+      #fffaf2 0%,
+      #fffdf9 45%,
+      #ffffff 100%
     );
 }
 
-.dashboard-page > * {
-  position: relative;
-  z-index: 1;
-}
-
-
-/* =====================================================
-   DRIVER CARD
-===================================================== */
-
-.driver-card {
-  min-height: 105px;
-
+.driver-summary {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-
-  gap: 20px;
-  padding: 22px;
-
-  background: rgba(255, 255, 255, 0.96);
-
-  border:
-    1px solid rgba(245, 158, 11, 0.12);
-
-  border-radius: 20px;
-
+  gap: 12px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #f1e6d6;
+  border-radius: 18px;
   box-shadow:
-    0 8px 24px rgba(120, 74, 20, 0.07);
+    0 7px 18px rgba(60, 42, 20, 0.08);
 }
 
-.driver-info {
-  min-width: 0;
-}
-
-.driver-label {
-  margin-bottom: 8px;
-
-  color: var(--app-subtext);
-
-  font-size: 11px;
-  font-weight: 700;
-
+.eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #7a6d60;
+  font-size: 10px;
+  font-weight: 800;
   letter-spacing: 1px;
 }
 
-.driver-id {
-  color: var(--app-text);
-
-  font-size: 17px;
-  font-weight: 750;
-
-  word-break: break-word;
-}
-
-.driver-avatar {
-  flex-shrink: 0;
-
-  width: 58px;
-  height: 58px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fff3d6,
-      #fff9ed
-    );
-
-  border:
-    1px solid rgba(245, 158, 11, 0.14);
-
-  color: var(--app-primary-dark);
-
-  font-size: 28px;
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-.status-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 10px;
-
-  margin: 22px 0 18px;
-}
-
-.status-label {
-  color: var(--app-subtext);
-
-  font-size: 13px;
-  font-weight: 550;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 7px;
-
-  padding: 7px 12px;
-
-  border-radius: 30px;
-
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-
-  border-radius: 50%;
-}
-
-.status-stopped {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.status-stopped .status-dot {
-  background: #94a3b8;
-}
-
-.status-running {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.status-running .status-dot {
-  background: #22c55e;
-
-  box-shadow:
-    0 0 0 4px rgba(34, 197, 94, 0.12);
-
-  animation:
-    ridePulse 1.8s infinite;
-}
-
-@keyframes ridePulse {
-
-  0% {
-    box-shadow:
-      0 0 0 0 rgba(34, 197, 94, 0.25);
-  }
-
-  70% {
-    box-shadow:
-      0 0 0 8px rgba(34, 197, 94, 0);
-  }
-
-  100% {
-    box-shadow:
-      0 0 0 0 rgba(34, 197, 94, 0);
-  }
-
-}
-
-
-/* =====================================================
-   ACTION GRID
-===================================================== */
-
-.action-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  gap: 14px;
-}
-
-.action-card {
-  min-width: 0;
-  min-height: 12px;
-
-  // padding: 18px 10px 14px;
-  padding: 5px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  border:
-    1px solid rgba(15, 23, 42, 0.06);
-
-  border-radius: 18px;
-
-  background:
-    rgba(255, 255, 255, 0.97);
-
-  box-shadow:
-    0 7px 20px rgba(15, 23, 42, 0.06);
-
-  cursor: pointer;
-
-  font-family: inherit;
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
-}
-
-.action-card:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
-.action-icon {
-  width: 48px;
-  height: 48px;
-
-  margin-bottom: 12px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 15px;
-
-  font-size: 25px;
-}
-
-.start-icon {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.end-icon {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.action-title {
-  color: var(--app-text);
-
-  font-size: 13px;
-  font-weight: 700;
-
-  text-align: center;
-}
-
-.action-subtitle {
-  margin-top: 5px;
-
-  color: var(--app-text-muted);
-
-  font-size: 10px;
-  line-height: 1.3;
-
-  text-align: center;
-}
-
-.action-disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-
-/* =====================================================
-   RIDE HINT
-===================================================== */
-
-.ride-hint {
-  display: flex;
-  align-items: flex-start;
-
-  gap: 9px;
-
-  margin-top: 14px;
-  padding: 12px 14px;
-
-  background: #fff7e6;
-
-  border:
-    1px solid rgba(245, 158, 11, 0.14);
-
-  border-radius: 13px;
-
-  color: #92400e;
-
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.ride-hint ion-icon {
-  flex-shrink: 0;
-
-  margin-top: 1px;
-
-  font-size: 18px;
-
+.eyebrow.accent {
   color: #f59e0b;
 }
 
-
-/* =====================================================
-   TODAY'S STUDENTS
-===================================================== */
-
-.route-dashboard {
-  margin-top: 28px;
+.driver-summary h1 {
+  margin: 0;
+  color: #172033;
+  font-size: 19px;
+  font-weight: 850;
 }
 
-
-/* =====================================================
-   TODAY STUDENT COUNT
-===================================================== */
-
-.today-student-count {
-  min-width: 58px;
-
-  padding: 8px 10px;
-
-  text-align: center;
-
-  background: #fff7e6;
-
-  border-radius: 12px;
-
-  color: var(--app-primary-dark);
-
-  font-size: 16px;
-  font-weight: 800;
+.driver-summary p {
+  margin: 5px 0 0;
+  color: #7b8494;
+  font-size: 11px;
 }
 
-.today-student-count span {
-  display: block;
-
-  margin-top: 2px;
-
-  font-size: 8px;
-
-  font-weight: 600;
-
-  color: var(--app-subtext);
-}
-
-
-/* =====================================================
-   STUDENT GROUP
-===================================================== */
-
-.student-group {
-  margin-top: 18px;
-}
-
-
-/* =====================================================
-   GROUP HEADER
-===================================================== */
-
-.student-group-header {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 12px;
-
-  margin-bottom: 10px;
-
-  padding: 12px 14px;
-
-  border-radius: 14px;
-}
-
-.picked-header {
-  background: #f0fdf4;
-}
-
-.pending-header {
-  background: #fff7e6;
-}
-
-.student-group-title {
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  color: var(--app-text);
-
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.student-group-header p {
-  margin: 4px 0 0 15px;
-
-  color: var(--app-subtext);
-
-  font-size: 10px;
-}
-
-
-.group-dot {
-  width: 8px;
-  height: 8px;
-
+.ride-state {
   flex-shrink: 0;
-
-  border-radius: 50%;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 9px;
+  font-weight: 850;
 }
 
-.picked-dot {
-  background: #16a34a;
+.ride-state.running {
+  background: #15803d;
+  color: #ffffff;
 }
 
-.pending-dot {
-  background: #f59e0b;
+.journey-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 2px 12px;
 }
 
+.journey-icon {
+  font-size: 23px;
+}
 
-.group-count {
-  min-width: 30px;
+.journey-heading h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 850;
+}
 
-  height: 30px;
+.journey-heading p {
+  margin: 4px 0 0;
+  color: #7b8494;
+  font-size: 11px;
+}
 
+.attendance-banner {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  border-radius: 10px;
-
-  font-size: 12px;
-  font-weight: 800;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 16px;
+  border-radius: 15px;
+  background: #ecfdf5;
+  color: #166534;
+  border: 1px solid #d1fae5;
 }
 
-.picked-count {
-  background: #dcfce7;
-  color: #15803d;
+.attendance-banner span {
+  width: 1px;
+  height: 22px;
+  background: #c7ddd0;
 }
 
-.pending-count {
-  background: #ffedd5;
-  color: #c2410c;
+.attendance-banner strong:last-child {
+  color: #b91c1c;
 }
 
-
-/* =====================================================
-   STUDENT CARD
-===================================================== */
-
-.student-route-card {
-  position: relative;
-
+.primary-driver-action {
+  width: 100%;
+  min-height: 58px;
   display: flex;
   align-items: center;
-
-  width: 100%;
-
-  min-height: 72px;
-
-  padding: 10px 12px;
-
-  margin-bottom: 8px;
-
-  background: #ffffff;
-
+  justify-content: center;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 14px 18px;
+  border: 0;
   border-radius: 14px;
-
-  border:
-    1px solid rgba(15, 23, 42, 0.06);
-
+  background: #ff9800;
+  color: #ffffff;
   box-shadow:
-    0 4px 12px rgba(15, 23, 42, 0.045);
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+    0 9px 20px rgba(255, 152, 0, 0.25);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
 }
 
-.student-route-card:active {
-  transform: scale(0.99);
+.primary-driver-action ion-icon {
+  font-size: 21px;
 }
 
-
-/* =====================================================
-   PICKED / PENDING CARD
-===================================================== */
-.picked-card {
-  border-left: 4px solid #16a34a;
+.primary-driver-action:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
-.pending-card {
-  border-left: 4px solid #f59e0b;
+.primary-driver-action:disabled {
+  opacity: 0.45;
+  box-shadow: none;
 }
 
-/* =====================================================
-   STUDENT TOP
-===================================================== */
-.student-top {
+.success-action {
+  background: #16a34a;
+  box-shadow:
+    0 9px 20px rgba(22, 163, 74, 0.20);
+}
+
+.danger-action {
+  background: #e64949;
+  box-shadow:
+    0 9px 20px rgba(230, 73, 73, 0.20);
+}
+
+.student-preview {
+  margin-top: 22px;
+}
+
+.section-title-row {
   display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
 
+.section-title-row h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.section-title-row p {
+  margin: 4px 0 0;
+  color: #7b8494;
+  font-size: 10px;
+}
+
+.count-chip {
+  min-width: 34px;
+  height: 34px;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: #fff1d6;
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 900;
+}
 
-  width: 100%;
-
+.compact-student {
+  display: flex;
+  align-items: center;
   gap: 10px;
+  margin-bottom: 8px;
+  padding: 11px;
+  border: 1px solid #ece8e1;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.04);
+}
 
-  min-width: 0;
+.student-avatar,
+.next-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff2d8;
+  color: #b45309;
+  font-weight: 900;
 }
 
 .student-avatar {
   width: 38px;
   height: 38px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 11px;
-  font-size: 15px;
-  font-weight: 800;
 }
 
-.picked-avatar {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.pending-avatar {
-  background: #fff3d6;
-  color: #b45309;
-}
-
-
-/* =====================================================
-   STUDENT INFO
-===================================================== */
-.student-info {
+.student-copy {
   flex: 1;
-
   min-width: 0;
-
-  overflow: hidden;
 }
 
-.student-info h3 {
-  margin: 0 0 3px;
+.student-copy strong,
+.student-copy span {
+  display: block;
+}
 
-  color: var(--app-text);
+.student-copy strong {
+  color: #172033;
+  font-size: 13px;
+}
 
-  font-size: 14px;
-  font-weight: 750;
-
+.student-copy span {
+  margin-top: 3px;
+  color: #7b8494;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.student-location {
-  display: inline;
 
-  margin: 0;
-
-  color: var(--app-subtext);
-
-  font-size: 10px;
-
-  line-height: 1.3;
-
-  white-space: nowrap;
+.present-chip,
+.waiting-chip {
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 900;
 }
 
-.student-location + .student-location {
-  margin-left: 8px;
-}
-
-.student-location span {
-  color: var(--app-text);
-
-  font-weight: 700;
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-.student-status {
-  display: inline-flex;
-
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  margin: 0 8px 0 4px;
-
-  padding: 5px 8px;
-
-  border-radius: 18px;
-
-  background: #f1f5f9;
-
-  color: #64748b;
-
-  font-size: 9px;
-
-  font-weight: 800;
-
-  white-space: nowrap;
-}
-
-.student-status.pending {
-  background: #fff7e6;
-  color: #b45309;
-}
-
-.student-status.picked {
+.present-chip {
   background: #dcfce7;
   color: #15803d;
 }
 
-.student-status.dropped {
-  background: #dbeafe;
-  color: #1d4ed8;
+.waiting-chip {
+  background: #e9f8ef;
+  color: #15803d;
 }
 
-
-
-/* =====================================================
-   STUDENT ACTION
-===================================================== */
-
-.student-actions {
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  margin: 0;
-
-  gap: 6px;
-}
-
-.student-actions ion-button {
-  --border-radius: 10px;
-
-  min-width: 62px;
-
-  height: 36px;
-
-  margin: 0;
-
-  font-size: 11px;
-
-  font-weight: 700;
-
-  text-transform: none;
-}
-
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
-
-@media (max-width: 380px) {
-
-  .student-route-card {
-    min-height: 68px;
-
-    padding: 9px 10px;
-  }
-
-  .student-top {
-    gap: 8px;
-  }
-
-  .student-avatar {
-    width: 35px;
-    height: 35px;
-
-    border-radius: 10px;
-
-    font-size: 14px;
-  }
-
-  .student-info h3 {
-    font-size: 13px;
-
-    margin-bottom: 2px;
-  }
-
-  .student-location {
-    font-size: 9px;
-  }
-
-  .student-location + .student-location {
-    margin-left: 5px;
-  }
-
-  .student-status {
-    margin-left: 3px;
-    margin-right: 5px;
-
-    padding: 4px 7px;
-
-    font-size: 8px;
-  }
-
-  .student-actions ion-button {
-    min-width: 55px;
-
-    height: 34px;
-
-    font-size: 10px;
-  }
-}
-
-/* =====================================================
-   BEFORE RIDE STUDENT STATE
-===================================================== */
-
-.pre-ride-student-state {
-  margin-top: 24px;
-
-  padding: 25px 18px;
-
-  text-align: center;
-
-  background:
-    linear-gradient(
-      135deg,
-      #fffaf0,
-      #ffffff
-    );
-
-  border:
-    1px dashed rgba(245, 158, 11, 0.25);
-
-  border-radius: 18px;
-}
-
-.pre-ride-icon {
-  width: 48px;
-  height: 48px;
-
-  margin: 0 auto 10px;
-
+.running-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-
-  border-radius: 14px;
-
-  background: #fff3d6;
-
-  color: #f59e0b;
-
-  font-size: 22px;
-}
-
-.pre-ride-student-state h3 {
-  margin: 0;
-
-  color: var(--app-text);
-
-  font-size: 15px;
-  font-weight: 750;
-}
-
-.pre-ride-student-state p {
-  max-width: 280px;
-
-  margin: 6px auto 0;
-
-  color: var(--app-subtext);
-
-  font-size: 11px;
-
-  line-height: 1.5;
-}
-
-
-/* =====================================================
-   EMPTY STATE
-===================================================== */
-
-.empty-state {
-  padding: 35px 20px;
-
-  text-align: center;
-}
-
-.empty-icon {
-  width: 62px;
-  height: 62px;
-
-  margin: 0 auto 15px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 18px;
-
-  background: #fff7e6;
-
-  color: var(--app-primary);
-
-  font-size: 28px;
-}
-
-.empty-state h3 {
-  margin: 0 0 6px;
-
-  color: var(--app-text);
-
-  font-size: 17px;
-}
-
-.empty-state p {
-  max-width: 260px;
-
-  margin: 0 auto;
-
-  color: var(--app-subtext);
-
-  font-size: 12px;
-
-  line-height: 1.5;
-}
-
-
-/* =====================================================
-   OVERVIEW
-===================================================== */
-
-.overview-section {
-  margin-top: 28px;
-}
-
-.section-heading {
-  display: flex;
-
-  align-items: flex-end;
   justify-content: space-between;
-
-  margin-bottom: 14px;
-}
-
-.section-heading h2 {
-  margin: 0;
-
-  color: var(--app-text);
-
-  font-size: 17px;
-  font-weight: 750;
-}
-
-.section-heading p {
-  margin: 4px 0 0;
-
-  color: var(--app-subtext);
-
-  font-size: 11px;
-}
-
-.overview-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap: 10px;
-}
-
-.overview-card {
-  min-height: 118px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  padding: 14px 8px;
-
-  background:
-    rgba(255, 255, 255, 0.96);
-
-  border:
-    1px solid rgba(15, 23, 42, 0.055);
-
-  border-radius: 17px;
-
-  box-shadow:
-    0 5px 16px rgba(15, 23, 42, 0.045);
-}
-
-.overview-icon {
-  width: 34px;
-  height: 34px;
-
-  margin-bottom: 8px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 11px;
-
-  font-size: 18px;
-}
-
-.total-icon {
-  background: #fff3d6;
-  color: #f59e0b;
-}
-
-.present-icon {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.absent-icon {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.overview-value {
-  color: var(--app-text);
-
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.overview-label {
-  margin-top: 3px;
-
-  color: var(--app-subtext);
-
-  font-size: 11px;
-  font-weight: 550;
-}
-
-
-/* =====================================================
-   SAFETY
-===================================================== */
-
-.safety-card {
-  display: flex;
-  align-items: center;
-
   gap: 12px;
-
-  margin-top: 20px;
-  padding: 14px 16px;
-
-  background:
-    linear-gradient(
-      100deg,
-      #fff7e6,
-      #fffaf2
-    );
-
-  border:
-    1px solid rgba(245, 158, 11, 0.12);
-
-  border-radius: 15px;
+  margin: 18px 2px 12px;
+  color: #687386;
+  font-size: 10px;
+  font-weight: 700;
 }
 
-.safety-icon {
-  width: 38px;
-  height: 38px;
+.running-badge,
+.return-ready-badge {
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 850;
+}
 
-  flex-shrink: 0;
+.running-badge {
+  background: #16a34a;
+  color: #ffffff;
+}
 
+.return-ready-badge {
+  background: #ff9800;
+  color: #ffffff;
+}
+
+.next-action-card {
+  margin-top: 10px;
+  padding: 22px 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #e8e1d8;
+  box-shadow:
+    0 8px 18px rgba(15, 23, 42, 0.07);
+}
+
+.next-student {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+}
 
-  border-radius: 12px;
-
-  background: #f59e0b;
-
-  color: #ffffff;
-
+.next-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
   font-size: 20px;
 }
 
-.safety-card strong {
-  color: var(--app-text);
-
-  font-size: 12px;
+.next-student h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 22px;
+  font-weight: 900;
 }
 
-.safety-card p {
-  margin: 3px 0 0;
+.next-student p {
+  margin: 5px 0 0;
+  color: #697386;
+  font-size: 11px;
+}
 
-  color: var(--app-subtext);
-
+.sequence-label,
+.tracking-note {
+  margin: 16px 0 0;
+  color: #778193;
   font-size: 10px;
 }
 
+.tracking-on {
+  display: inline-block;
+  margin-top: 7px;
+  color: #16a34a;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.progress-copy,
+.tracking-footer,
+.center-message,
+.return-rule {
+  text-align: center;
+  color: #778193;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.progress-copy,
+.tracking-footer {
+  margin-top: 18px;
+}
+
+.center-message {
+  margin: 22px 0 4px;
+  color: #172033;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.return-rule {
+  margin: 18px 6px 4px;
+}
+
+.return-rule strong {
+  display: block;
+  margin-top: 5px;
+  color: #172033;
+}
+
+.complete-card {
+  margin-top: 24px;
+  padding: 28px 18px;
+  text-align: center;
+  border-radius: 18px;
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+}
+
+.complete-card ion-icon {
+  color: #16a34a;
+  font-size: 42px;
+}
+
+.complete-card h2 {
+  margin: 10px 0 0;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.complete-card p {
+  margin: 7px 0 0;
+  color: #6e7c8f;
+  font-size: 10px;
+}
+
+.overview-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid #efe8df;
+}
+
+.overview-strip div {
+  padding: 12px 8px;
+  text-align: center;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #eee8df;
+}
+
+.overview-strip strong,
+.overview-strip span {
+  display: block;
+}
+
+.overview-strip strong {
+  color: #172033;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.overview-strip span {
+  margin-top: 3px;
+  color: #7b8494;
+  font-size: 9px;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #7b8494;
+  font-size: 11px;
+}
 
 /* =====================================================
-   SUB PAGES
+   SECONDARY PAGES
 ===================================================== */
 
 .sub-page {
   min-height: 100%;
-
   padding: 20px 16px 32px;
+  background: #fffaf2;
 }
 
 .content-card {
   padding: 20px;
-
-  background:
-    rgba(255, 255, 255, 0.97);
-
-  border:
-    1px solid rgba(245, 158, 11, 0.10);
-
+  background: #ffffff;
+  border: 1px solid #f0e5d5;
   border-radius: 20px;
-
   box-shadow:
-    0 8px 24px rgba(15, 23, 42, 0.055);
+    0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .content-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 15px;
-
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .content-card-header h2 {
   margin: 0;
-
-  color: var(--app-text);
-
+  color: #172033;
   font-size: 19px;
-  font-weight: 750;
 }
 
 .content-card-header p {
   margin: 5px 0 0;
-
-  color: var(--app-subtext);
-
-  font-size: 12px;
+  color: #7b8494;
+  font-size: 11px;
 }
-
-
-/* =====================================================
-   ATTENDANCE
-===================================================== */
 
 .attendance-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .attendance-stat {
-  min-height: 130px;
-
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  border-radius: 17px;
+  border-radius: 15px;
 }
 
 .attendance-stat ion-icon {
-  margin-bottom: 8px;
-
-  font-size: 25px;
+  margin-bottom: 7px;
+  font-size: 24px;
 }
 
 .attendance-stat strong {
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 22px;
 }
 
 .attendance-stat span {
-  margin-top: 4px;
-
-  font-size: 11px;
-  font-weight: 600;
+  margin-top: 3px;
+  font-size: 10px;
 }
 
 .present-stat {
@@ -1168,98 +547,31 @@ ion-title {
   color: #b45309;
 }
 
-
-/* =====================================================
-   ROUTE SUB PAGE
-===================================================== */
-
-.student-count {
-  min-width: 60px;
-
-  padding: 9px 10px;
-
-  background: #fff7e6;
-
-  color: var(--app-primary-dark);
-
-  border-radius: 12px;
-
-  text-align: center;
-
-  font-size: 17px;
-  font-weight: 800;
-}
-
-.student-count span {
-  display: block;
-
-  margin-top: 2px;
-
-  font-size: 8px;
-
-  font-weight: 600;
-}
-
-.route-list {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 12px;
-}
-
-
-/* =====================================================
-   STUDENTS
-===================================================== */
-
 .students-list {
   display: flex;
-
   flex-direction: column;
-
   gap: 9px;
 }
 
 .student-list-item {
   width: 100%;
-
   display: flex;
   align-items: center;
-
   gap: 12px;
-
   padding: 12px;
-
-  border:
-    1px solid var(--app-border-light);
-
+  border: 1px solid #ece8e1;
   border-radius: 14px;
-
   background: #ffffff;
-
   font-family: inherit;
-
   text-align: left;
 }
 
 .student-name {
   flex: 1;
-
-  color: var(--app-text);
-
-  font-size: 14px;
-  font-weight: 650;
+  color: #172033;
+  font-size: 13px;
+  font-weight: 750;
 }
-
-.student-list-item > ion-icon {
-  color: var(--app-text-muted);
-}
-
-
-/* =====================================================
-   REFERRAL
-===================================================== */
 
 .referral-card {
   text-align: center;
@@ -1268,158 +580,71 @@ ion-title {
 .section-icon {
   width: 60px;
   height: 60px;
-
   margin: 4px auto 15px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  background: var(--app-primary-light);
-
-  color: var(--app-primary-dark);
-
+  background: #fff2d8;
+  color: #b45309;
   border-radius: 18px;
-
   font-size: 27px;
 }
 
-.referral-card h2 {
-  margin: 0;
-
-  color: var(--app-text);
-
-  font-size: 21px;
-}
-
 .section-description {
-  color: var(--app-subtext);
-
-  font-size: 13px;
+  color: #7b8494;
+  font-size: 12px;
 }
 
 .referral-code-box {
   margin: 24px 0 14px;
-
   padding: 20px;
-
   background: #fff9ed;
-
-  border:
-    1px dashed rgba(245, 158, 11, 0.45);
-
+  border: 1px dashed rgba(245, 158, 11, 0.45);
   border-radius: 16px;
 }
 
 .referral-code-box span {
   display: block;
-
   margin-bottom: 7px;
-
-  color: var(--app-subtext);
-
-  font-size: 11px;
+  color: #7b8494;
+  font-size: 10px;
 }
 
 .referral-code-box strong {
-  color: var(--app-primary-dark);
-
-  font-size: 25px;
-
+  color: #b45309;
+  font-size: 24px;
   letter-spacing: 2px;
 }
 
 .referral-count {
   display: flex;
   justify-content: space-between;
-
   padding: 15px 5px;
-
   margin-bottom: 12px;
-
-  color: var(--app-text-secondary);
-
-  font-size: 13px;
+  color: #4b5563;
+  font-size: 12px;
 }
-
-
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
 
 @media (max-width: 380px) {
-
-  .dashboard-page {
-    padding: 16px 12px 28px;
+  .driver-workflow {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
-  .action-grid {
-    gap: 8px;
+  .next-student h2 {
+    font-size: 19px;
   }
 
-  .action-card {
-    min-height: 132px;
-
-    padding:
-      // 15px 6px 12px;
-      5px
+  .primary-driver-action {
+    min-height: 55px;
+    font-size: 13px;
   }
-
-  .action-icon {
-    width: 43px;
-    height: 43px;
-
-    font-size: 22px;
-  }
-
-  .action-title {
-    font-size: 11px;
-  }
-
-  .action-subtitle {
-    font-size: 8px;
-  }
-
-  .overview-grid {
-    gap: 7px;
-  }
-
-  .student-group-header {
-    padding: 10px 11px;
-  }
-
-  .student-group-title {
-    font-size: 12px;
-  }
-
-  .student-group-header p {
-    font-size: 9px;
-  }
-
-  .student-route-card {
-    padding: 13px;
-  }
-
 }
 
-
-/* =====================================================
-   TABLET
-===================================================== */
-
 @media (min-width: 768px) {
-
-  .dashboard-page,
+  .driver-workflow,
   .sub-page {
-    max-width: 760px;
-
+    max-width: 720px;
     margin: 0 auto;
-
-    padding-top: 30px;
   }
-
-  .action-card {
-    min-height: 155px;
-  }
-
 }

@@ -12,6 +12,12 @@ export class RideService {
     private http: HttpClient
   ) {}
 
+  /**
+   * =====================================================
+   * START RIDE
+   * =====================================================
+   */
+
   startRide(
     driverId: string,
     rideType: 'morning' | 'evening'
@@ -26,6 +32,29 @@ export class RideService {
     );
 
   }
+
+  /**
+   * =====================================================
+   * GET RIDE STATUS
+   * =====================================================
+   */
+
+  getRideStatus(
+    driverId: string,
+    rideType: 'morning' | 'evening'
+  ): Observable<any> {
+
+    return this.http.get(
+      `${environment.apiUrl}/rides/status/${driverId}/${rideType}`
+    );
+
+  }
+
+  /**
+   * =====================================================
+   * UPDATE LOCATION
+   * =====================================================
+   */
 
   updateLocation(
     driverId: string,
@@ -45,6 +74,12 @@ export class RideService {
     );
 
   }
+
+  /**
+   * =====================================================
+   * END RIDE
+   * =====================================================
+   */
 
   endRide(
     driverId: string,

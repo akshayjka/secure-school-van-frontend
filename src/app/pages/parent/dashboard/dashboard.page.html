@@ -45,75 +45,82 @@
      ATTENDANCE
 ================================================= -->
 
-<section class="attendance-card">
+    <section class="attendance-card">
 
-  <!-- CALENDAR = ONLY CLICKABLE ACTION -->
+      <!-- CALENDAR = ONLY CLICKABLE ACTION -->
 
-  <button
-    type="button"
-    class="attendance-icon-button"
-    (click)="openAttendance()"
-    aria-label="Open attendance">
+      <button type="button" class="attendance-icon-button" (click)="openAttendance()" aria-label="Open attendance">
 
-    <ion-icon name="calendar-outline"></ion-icon>
+        <ion-icon name="calendar-outline"></ion-icon>
 
-  </button>
+      </button>
 
 
-  <div class="attendance-content">
+      <div class="attendance-content">
 
-    <span class="card-label">
-      ATTENDANCE
-    </span>
+        <span class="card-label">
+          ATTENDANCE
+        </span>
 
-    <h2>
-      Today's Attendance
-    </h2>
+        <h2>
+          Today's Attendance
+        </h2>
 
-    <div
-      class="attendance-status"
-      [class.present]="isPresent"
-      [class.absent]="!isPresent">
+        <div class="attendance-status" [class.present]="todayAttendanceStatus === 'present'"
+          [class.absent]="todayAttendanceStatus === 'absent'"
+          [class.not-marked]="todayAttendanceStatus === 'not_marked'">
 
-      <span class="status-dot"></span>
+          <span class="status-dot"></span>
 
-      {{ isPresent ? 'Present' : 'Absent' }}
+          <ng-container [ngSwitch]="todayAttendanceStatus">
 
-    </div>
+            <span *ngSwitchCase="'present'">
+              Present
+            </span>
 
-    <div class="attendance-hint">
+            <span *ngSwitchCase="'absent'">
+              Absent
+            </span>
 
-      <ion-icon name="calendar-outline"></ion-icon>
+            <span *ngSwitchDefault>
+              Not Marked
+            </span>
 
-      <span>
-        Tap calendar to manage attendance
-      </span>
+          </ng-container>
 
-    </div>
+        </div>
 
-  </div>
+        <div class="attendance-hint">
+
+          <ion-icon name="calendar-outline"></ion-icon>
+
+          <span>
+            Tap calendar to manage attendance
+          </span>
+
+        </div>
+
+      </div>
 
 
-  <div class="attendance-arrow">
+      <div class="attendance-arrow">
 
-    <ion-icon
-      name="chevron-forward-outline">
-    </ion-icon>
+        <ion-icon name="chevron-forward-outline">
+        </ion-icon>
 
-  </div>
+      </div>
 
-</section>
+    </section>
 
 
     <!-- LIVE RIDE NOTIFICATION -->
 
-    <section class="ride-notification" *ngIf="notificationMessage" [class.notification-success]="rideStarted"
+    <section class="ride-notification" [class.notification-success]="rideStarted"
       [class.notification-ended]="!rideStarted">
 
       <div class="notification-icon">
 
-        <ion-icon [name]="rideStarted ? 'bus-outline' : 'checkmark-circle-outline'">
-        </ion-icon>
+        <ion-icon [name]=" rideStarted? 'bus-outline': 'checkmark-circle-outline'"> </ion-icon>
 
       </div>
 
@@ -127,64 +134,66 @@
           {{ notificationMessage }}
         </p>
 
+        <small *ngIf="rideStarted && rideDirection">
+          {{ rideDirection }}
+        </small>
+
       </div>
 
-      <span class="live-badge">
+      <span class="live-badge" *ngIf="rideStarted">
+
         LIVE
+
       </span>
 
     </section>
-<!-- ================================================
+    <!-- ================================================
      STUDENT PROFILE
 ================================================= -->
 
-<section class="student-profile-card">
+    <section class="student-profile-card">
 
-  <div class="student-profile-header">
+      <div class="student-profile-header">
 
-    <div class="student-profile-info">
+        <div class="student-profile-info">
 
-      <span class="card-eyebrow">
-        STUDENT
-      </span>
+          <span class="card-eyebrow">
+            STUDENT
+          </span>
 
-      <h2>
-        {{ parent.studentName || 'Student' }}
-      </h2>
+          <h2>
+            {{ parent.studentName || 'Student' }}
+          </h2>
 
-      <p>
-        {{ parent.schoolName || 'School not available' }}
-      </p>
+          <p>
+            {{ parent.schoolName || 'School not available' }}
+          </p>
 
-      <!-- UX HINT -->
-      <div class="student-profile-hint">
+          <!-- UX HINT -->
+          <div class="student-profile-hint">
 
-        <ion-icon name="person-outline"></ion-icon>
+            <ion-icon name="person-outline"></ion-icon>
 
-        <span>
-          Tap profile to view student details
-        </span>
+            <span>
+              Tap profile to view student details
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROFILE ACTION -->
+
+        <button type="button" class="student-avatar" (click)="openStudentProfile()" aria-label="View student details">
+
+          <ion-icon name="person-outline"></ion-icon>
+
+        </button>
 
       </div>
 
-    </div>
-
-
-    <!-- PROFILE ACTION -->
-
-    <button
-      type="button"
-      class="student-avatar"
-      (click)="openStudentProfile()"
-      aria-label="View student details">
-
-      <ion-icon name="person-outline"></ion-icon>
-
-    </button>
-
-  </div>
-
-</section>
+    </section>
 
     <!-- ================================================
          DRIVER + RIDE
@@ -254,22 +263,13 @@
 
             <span class="status-dot"></span>
 
-            {{
-            rideStarted
-            ? 'Ride Started'
-            : 'Ride Ended'
-            }}
+            {{ rideStarted? (rideType === 'morning' ? 'Going To School': 'Returning Home') : 'No Active Ride'}}
 
           </div>
 
           <p>
-
-            {{
-            rideStarted
-            ? 'Van is currently on route'
-            : 'No active ride'
-            }}
-
+            {{rideStarted ? ( rideType === 'morning' ? 'School trip is currently running': 'Return trip is currently
+            running'): 'No active trip'}}
           </p>
 
         </div>
@@ -348,7 +348,7 @@
      TRACKING ACTION
 ================================================= -->
 
-<div class="tracking-footer" *ngIf="rideStarted">
+<div class="tracking-footer" *ngIf="trackingAvailable">
 
   <ion-button expand="block" class="track-button" (click)="openTracking()">
 
@@ -406,19 +406,14 @@
      STUDENT PROFILE POPUP
 ===================================================== -->
 
-<div
-  class="student-popup-overlay"
-  *ngIf="showStudentProfile"
-  (click)="closeStudentProfile()">
+<div class="student-popup-overlay" *ngIf="showStudentProfile" (click)="closeStudentProfile()">
 
 
   <!-- =================================================
        POPUP CARD
   ================================================== -->
 
-  <div
-    class="student-popup-card"
-    (click)="$event.stopPropagation()">
+  <div class="student-popup-card" (click)="$event.stopPropagation()">
 
 
     <!-- =================================================
@@ -430,13 +425,9 @@
 
       <!-- CLOSE -->
 
-      <button
-        type="button"
-        class="popup-close"
-        (click)="closeStudentProfile()">
+      <button type="button" class="popup-close" (click)="closeStudentProfile()">
 
-        <ion-icon
-          name="close-outline">
+        <ion-icon name="close-outline">
         </ion-icon>
 
       </button>
@@ -447,9 +438,9 @@
       <div class="popup-avatar">
 
         {{
-          parent.studentName
-            ? parent.studentName.charAt(0).toUpperCase()
-            : 'S'
+        parent.studentName
+        ? parent.studentName.charAt(0).toUpperCase()
+        : 'S'
         }}
 
       </div>
@@ -481,8 +472,7 @@
 
         <div class="popup-detail-icon popup-school">
 
-          <ion-icon
-            name="school-outline">
+          <ion-icon name="school-outline">
           </ion-icon>
 
         </div>
@@ -508,8 +498,7 @@
 
         <div class="popup-detail-icon popup-pickup">
 
-          <ion-icon
-            name="location-outline">
+          <ion-icon name="location-outline">
           </ion-icon>
 
         </div>
@@ -535,8 +524,7 @@
 
         <div class="popup-detail-icon popup-drop">
 
-          <ion-icon
-            name="navigate-outline">
+          <ion-icon name="navigate-outline">
           </ion-icon>
 
         </div>
@@ -555,11 +543,11 @@
 
       </div>
 
-<!-- ================================================
+      <!-- ================================================
      ATTENDANCE
 ================================================= -->
 
-<!-- <section class="attendance-card">
+      <!-- <section class="attendance-card">
 
   
   <button
@@ -624,8 +612,7 @@
 
         <div class="popup-detail-icon popup-driver">
 
-          <ion-icon
-            name="person-outline">
+          <ion-icon name="person-outline">
           </ion-icon>
 
         </div>
@@ -651,8 +638,7 @@
 
         <div class="popup-detail-icon popup-phone">
 
-          <ion-icon
-            name="call-outline">
+          <ion-icon name="call-outline">
           </ion-icon>
 
         </div>
@@ -676,13 +662,9 @@
 
       <div class="popup-detail-card popup-full-width">
 
-        <div
-          class="popup-detail-icon"
-          [class.popup-ride-active]="rideStarted"
-          [class.popup-ride-ended]="!rideStarted">
+        <div class="popup-detail-icon" [class.popup-ride-active]="rideStarted" [class.popup-ride-ended]="!rideStarted">
 
-          <ion-icon
-            [name]="
+          <ion-icon [name]="
               rideStarted
                 ? 'bus-outline'
                 : 'checkmark-circle-outline'
@@ -697,14 +679,12 @@
             Ride Status
           </span>
 
-          <strong
-            [class.popup-present]="rideStarted"
-            [class.popup-ended]="!rideStarted">
+          <strong [class.popup-present]="rideStarted" [class.popup-ended]="!rideStarted">
 
             {{
-              rideStarted
-                ? 'Ride Started'
-                : 'Ride Ended'
+            rideStarted
+            ? 'Ride Started'
+            : 'Ride Ended'
             }}
 
           </strong>
@@ -712,9 +692,9 @@
           <small>
 
             {{
-              rideStarted
-                ? 'Van is currently on route'
-                : 'No active ride'
+            rideStarted
+            ? 'Van is currently on route'
+            : 'No active ride'
             }}
 
           </small>
@@ -728,10 +708,7 @@
            CLOSE BUTTON
       ================================================== -->
 
-      <ion-button
-        expand="block"
-        class="popup-close-button"
-        (click)="closeStudentProfile()">
+      <ion-button expand="block" class="popup-close-button" (click)="closeStudentProfile()">
 
         Close
 

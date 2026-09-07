@@ -3,6 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
+export type RideType = 'morning' | 'evening';
+
+export type MorningStudentStatus =
+  | 'pending'
+  | 'picked_up'
+  | 'dropped_at_school';
+
+export type EveningStudentStatus =
+  | 'waiting'
+  | 'picked_up'
+  | 'dropped_at_home';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -13,57 +25,98 @@ export class Driver {
   ) {}
 
   register(data: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/auth/register`, data);
+    return this.http.post(
+      `${environment.apiUrl}/auth/register`,
+      data
+    );
   }
 
-   addDriver(data: any): Observable<any> {
-    return this.http.post( `${environment.apiUrl}/drivers/add`, data );
+  addDriver(data: any): Observable<any> {
+    return this.http.post(
+      `${environment.apiUrl}/drivers/add`,
+      data
+    );
   }
 
-
-  getDashboard(driverId:string):Observable<any>{
-    return this.http.get( `${environment.apiUrl}/drivers/dashboard/${driverId}` );
+  getDashboard(driverId: string): Observable<any> {
+    return this.http.get(
+      `${environment.apiUrl}/drivers/dashboard/${driverId}`
+    );
   }
 
-   getDrivers() {
-    return this.http.get(`${environment.apiUrl}/drivers`);
+  getDrivers(): Observable<any> {
+    return this.http.get(
+      `${environment.apiUrl}/drivers`
+    );
   }
 
-  deleteDriver(id: string) {
-    return this.http.delete(`${environment.apiUrl}/drivers/${id}`);
+  deleteDriver(id: string): Observable<any> {
+    return this.http.delete(
+      `${environment.apiUrl}/drivers/${id}`
+    );
   }
 
-  getDriver(id: string) {
-    return this.http.get(`${environment.apiUrl}/drivers/${id}`);
+  getDriver(id: string): Observable<any> {
+    return this.http.get(
+      `${environment.apiUrl}/drivers/${id}`
+    );
   }
 
-  updateDriver(id: string, body: any) {
-    return this.http.put(`${environment.apiUrl}/drivers/${id}`, body );
+  updateDriver(
+    id: string,
+    body: any
+  ): Observable<any> {
+    return this.http.put(
+      `${environment.apiUrl}/drivers/${id}`,
+      body
+    );
   }
 
-getReferredDrivers(driverId: string): Observable<any> {
-  return this.http.get( `${environment.apiUrl}/drivers/referrals/${driverId}` );
-}
+  getReferredDrivers(
+    driverId: string
+  ): Observable<any> {
+    return this.http.get(
+      `${environment.apiUrl}/drivers/referrals/${driverId}`
+    );
+  }
 
-getReferralDetails(driverId: string) {
-  return this.http.get<any>(`${environment.apiUrl}/drivers/referral/${driverId}`);
-}
+  getReferralDetails(
+    driverId: string
+  ): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/drivers/referral/${driverId}`
+    );
+  }
 
-updateStudentStatus(
-  parentId: string,
-  rideType: 'morning' | 'evening',
-  status: string
-): Observable<any> {
-
-  return this.http.put(
-    `${environment.apiUrl}/parents/update-status`,
-    {
-      parentId,
-      rideType,
-      status
-    }
-  );
-
-}
-
+  /**
+   * Student lifecycle action.
+   *
+   * Morning:
+   * pending -> picked_up -> dropped_at_school
+   *
+   * Evening:
+   * waiting -> picked_up -> dropped_at_home
+   *
+   * The backend should:
+   * 1. persist the status + action timestamp;
+   * 2. notify the corresponding parent;
+   * 3. enable/disable parent tracking for that student;
+   * 4. emit socket updates.
+   */
+  updateStudentStatus(
+    parentId: string,
+    rideType: RideType,
+    status:
+      | MorningStudentStatus
+      | EveningStudentStatus
+  ): Observable<any> {
+    return this.http.put(
+      `${environment.apiUrl}/parents/update-status`,
+      {
+        parentId,
+        rideType,
+        status
+      }
+    );
+  }
 }
