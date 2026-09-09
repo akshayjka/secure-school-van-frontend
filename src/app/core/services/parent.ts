@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {
+  HttpClient,
+  HttpParams
+} from '@angular/common/http';
+
+import {
+  Observable
+} from 'rxjs';
 
 import { Parent } from '../models/parent.model';
 import { environment } from 'src/environments/environment';
@@ -10,7 +16,8 @@ import { environment } from 'src/environments/environment';
 })
 export class ParentService {
 
-  private apiUrl = `${environment.apiUrl}/parents`;
+  private apiUrl =
+    `${environment.apiUrl}/parents`;
 
   constructor(
     private http: HttpClient
@@ -21,59 +28,104 @@ export class ParentService {
   // =====================================================
 
   getParents(): Observable<any> {
-    return this.http.get(this.apiUrl);
+
+    return this.http.get(
+      this.apiUrl
+    );
+
   }
 
-  getParent(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+
+  getParent(
+    id: string
+  ): Observable<any> {
+
+    return this.http.get(
+      `${this.apiUrl}/${id}`
+    );
+
   }
 
-  getParentById(parentId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${parentId}`);
+
+  getParentById(
+    parentId: string
+  ): Observable<any> {
+
+    return this.http.get(
+      `${this.apiUrl}/${parentId}`
+    );
+
   }
 
-  addParent(parent: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/add`, parent);
+
+  addParent(
+    parent: any
+  ): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/add`,
+      parent
+    );
+
   }
+
 
   updateParent(
     id: string,
     parent: any
   ): Observable<any> {
+
     return this.http.put(
       `${this.apiUrl}/${id}`,
       parent
     );
+
   }
 
-  deleteParent(id: string): Observable<any> {
+
+  deleteParent(
+    id: string
+  ): Observable<any> {
+
     return this.http.delete(
       `${this.apiUrl}/${id}`
     );
+
   }
+
 
   // =====================================================
   // DASHBOARD
   // =====================================================
 
-  getDashboard(parentId: string): Observable<any> {
+  getDashboard(
+    parentId: string
+  ): Observable<any> {
+
     return this.http.get(
       `${this.apiUrl}/dashboard/${parentId}`
     );
+
   }
+
 
   // =====================================================
   // PROFILE
   // =====================================================
 
-  getProfile(parentId: string): Observable<any> {
+  getProfile(
+    parentId: string
+  ): Observable<any> {
+
     return this.http.get(
       `${this.apiUrl}/profile/${parentId}`
     );
+
   }
 
+
   // =====================================================
-  // LIVE TRACKING
+  // LIVE LOCATION
   // =====================================================
 
   getLiveLocation(
@@ -82,15 +134,22 @@ export class ParentService {
     parentId: string
   ): Observable<any> {
 
-    return this.http.get(
-      `${environment.apiUrl}/rides/live/${driverId}/${rideType}`,
-      {
-        params: {
+    const params =
+      new HttpParams()
+        .set(
+          'parentId',
           parentId
-        }
+        );
+
+    return this.http.get(
+      `${environment.apiUrl}/rides/live-location/${encodeURIComponent(driverId)}/${encodeURIComponent(rideType)}`,
+      {
+        params
       }
     );
+
   }
+
 
   // =====================================================
   // RIDE STATUS
@@ -98,34 +157,50 @@ export class ParentService {
 
   getRideStatus(
     driverId: string,
-    rideType: 'morning' | 'evening',
+    rideType:
+      | 'morning'
+      | 'evening',
     parentId?: string
   ): Observable<any> {
 
-    let params: any = {};
+    let params =
+      new HttpParams();
 
     if (parentId) {
-      params.parentId = parentId;
+
+      params =
+        params.set(
+          'parentId',
+          parentId
+        );
+
     }
 
     return this.http.get(
-      `${environment.apiUrl}/rides/status/${driverId}/${rideType}`,
+      `${environment.apiUrl}/rides/status/${encodeURIComponent(driverId)}/${encodeURIComponent(rideType)}`,
       {
         params
       }
     );
+
   }
+
 
   // =====================================================
   // ATTENDANCE
   // =====================================================
 
-  saveMonthlyAttendance(payload: any): Observable<any> {
+  saveMonthlyAttendance(
+    payload: any
+  ): Observable<any> {
+
     return this.http.put(
       `${this.apiUrl}/attendance`,
       payload
     );
+
   }
+
 
   getMonthlyAttendance(
     parentId: string,
@@ -137,17 +212,27 @@ export class ParentService {
       `${this.apiUrl}/attendance/${parentId}`,
       {
         params: {
-          year: year.toString(),
-          month: month.toString()
+          year:
+            year.toString(),
+
+          month:
+            month.toString()
         }
       }
     );
+
   }
 
-  updateAttendance(payload: any): Observable<any> {
+
+  updateAttendance(
+    payload: any
+  ): Observable<any> {
+
     return this.http.put(
       `${this.apiUrl}/attendance`,
       payload
     );
+
   }
+
 }

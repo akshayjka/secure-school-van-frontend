@@ -1,155 +1,394 @@
+/* =====================================================
+   DRIVER DASHBOARD — PROFESSIONAL UI THEME
+   -----------------------------------------------------
+   Design goals:
+   - Keep existing button sizes
+   - Premium school transport / fleet appearance
+   - Clear ride-state hierarchy
+   - Better mobile readability
+   - Subtle depth, gradients and borders
+   - No HTML / TS changes required
+===================================================== */
+
+
+/* =====================================================
+   GLOBAL TOOLBAR
+===================================================== */
 
 ion-toolbar {
   --min-height: 62px;
-  --background: #ff9800;
+  --background: linear-gradient(135deg, #0f172a 0%, #172554 100%);
   --color: #ffffff;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.16);
 }
 
 ion-title {
   text-align: center;
   font-size: 18px;
   font-weight: 800;
+  letter-spacing: -0.2px;
 }
 
 .toolbar-icon-btn {
   --color: #ffffff;
   --border-radius: 12px;
+
   width: 44px;
   height: 44px;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
+
+.toolbar-icon-btn:active {
+  transform: scale(0.96);
+}
+
+
+/* =====================================================
+   MAIN DRIVER WORKFLOW
+===================================================== */
 
 .driver-workflow {
   min-height: 100%;
   padding: 16px 16px 34px;
+
   background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(245, 158, 11, 0.10),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 0% 20%,
+      rgba(37, 99, 235, 0.06),
+      transparent 28%
+    ),
     linear-gradient(
       180deg,
-      #fffaf2 0%,
-      #fffdf9 45%,
-      #ffffff 100%
+      #f8fafc 0%,
+      #f8fafc 55%,
+      #f1f5f9 100%
     );
 }
 
+
+/* =====================================================
+   DRIVER SUMMARY
+===================================================== */
+
 .driver-summary {
+  position: relative;
+
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 12px;
   padding: 18px;
-  background: #ffffff;
-  border: 1px solid #f1e6d6;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f8fafc 100%
+    );
+
+  border: 1px solid #e2e8f0;
   border-radius: 18px;
+
   box-shadow:
-    0 7px 18px rgba(60, 42, 20, 0.08);
+    0 10px 28px rgba(15, 23, 42, 0.07),
+    0 2px 5px rgba(15, 23, 42, 0.03);
+}
+
+.driver-summary::before {
+  content: '';
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 4px;
+  height: 100%;
+
+  background: linear-gradient(
+    180deg,
+    #f59e0b,
+    #f97316
+  );
+}
+
+.driver-summary::after {
+  content: '';
+
+  position: absolute;
+
+  width: 90px;
+  height: 90px;
+
+  right: -35px;
+  top: -35px;
+
+  border-radius: 50%;
+
+  background: rgba(245, 158, 11, 0.08);
 }
 
 .eyebrow {
+  position: relative;
+  z-index: 1;
+
   display: block;
+
   margin-bottom: 6px;
-  color: #7a6d60;
+
+  color: #64748b;
+
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 1px;
+
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
 .eyebrow.accent {
-  color: #f59e0b;
+  color: #d97706;
 }
 
 .driver-summary h1 {
+  position: relative;
+  z-index: 1;
+
   margin: 0;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 19px;
   font-weight: 850;
+
+  letter-spacing: -0.35px;
 }
 
 .driver-summary p {
+  position: relative;
+  z-index: 1;
+
   margin: 5px 0 0;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 11px;
 }
 
+
+/* =====================================================
+   RIDE STATE
+===================================================== */
+
 .ride-state {
+  position: relative;
+  z-index: 2;
+
   flex-shrink: 0;
+
   padding: 7px 10px;
+
   border-radius: 10px;
-  background: #dcfce7;
+
+  background: #ecfdf5;
   color: #15803d;
+
+  border: 1px solid #bbf7d0;
+
   font-size: 9px;
   font-weight: 850;
+
+  box-shadow:
+    0 2px 6px rgba(22, 163, 74, 0.08);
 }
 
 .ride-state.running {
   background: #15803d;
   color: #ffffff;
+
+  border-color: #15803d;
+
+  box-shadow:
+    0 4px 12px rgba(22, 163, 74, 0.22);
 }
+
+
+/* =====================================================
+   JOURNEY HEADER
+===================================================== */
 
 .journey-heading {
   display: flex;
   align-items: center;
+
   gap: 12px;
+
   margin: 24px 2px 12px;
 }
 
 .journey-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #ffedd5
+    );
+
+  border: 1px solid #fed7aa;
+
   font-size: 23px;
+
+  box-shadow:
+    0 5px 12px rgba(245, 158, 11, 0.10);
 }
 
 .journey-heading h2 {
   margin: 0;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 18px;
   font-weight: 850;
+
+  letter-spacing: -0.25px;
 }
 
 .journey-heading p {
   margin: 4px 0 0;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 11px;
 }
 
+
+/* =====================================================
+   ATTENDANCE BANNER
+===================================================== */
+
 .attendance-banner {
+  position: relative;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 14px;
+
   margin-bottom: 14px;
   padding: 16px;
+
   border-radius: 15px;
-  background: #ecfdf5;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f0fdf4,
+      #ecfdf5
+    );
+
   color: #166534;
-  border: 1px solid #d1fae5;
+
+  border: 1px solid #bbf7d0;
+
+  box-shadow:
+    0 5px 14px rgba(22, 163, 74, 0.07);
+}
+
+.attendance-banner::before {
+  content: '';
+
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+
+  width: 3px;
+
+  border-radius: 10px;
+
+  background: #22c55e;
 }
 
 .attendance-banner span {
   width: 1px;
   height: 22px;
-  background: #c7ddd0;
+
+  background: #bbdfc9;
 }
 
 .attendance-banner strong:last-child {
-  color: #b91c1c;
+  color: #dc2626;
 }
+
+
+/* =====================================================
+   PRIMARY DRIVER ACTIONS
+   IMPORTANT:
+   Existing width / height / sizing preserved.
+===================================================== */
 
 .primary-driver-action {
   width: 100%;
   min-height: 58px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 9px;
+
   margin-top: 14px;
   padding: 14px 18px;
+
   border: 0;
   border-radius: 14px;
-  background: #ff9800;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b 0%,
+      #f97316 100%
+    );
+
   color: #ffffff;
+
   box-shadow:
-    0 9px 20px rgba(255, 152, 0, 0.25);
+    0 9px 20px rgba(245, 158, 11, 0.22),
+    0 2px 5px rgba(15, 23, 42, 0.05);
+
   font: inherit;
   font-size: 15px;
   font-weight: 900;
+
   letter-spacing: 0.2px;
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
 }
 
 .primary-driver-action ion-icon {
@@ -158,6 +397,9 @@ ion-title {
 
 .primary-driver-action:active:not(:disabled) {
   transform: translateY(1px);
+
+  box-shadow:
+    0 5px 12px rgba(245, 158, 11, 0.18);
 }
 
 .primary-driver-action:disabled {
@@ -166,16 +408,33 @@ ion-title {
 }
 
 .success-action {
-  background: #16a34a;
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #15803d
+    );
+
   box-shadow:
-    0 9px 20px rgba(22, 163, 74, 0.20);
+    0 9px 20px rgba(22, 163, 74, 0.18);
 }
 
 .danger-action {
-  background: #e64949;
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #dc2626
+    );
+
   box-shadow:
-    0 9px 20px rgba(230, 73, 73, 0.20);
+    0 9px 20px rgba(220, 38, 38, 0.18);
 }
+
+
+/* =====================================================
+   STUDENT PREVIEW
+===================================================== */
 
 .student-preview {
   margin-top: 22px;
@@ -185,63 +444,132 @@ ion-title {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+
   gap: 12px;
+
   margin-bottom: 10px;
 }
 
 .section-title-row h2 {
   margin: 0;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 16px;
   font-weight: 850;
+
+  letter-spacing: -0.2px;
 }
 
 .section-title-row p {
   margin: 4px 0 0;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 10px;
 }
+
+
+/* =====================================================
+   COUNT CHIP
+===================================================== */
 
 .count-chip {
   min-width: 34px;
   height: 34px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 11px;
-  background: #fff1d6;
-  color: #b45309;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #ffedd5
+    );
+
+  color: #c2410c;
+
+  border: 1px solid #fed7aa;
+
   font-size: 13px;
   font-weight: 900;
+
+  box-shadow:
+    0 3px 8px rgba(245, 158, 11, 0.08);
 }
+
+
+/* =====================================================
+   STUDENT CARD
+===================================================== */
 
 .compact-student {
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   margin-bottom: 8px;
   padding: 11px;
-  border: 1px solid #ece8e1;
+
+  border: 1px solid #e2e8f0;
   border-radius: 13px;
-  background: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #f8fafc
+    );
+
   box-shadow:
     0 4px 12px rgba(15, 23, 42, 0.04);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.compact-student:active {
+  transform: scale(0.99);
+
+  border-color: #cbd5e1;
+
+  box-shadow:
+    0 3px 8px rgba(15, 23, 42, 0.05);
 }
 
 .student-avatar,
 .next-avatar {
   flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff2d8;
-  color: #b45309;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #ffedd5
+    );
+
+  color: #c2410c;
+
   font-weight: 900;
+
+  border: 1px solid #fed7aa;
 }
 
 .student-avatar {
   width: 38px;
   height: 38px;
+
   border-radius: 11px;
 }
 
@@ -256,44 +584,71 @@ ion-title {
 }
 
 .student-copy strong {
-  color: #172033;
+  color: #0f172a;
+
   font-size: 13px;
+  font-weight: 800;
 }
 
 .student-copy span {
   margin-top: 3px;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 10px;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+
+/* =====================================================
+   STUDENT STATUS CHIPS
+===================================================== */
+
 .present-chip,
 .waiting-chip {
   padding: 6px 8px;
+
   border-radius: 8px;
+
   font-size: 8px;
   font-weight: 900;
+
+  letter-spacing: 0.2px;
 }
 
 .present-chip {
   background: #dcfce7;
   color: #15803d;
+
+  border: 1px solid #bbf7d0;
 }
 
 .waiting-chip {
-  background: #e9f8ef;
+  background: #ecfdf5;
   color: #15803d;
+
+  border: 1px solid #d1fae5;
 }
+
+
+/* =====================================================
+   RUNNING STATUS ROW
+===================================================== */
 
 .running-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 12px;
+
   margin: 18px 2px 12px;
-  color: #687386;
+
+  color: #64748b;
+
   font-size: 10px;
   font-weight: 700;
 }
@@ -301,80 +656,160 @@ ion-title {
 .running-badge,
 .return-ready-badge {
   padding: 7px 10px;
+
   border-radius: 8px;
+
   font-size: 9px;
   font-weight: 850;
+
+  letter-spacing: 0.2px;
 }
 
 .running-badge {
   background: #16a34a;
   color: #ffffff;
+
+  box-shadow:
+    0 3px 8px rgba(22, 163, 74, 0.16);
 }
 
 .return-ready-badge {
-  background: #ff9800;
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #f97316
+    );
+
   color: #ffffff;
+
+  box-shadow:
+    0 3px 8px rgba(245, 158, 11, 0.16);
 }
+
+
+/* =====================================================
+   NEXT ACTION CARD
+===================================================== */
 
 .next-action-card {
   margin-top: 10px;
+
   padding: 22px 18px;
+
   border-radius: 18px;
-  background: #ffffff;
-  border: 1px solid #e8e1d8;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #f8fafc 100%
+    );
+
+  border: 1px solid #e2e8f0;
+
   box-shadow:
-    0 8px 18px rgba(15, 23, 42, 0.07);
+    0 10px 24px rgba(15, 23, 42, 0.07),
+    0 2px 5px rgba(15, 23, 42, 0.03);
 }
 
 .next-student {
   display: flex;
   align-items: center;
+
   gap: 14px;
+
   margin-top: 16px;
 }
 
 .next-avatar {
   width: 54px;
   height: 54px;
+
   border-radius: 15px;
+
   font-size: 20px;
+
+  box-shadow:
+    0 5px 12px rgba(245, 158, 11, 0.08);
 }
 
 .next-student h2 {
   margin: 0;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 22px;
   font-weight: 900;
+
+  letter-spacing: -0.5px;
 }
 
 .next-student p {
   margin: 5px 0 0;
-  color: #697386;
+
+  color: #64748b;
+
   font-size: 11px;
 }
+
+
+/* =====================================================
+   SEQUENCE / TRACKING INFORMATION
+===================================================== */
 
 .sequence-label,
 .tracking-note {
   margin: 16px 0 0;
-  color: #778193;
+
+  color: #64748b;
+
   font-size: 10px;
 }
 
 .tracking-on {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
   margin-top: 7px;
+
   color: #16a34a;
+
   font-size: 10px;
   font-weight: 850;
 }
+
+.tracking-on::before {
+  content: '';
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.10);
+}
+
+
+/* =====================================================
+   PROGRESS / INFORMATION
+===================================================== */
 
 .progress-copy,
 .tracking-footer,
 .center-message,
 .return-rule {
   text-align: center;
-  color: #778193;
+
+  color: #64748b;
+
   font-size: 10px;
+
   line-height: 1.6;
 }
 
@@ -385,9 +820,11 @@ ion-title {
 
 .center-message {
   margin: 22px 0 4px;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .return-rule {
@@ -396,52 +833,131 @@ ion-title {
 
 .return-rule strong {
   display: block;
+
   margin-top: 5px;
-  color: #172033;
+
+  color: #0f172a;
 }
 
+
+/* =====================================================
+   COMPLETION CARD
+===================================================== */
+
 .complete-card {
+  position: relative;
+
   margin-top: 24px;
   padding: 28px 18px;
+
   text-align: center;
+
   border-radius: 18px;
-  background: #ecfdf5;
-  border: 1px solid #d1fae5;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f0fdf4,
+      #ecfdf5
+    );
+
+  border: 1px solid #bbf7d0;
+
+  box-shadow:
+    0 8px 20px rgba(22, 163, 74, 0.07);
+
+  overflow: hidden;
+}
+
+.complete-card::after {
+  content: '';
+
+  position: absolute;
+
+  width: 110px;
+  height: 110px;
+
+  right: -55px;
+  bottom: -55px;
+
+  border-radius: 50%;
+
+  background: rgba(34, 197, 94, 0.08);
 }
 
 .complete-card ion-icon {
+  position: relative;
+  z-index: 1;
+
   color: #16a34a;
+
   font-size: 42px;
+
+  filter:
+    drop-shadow(
+      0 4px 8px rgba(22, 163, 74, 0.12)
+    );
 }
 
 .complete-card h2 {
+  position: relative;
+  z-index: 1;
+
   margin: 10px 0 0;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 18px;
   font-weight: 900;
 }
 
 .complete-card p {
+  position: relative;
+  z-index: 1;
+
   margin: 7px 0 0;
-  color: #6e7c8f;
+
+  color: #64748b;
+
   font-size: 10px;
 }
 
+
+/* =====================================================
+   OVERVIEW STRIP
+===================================================== */
+
 .overview-strip {
   display: grid;
+
   grid-template-columns: repeat(3, 1fr);
+
   gap: 9px;
+
   margin-top: 28px;
   padding-top: 18px;
-  border-top: 1px solid #efe8df;
+
+  border-top: 1px solid #e2e8f0;
 }
 
 .overview-strip div {
   padding: 12px 8px;
+
   text-align: center;
+
   border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #eee8df;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fafc
+    );
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 3px 8px rgba(15, 23, 42, 0.03);
 }
 
 .overview-strip strong,
@@ -450,23 +966,39 @@ ion-title {
 }
 
 .overview-strip strong {
-  color: #172033;
+  color: #0f172a;
+
   font-size: 17px;
   font-weight: 900;
 }
 
 .overview-strip span {
   margin-top: 3px;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 9px;
 }
 
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
 .empty-state {
   padding: 24px;
+
   text-align: center;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 11px;
+
+  background: rgba(255, 255, 255, 0.6);
+
+  border-radius: 14px;
 }
+
 
 /* =====================================================
    SECONDARY PAGES
@@ -474,17 +1006,40 @@ ion-title {
 
 .sub-page {
   min-height: 100%;
+
   padding: 20px 16px 32px;
-  background: #fffaf2;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(245, 158, 11, 0.08),
+      transparent 32%
+    ),
+    #f8fafc;
 }
+
+
+/* =====================================================
+   CONTENT CARD
+===================================================== */
 
 .content-card {
   padding: 20px;
-  background: #ffffff;
-  border: 1px solid #f0e5d5;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fafc
+    );
+
+  border: 1px solid #e2e8f0;
+
   border-radius: 20px;
+
   box-shadow:
-    0 8px 24px rgba(15, 23, 42, 0.06);
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    0 2px 5px rgba(15, 23, 42, 0.03);
 }
 
 .content-card-header {
@@ -493,85 +1048,178 @@ ion-title {
 
 .content-card-header h2 {
   margin: 0;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 19px;
+  font-weight: 850;
+
+  letter-spacing: -0.3px;
 }
 
 .content-card-header p {
   margin: 5px 0 0;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 11px;
 }
 
+
+/* =====================================================
+   ATTENDANCE GRID
+===================================================== */
+
 .attendance-grid {
   display: grid;
+
   grid-template-columns: repeat(3, 1fr);
+
   gap: 8px;
 }
 
 .attendance-stat {
   min-height: 120px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   border-radius: 15px;
+
+  border: 1px solid transparent;
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.attendance-stat:active {
+  transform: scale(0.98);
 }
 
 .attendance-stat ion-icon {
   margin-bottom: 7px;
+
   font-size: 24px;
 }
 
 .attendance-stat strong {
   font-size: 22px;
+  font-weight: 900;
 }
 
 .attendance-stat span {
   margin-top: 3px;
+
   font-size: 10px;
+  font-weight: 650;
 }
 
 .present-stat {
-  background: #f0fdf4;
+  background:
+    linear-gradient(
+      145deg,
+      #f0fdf4,
+      #ecfdf5
+    );
+
   color: #15803d;
+
+  border-color: #bbf7d0;
 }
 
 .absent-stat {
-  background: #fff1f2;
+  background:
+    linear-gradient(
+      145deg,
+      #fff1f2,
+      #fff7f8
+    );
+
   color: #be123c;
+
+  border-color: #fecdd3;
 }
 
 .total-stat {
-  background: #fff7e6;
+  background:
+    linear-gradient(
+      145deg,
+      #fff7ed,
+      #fffbeb
+    );
+
   color: #b45309;
+
+  border-color: #fed7aa;
 }
+
+
+/* =====================================================
+   STUDENT LIST
+===================================================== */
 
 .students-list {
   display: flex;
   flex-direction: column;
+
   gap: 9px;
 }
 
 .student-list-item {
   width: 100%;
+
   display: flex;
   align-items: center;
+
   gap: 12px;
+
   padding: 12px;
-  border: 1px solid #ece8e1;
+
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  background: #ffffff;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fafc
+    );
+
   font-family: inherit;
+
   text-align: left;
+
+  box-shadow:
+    0 3px 9px rgba(15, 23, 42, 0.035);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.student-list-item:active {
+  transform: scale(0.99);
+
+  box-shadow:
+    0 2px 6px rgba(15, 23, 42, 0.05);
 }
 
 .student-name {
   flex: 1;
-  color: #172033;
+
+  color: #0f172a;
+
   font-size: 13px;
   font-weight: 750;
 }
+
+
+/* =====================================================
+   REFERRAL / SECTION ICON
+===================================================== */
 
 .referral-card {
   text-align: center;
@@ -580,50 +1228,110 @@ ion-title {
 .section-icon {
   width: 60px;
   height: 60px;
+
   margin: 4px auto 15px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff2d8;
-  color: #b45309;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #ffedd5
+    );
+
+  color: #c2410c;
+
+  border: 1px solid #fed7aa;
+
   border-radius: 18px;
+
   font-size: 27px;
+
+  box-shadow:
+    0 6px 14px rgba(245, 158, 11, 0.08);
 }
 
 .section-description {
-  color: #7b8494;
+  color: #64748b;
+
   font-size: 12px;
+
+  line-height: 1.55;
 }
+
+
+/* =====================================================
+   REFERRAL CODE
+===================================================== */
 
 .referral-code-box {
   margin: 24px 0 14px;
+
   padding: 20px;
-  background: #fff9ed;
-  border: 1px dashed rgba(245, 158, 11, 0.45);
+
+  background:
+    linear-gradient(
+      135deg,
+      #fffaf0,
+      #fff7ed
+    );
+
+  border: 1px dashed rgba(245, 158, 11, 0.50);
+
   border-radius: 16px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .referral-code-box span {
   display: block;
+
   margin-bottom: 7px;
-  color: #7b8494;
+
+  color: #64748b;
+
   font-size: 10px;
 }
 
 .referral-code-box strong {
   color: #b45309;
+
   font-size: 24px;
+
   letter-spacing: 2px;
 }
+
+
+/* =====================================================
+   REFERRAL COUNT
+===================================================== */
 
 .referral-count {
   display: flex;
   justify-content: space-between;
+
   padding: 15px 5px;
+
   margin-bottom: 12px;
-  color: #4b5563;
+
+  color: #475569;
+
   font-size: 12px;
+
+  border-bottom: 1px solid #e2e8f0;
 }
+
+
+/* =====================================================
+   SMALL MOBILE DEVICES
+   -----------------------------------------------------
+   Dimensions intentionally remain compatible with
+   existing layout.
+===================================================== */
 
 @media (max-width: 380px) {
   .driver-workflow {
@@ -641,10 +1349,31 @@ ion-title {
   }
 }
 
+
+/* =====================================================
+   TABLET / DESKTOP
+===================================================== */
+
 @media (min-width: 768px) {
   .driver-workflow,
   .sub-page {
     max-width: 720px;
+
     margin: 0 auto;
+  }
+}
+
+
+/* =====================================================
+   ACCESSIBILITY / MOTION
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-driver-action,
+  .compact-student,
+  .student-list-item,
+  .attendance-stat,
+  .toolbar-icon-btn {
+    transition: none;
   }
 }

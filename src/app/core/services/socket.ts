@@ -13,6 +13,7 @@ import {
   environment
 } from 'src/environments/environment';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,23 +21,30 @@ export class SocketService {
 
   private socket: Socket | null = null;
 
+
   /**
    * =====================================================
    * ROOMS TO REJOIN AFTER SOCKET RECONNECT
    * =====================================================
    */
 
-  private parentRooms = new Set<string>();
+  private parentRooms =
+    new Set<string>();
 
-  private driverRooms = new Set<string>();
+  private driverRooms =
+    new Set<string>();
 
-  private driverChannels = new Set<string>();
+  private driverChannels =
+    new Set<string>();
 
-  private parentChannels = new Set<string>();
-  private isAdmin = false;
+  private parentChannels =
+    new Set<string>();
 
   private parentAttendanceRooms =
     new Set<string>();
+
+  private isAdmin =
+    false;
 
 
   /**
@@ -47,13 +55,18 @@ export class SocketService {
 
   connect(): void {
 
+    // Already connected
     if (this.socket?.connected) {
       return;
     }
 
+
+    // Socket already exists and is attempting
+    // to reconnect.
     if (this.socket) {
       return;
     }
+
 
     this.socket = io(
       environment.apiUrl.replace('/api', ''),
@@ -65,11 +78,14 @@ export class SocketService {
 
         reconnection: true,
 
-        reconnectionAttempts: Infinity,
+        reconnectionAttempts:
+          Infinity,
 
-        reconnectionDelay: 1000,
+        reconnectionDelay:
+          1000,
 
-        timeout: 20000
+        timeout:
+          20000
       }
     );
 
@@ -85,18 +101,13 @@ export class SocketService {
       () => {
 
         console.log(
-          '✅ Socket Connected :',
+          '✅ Socket Connected:',
           this.socket?.id
         );
 
 
-        /**
-         * Rejoin rooms after reconnect.
-         *
-         * Socket.IO rooms are server-side.
-         * After reconnecting, the client must join again.
-         */
-
+        // Socket.IO rooms are server-side.
+        // Rejoin after reconnect.
         this.rejoinRooms();
 
       }
@@ -114,7 +125,7 @@ export class SocketService {
       (reason) => {
 
         console.log(
-          '❌ Socket Disconnected :',
+          '❌ Socket Disconnected:',
           reason
         );
 
@@ -133,7 +144,7 @@ export class SocketService {
       (error) => {
 
         console.error(
-          '❌ Socket Connection Error',
+          '❌ Socket Connection Error:',
           error
         );
 
@@ -155,13 +166,16 @@ export class SocketService {
       return;
     }
 
+
     /**
- * Admin room
- */
+     * ===================================================
+     * ADMIN
+     * ===================================================
+     */
 
     if (this.isAdmin) {
 
-      this.socket?.emit(
+      this.socket.emit(
         'joinAdminRoom'
       );
 
@@ -169,81 +183,98 @@ export class SocketService {
 
 
     /**
-     * Parent attendance rooms
+     * ===================================================
+     * PARENT ATTENDANCE ROOMS
+     * ===================================================
      */
 
-    this.parentAttendanceRooms.forEach(
-      (parentId) => {
+    this.parentAttendanceRooms
+      .forEach(
+        (parentId) => {
 
-        this.socket?.emit(
-          'joinParentAttendanceRoom',
-          parentId
-        );
+          this.socket?.emit(
+            'joinParentAttendanceRoom',
+            parentId
+          );
 
-      }
-    );
-    /**
-     * Parent rooms
-     */
-
-    this.parentRooms.forEach(
-      (parentId) => {
-
-        this.socket?.emit(
-          'joinParentRoom',
-          parentId
-        );
-
-      }
-    );
+        }
+      );
 
 
     /**
-     * Driver rooms
+     * ===================================================
+     * PARENT ROOMS
+     * ===================================================
      */
 
-    this.driverRooms.forEach(
-      (driverId) => {
+    this.parentRooms
+      .forEach(
+        (parentId) => {
 
-        this.socket?.emit(
-          'joinDriverRoom',
-          driverId
-        );
+          this.socket?.emit(
+            'joinParentRoom',
+            parentId
+          );
 
-      }
-    );
+        }
+      );
 
 
     /**
-     * Driver channels
+     * ===================================================
+     * DRIVER ROOMS
+     * ===================================================
      */
 
-    this.driverChannels.forEach(
-      (driverId) => {
+    this.driverRooms
+      .forEach(
+        (driverId) => {
 
-        this.socket?.emit(
-          'joinDriverChannel',
-          driverId
-        );
+          this.socket?.emit(
+            'joinDriverRoom',
+            driverId
+          );
 
-      }
-    );
+        }
+      );
 
 
     /**
-     * Parent channels
+     * ===================================================
+     * DRIVER CHANNELS
+     * ===================================================
      */
 
-    this.parentChannels.forEach(
-      (driverId) => {
+    this.driverChannels
+      .forEach(
+        (driverId) => {
 
-        this.socket?.emit(
-          'joinParentChannel',
-          driverId
-        );
+          this.socket?.emit(
+            'joinDriverChannel',
+            driverId
+          );
 
-      }
-    );
+        }
+      );
+
+
+    /**
+     * ===================================================
+     * PARENT CHANNELS
+     * ===================================================
+     */
+
+    this.parentChannels
+      .forEach(
+        (driverId) => {
+
+          this.socket?.emit(
+            'joinParentChannel',
+            driverId
+          );
+
+        }
+      );
 
   }
 
@@ -260,17 +291,16 @@ export class SocketService {
       return;
     }
 
+
     this.socket.removeAllListeners();
 
     this.socket.disconnect();
 
     this.socket = null;
 
+
     /**
-     * Clear room registrations.
-     *
-     * Dashboard will register them again
-     * when the page is initialized.
+     * Clear registered rooms.
      */
 
     this.parentRooms.clear();
@@ -280,6 +310,10 @@ export class SocketService {
     this.driverChannels.clear();
 
     this.parentChannels.clear();
+
+    this.parentAttendanceRooms.clear();
+
+    this.isAdmin = false;
 
   }
 
@@ -298,11 +332,16 @@ export class SocketService {
       return;
     }
 
-    this.parentRooms.add(parentId);
+
+    this.parentRooms.add(
+      parentId
+    );
+
 
     if (!this.socket?.connected) {
       return;
     }
+
 
     this.socket.emit(
       'joinParentRoom',
@@ -326,11 +365,16 @@ export class SocketService {
       return;
     }
 
-    this.driverRooms.add(driverId);
+
+    this.driverRooms.add(
+      driverId
+    );
+
 
     if (!this.socket?.connected) {
       return;
     }
+
 
     this.socket.emit(
       'joinDriverRoom',
@@ -358,11 +402,16 @@ export class SocketService {
       return;
     }
 
-    this.driverChannels.add(driverId);
+
+    this.driverChannels.add(
+      driverId
+    );
+
 
     if (!this.socket?.connected) {
       return;
     }
+
 
     this.socket.emit(
       'joinDriverChannel',
@@ -388,11 +437,16 @@ export class SocketService {
       return;
     }
 
-    this.parentChannels.add(driverId);
+
+    this.parentChannels.add(
+      driverId
+    );
+
 
     if (!this.socket?.connected) {
       return;
     }
+
 
     this.socket.emit(
       'joinParentChannel',
@@ -404,7 +458,71 @@ export class SocketService {
 
   /**
    * =====================================================
+   * ADMIN ROOM
+   * =====================================================
+   */
+
+  joinAdminRoom(): void {
+
+    this.isAdmin = true;
+
+
+    if (!this.socket?.connected) {
+      return;
+    }
+
+
+    this.socket.emit(
+      'joinAdminRoom'
+    );
+
+  }
+
+
+  /**
+   * =====================================================
+   * PARENT ATTENDANCE ROOM
+   * =====================================================
+   */
+
+  joinParentAttendanceRoom(
+    parentId: string
+  ): void {
+
+    if (!parentId) {
+      return;
+    }
+
+
+    this.parentAttendanceRooms.add(
+      parentId
+    );
+
+
+    if (!this.socket?.connected) {
+      return;
+    }
+
+
+    this.socket.emit(
+      'joinParentAttendanceRoom',
+      parentId
+    );
+
+  }
+
+
+  /**
+   * =====================================================
    * GENERIC LISTENER
+   *
+   * IMPORTANT:
+   * This safely handles:
+   *
+   * - socket === null
+   * - socket reconnects
+   * - subscription unsubscribe
+   * - removing socket event listener
    * =====================================================
    */
 
@@ -415,6 +533,7 @@ export class SocketService {
     return new Observable(
       observer => {
 
+        // Socket does not exist
         if (!this.socket) {
 
           observer.complete();
@@ -423,11 +542,14 @@ export class SocketService {
 
         }
 
+
         const handler = (
           data: any
         ) => {
 
-          observer.next(data);
+          observer.next(
+            data
+          );
 
         };
 
@@ -437,6 +559,11 @@ export class SocketService {
           handler
         );
 
+
+        /**
+         * Remove ONLY this listener
+         * when RxJS subscription ends.
+         */
 
         return () => {
 
@@ -459,7 +586,13 @@ export class SocketService {
    * =====================================================
    */
 
-  listenDashboardUpdated(): Observable<any> {
+
+  /**
+   * Dashboard updated
+   */
+
+  listenDashboardUpdated():
+    Observable<any> {
 
     return this.listen(
       'dashboardUpdated'
@@ -468,7 +601,12 @@ export class SocketService {
   }
 
 
-  listenAttendanceUpdated(): Observable<any> {
+  /**
+   * Attendance updated
+   */
+
+  listenAttendanceUpdated():
+    Observable<any> {
 
     return this.listen(
       'attendanceUpdated'
@@ -477,7 +615,12 @@ export class SocketService {
   }
 
 
-  listenRideStarted(): Observable<any> {
+  /**
+   * Ride started
+   */
+
+  listenRideStarted():
+    Observable<any> {
 
     return this.listen(
       'rideStarted'
@@ -486,7 +629,12 @@ export class SocketService {
   }
 
 
-  listenRideEnded(): Observable<any> {
+  /**
+   * Ride ended
+   */
+
+  listenRideEnded():
+    Observable<any> {
 
     return this.listen(
       'rideEnded'
@@ -495,7 +643,22 @@ export class SocketService {
   }
 
 
-  listenStudentStatusUpdated(): Observable<any> {
+  /**
+   * Student status updated
+   *
+   * Examples:
+   *
+   * morning:
+   * picked_up
+   * dropped_at_school
+   *
+   * evening:
+   * picked_from_school
+   * dropped_at_home
+   */
+
+  listenStudentStatusUpdated():
+    Observable<any> {
 
     return this.listen(
       'studentStatusUpdated'
@@ -504,10 +667,51 @@ export class SocketService {
   }
 
 
-  listenLocationUpdated(): Observable<any> {
+  /**
+   * Vehicle location updated
+   */
+
+  listenLocationUpdated():
+    Observable<any> {
 
     return this.listen(
       'locationUpdated'
+    );
+
+  }
+
+
+  /**
+   * =====================================================
+   * LIVE TRACKING STARTED
+   *
+   * Fired after THIS student's pickup.
+   * =====================================================
+   */
+
+  trackingStarted():
+    Observable<any> {
+
+    return this.listen(
+      'trackingStarted'
+    );
+
+  }
+
+
+  /**
+   * =====================================================
+   * LIVE TRACKING STOPPED
+   *
+   * Fired after THIS student's drop.
+   * =====================================================
+   */
+
+  trackingStopped():
+    Observable<any> {
+
+    return this.listen(
+      'trackingStopped'
     );
 
   }
@@ -519,45 +723,11 @@ export class SocketService {
    * =====================================================
    */
 
-  getSocket(): Socket | null {
+  getSocket():
+    Socket | null {
+
     return this.socket;
-  }
-  joinAdminRoom(): void {
-
-    this.isAdmin = true;
-
-    if (!this.socket?.connected) {
-      return;
-    }
-
-    this.socket.emit(
-      'joinAdminRoom'
-    );
 
   }
-
-  joinParentAttendanceRoom(
-    parentId: string
-  ): void {
-
-    if (!parentId) {
-      return;
-    }
-
-    this.parentAttendanceRooms.add(
-      parentId
-    );
-
-    if (!this.socket?.connected) {
-      return;
-    }
-
-    this.socket.emit(
-      'joinParentAttendanceRoom',
-      parentId
-    );
-
-  }
-
 
 }
