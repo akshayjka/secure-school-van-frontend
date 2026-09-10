@@ -1377,3 +1377,904 @@ ion-title {
     transition: none;
   }
 }
+
+/* =====================================================
+   FLEXIBLE PICKUP EXPERIENCE
+===================================================== */
+
+.pickup-running-row {
+  margin-top: 20px;
+  margin-bottom: 14px;
+}
+
+.running-status-group {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.route-progress-text {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+
+  display: inline-block;
+
+  margin-right: 5px;
+
+  border-radius: 50%;
+
+  background: #bbf7d0;
+
+  box-shadow:
+    0 0 0 4px rgba(187, 247, 208, 0.12);
+}
+
+.remaining-pill {
+  padding: 7px 10px;
+
+  border-radius: 10px;
+
+  background: #fff7ed;
+
+  color: #c2410c;
+
+  border: 1px solid #fed7aa;
+
+  font-size: 9px;
+  font-weight: 900;
+}
+
+
+/* =====================================================
+   FLEXIBLE PICKUP HEADER
+===================================================== */
+
+.flexible-pickup-header {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 20px 2px 14px;
+
+  padding: 15px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 247, 237, 0.95),
+      rgba(255, 251, 235, 0.95)
+    );
+
+  border: 1px solid #fed7aa;
+
+  box-shadow:
+    0 5px 14px rgba(245, 158, 11, 0.07);
+}
+
+.pickup-header-icon {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #f97316
+    );
+
+  color: #ffffff;
+
+  font-size: 21px;
+
+  box-shadow:
+    0 6px 14px rgba(245, 158, 11, 0.20);
+}
+
+.pickup-header-icon.return-icon {
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #1d4ed8
+    );
+
+  box-shadow:
+    0 6px 14px rgba(37, 99, 235, 0.18);
+}
+
+.pickup-header-copy {
+  min-width: 0;
+}
+
+.pickup-header-copy .eyebrow {
+  margin-bottom: 3px;
+}
+
+.pickup-header-copy h2 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 16px;
+  font-weight: 900;
+
+  letter-spacing: -0.25px;
+}
+
+.pickup-header-copy p {
+  margin: 4px 0 0;
+
+  color: #64748b;
+
+  font-size: 10px;
+
+  line-height: 1.45;
+}
+
+
+/* =====================================================
+   SWIPE CONTAINER
+===================================================== */
+
+.swipe-pickup-container {
+  position: relative;
+
+  margin-top: 14px;
+
+  padding: 0 2px;
+}
+
+
+/* =====================================================
+   SWIPE HINT
+===================================================== */
+
+.swipe-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-bottom: 8px;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 1px;
+}
+
+.swipe-hint ion-icon {
+  font-size: 13px;
+}
+
+
+/* =====================================================
+   MAIN SWIPE CARD
+===================================================== */
+
+.swipe-student-card {
+  position: relative;
+
+  min-height: 270px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 26px 20px 22px;
+
+  overflow: hidden;
+
+  border-radius: 24px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(245, 158, 11, 0.14),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fafc
+    );
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.09),
+    0 4px 10px rgba(15, 23, 42, 0.04);
+
+  touch-action: pan-y;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.swipe-student-card::before {
+  content: '';
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 4px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #f59e0b,
+      #f97316
+    );
+}
+
+.swipe-student-card::after {
+  content: '';
+
+  position: absolute;
+
+  width: 150px;
+  height: 150px;
+
+  right: -75px;
+  bottom: -75px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(245, 158, 11, 0.055);
+}
+
+
+/* =====================================================
+   ROUTE NUMBER
+===================================================== */
+
+.route-number-badge {
+  position: absolute;
+
+  top: 15px;
+  left: 15px;
+
+  min-width: 34px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 8px;
+
+  border-radius: 9px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  border: 1px solid #e2e8f0;
+
+  font-size: 9px;
+  font-weight: 900;
+}
+
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+.swipe-student-avatar {
+  width: 70px;
+  height: 70px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+
+  border-radius: 21px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #ffedd5
+    );
+
+  color: #c2410c;
+
+  border: 1px solid #fed7aa;
+
+  font-size: 28px;
+  font-weight: 900;
+
+  box-shadow:
+    0 8px 18px rgba(245, 158, 11, 0.13);
+}
+
+
+/* =====================================================
+   STUDENT INFORMATION
+===================================================== */
+
+.swipe-student-info {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+
+  text-align: center;
+}
+
+.student-selection-label {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #94a3b8;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: 1px;
+}
+
+.swipe-student-info h2 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 22px;
+  font-weight: 900;
+
+  letter-spacing: -0.45px;
+}
+
+.pickup-location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  margin-top: 7px;
+
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.pickup-location ion-icon {
+  color: #f97316;
+
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   READY STATUS
+===================================================== */
+
+.swipe-ready-status {
+  position: relative;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-top: 15px;
+
+  padding: 7px 10px;
+
+  border-radius: 9px;
+
+  background: #f0fdf4;
+
+  color: #15803d;
+
+  border: 1px solid #bbf7d0;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: 0.3px;
+}
+
+.ready-status-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.10);
+}
+
+
+/* =====================================================
+   RETURN CARD
+===================================================== */
+
+.return-swipe-card::before {
+  background:
+    linear-gradient(
+      90deg,
+      #2563eb,
+      #3b82f6
+    );
+}
+
+.return-swipe-card .swipe-student-avatar {
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff,
+      #dbeafe
+    );
+
+  color: #1d4ed8;
+
+  border-color: #bfdbfe;
+
+  box-shadow:
+    0 8px 18px rgba(37, 99, 235, 0.12);
+}
+
+.return-swipe-card .pickup-location ion-icon {
+  color: #2563eb;
+}
+
+
+/* =====================================================
+   PAGINATION
+===================================================== */
+
+.swipe-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  margin-top: 13px;
+}
+
+.pagination-dot {
+  width: 7px;
+  height: 7px;
+
+  padding: 0;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #cbd5e1;
+
+  transition:
+    width 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.pagination-dot.active {
+  width: 20px;
+
+  border-radius: 10px;
+
+  background: #f59e0b;
+
+  transform: scale(1.02);
+}
+
+
+/* =====================================================
+   SWIPE POSITION
+===================================================== */
+
+.swipe-position {
+  margin-top: 7px;
+
+  text-align: center;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+
+/* =====================================================
+   PICKUP ACTION
+===================================================== */
+
+.pickup-student-action {
+  margin-top: 15px;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+.pickup-student-action::after {
+  content: '';
+
+  position: absolute;
+
+  top: 0;
+  left: -100%;
+
+  width: 60%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.16),
+      transparent
+    );
+
+  transition: left 0.5s ease;
+}
+
+.pickup-student-action:active::after {
+  left: 130%;
+}
+
+
+/* =====================================================
+   SWIPE INSTRUCTION
+===================================================== */
+
+.swipe-instruction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  margin-top: 11px;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+}
+
+.swipe-instruction ion-icon {
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   ROUTE OVERVIEW
+===================================================== */
+
+.route-overview-card {
+  margin-top: 20px;
+
+  padding: 16px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fafc
+    );
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 7px 18px rgba(15, 23, 42, 0.05);
+}
+
+.route-overview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+.route-overview-header .eyebrow {
+  margin-bottom: 2px;
+}
+
+.route-overview-header h3 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.route-count {
+  padding: 6px 9px;
+
+  border-radius: 9px;
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  font-size: 8px;
+  font-weight: 900;
+}
+
+
+/* =====================================================
+   ROUTE STUDENT ROW
+===================================================== */
+
+.route-student-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.route-student-row {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  min-height: 52px;
+
+  padding: 8px;
+
+  border-radius: 12px;
+
+  border: 1px solid transparent;
+
+  background: #f8fafc;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.route-student-row.route-pending {
+  cursor: pointer;
+}
+
+.route-student-row.route-selected {
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #fffbeb
+    );
+
+  border-color: #fed7aa;
+
+  box-shadow:
+    0 3px 9px rgba(245, 158, 11, 0.07);
+}
+
+.route-student-row.route-picked {
+  background: #f0fdf4;
+
+  border-color: #dcfce7;
+
+  opacity: 0.78;
+}
+
+.route-student-row:active {
+  transform: scale(0.99);
+}
+
+
+/* =====================================================
+   ROUTE INDEX
+===================================================== */
+
+.route-index {
+  width: 31px;
+  height: 31px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  color: #64748b;
+
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.route-selected .route-index {
+  background: #f59e0b;
+
+  color: #ffffff;
+
+  border-color: #f59e0b;
+}
+
+.route-picked .route-index {
+  background: #22c55e;
+
+  color: #ffffff;
+
+  border-color: #22c55e;
+}
+
+
+/* =====================================================
+   ROUTE STUDENT DETAILS
+===================================================== */
+
+.route-student-details {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.route-student-details strong,
+.route-student-details span {
+  display: block;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.route-student-details strong {
+  color: #0f172a;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.route-student-details span {
+  margin-top: 2px;
+
+  color: #94a3b8;
+
+  font-size: 8px;
+}
+
+
+/* =====================================================
+   ROUTE STATUS
+===================================================== */
+
+.route-status {
+  padding: 5px 7px;
+
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #64748b;
+
+  border: 1px solid #e2e8f0;
+
+  font-size: 7px;
+  font-weight: 900;
+
+  letter-spacing: 0.2px;
+}
+
+.route-selected .route-status {
+  background: #fff7ed;
+
+  color: #c2410c;
+
+  border-color: #fed7aa;
+}
+
+.route-status.status-picked {
+  background: #dcfce7;
+
+  color: #15803d;
+
+  border-color: #bbf7d0;
+}
+
+
+/* =====================================================
+   FLEXIBLE PICKUP FOOTER
+===================================================== */
+
+.flexible-pickup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  margin: 15px 8px 0;
+
+  line-height: 1.45;
+}
+
+.flexible-pickup-footer ion-icon {
+  flex-shrink: 0;
+
+  font-size: 13px;
+
+  color: #94a3b8;
+}
+
+
+/* =====================================================
+   MOBILE OPTIMIZATION
+===================================================== */
+
+@media (max-width: 380px) {
+
+  .swipe-student-card {
+    min-height: 250px;
+
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .swipe-student-avatar {
+    width: 62px;
+    height: 62px;
+
+    font-size: 24px;
+  }
+
+  .swipe-student-info h2 {
+    font-size: 19px;
+  }
+
+  .route-student-row {
+    min-height: 49px;
+  }
+
+}

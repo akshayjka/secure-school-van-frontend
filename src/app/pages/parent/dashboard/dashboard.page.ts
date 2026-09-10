@@ -28,7 +28,6 @@ import {
 } from '@angular/router';
 
 import {
-  Observable,
   Subscription
 } from 'rxjs';
 
@@ -59,10 +58,9 @@ import {
   busOutline,
   timeOutline,
   checkmarkCircleOutline,
-  chevronForwardOutline
+  chevronForwardOutline,
+  callOutline
 } from 'ionicons/icons';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -70,6 +68,7 @@ import { environment } from 'src/environments/environment';
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
+
   imports: [
     CommonModule,
     FormsModule,
@@ -85,6 +84,7 @@ import { environment } from 'src/environments/environment';
 })
 export class DashboardPage
   implements OnInit, OnDestroy {
+
 
   // =====================================================
   // RIDE
@@ -147,9 +147,45 @@ export class DashboardPage
 
   isLoading = false;
 
+  showStudentProfile = false;
+
+
+  // =====================================================
+  // RIDE UI STATE
+  // =====================================================
+
   notificationTitle = '';
 
   notificationMessage = '';
+
+  rideNotificationIcon = 'bus-outline';
+
+  rideNotificationType:
+    | 'active'
+    | 'waiting'
+    | 'completed' = 'waiting';
+
+
+  rideStatusTitle = 'No Active Ride';
+
+  rideStatusMessage =
+    'The school van is not currently on a trip.';
+
+  rideStatusClass:
+    | 'active'
+    | 'inactive'
+    | 'waiting'
+    | 'completed' = 'inactive';
+
+
+  // =====================================================
+  // STUDENT UI STATE
+  // =====================================================
+
+  studentStatusTitle = 'Waiting for Pickup';
+
+  studentStatusMessage =
+    'Your student is waiting for the van.';
 
 
   // =====================================================
@@ -173,11 +209,11 @@ export class DashboardPage
     private parentService: ParentService,
     private router: Router,
     private dialogService: DialogService,
-    private socketService: SocketService,
-    private http: HttpClient
+    private socketService: SocketService
   ) {
 
     addIcons({
+
       logOutOutline,
       refreshOutline,
       calendarOutline,
@@ -188,7 +224,9 @@ export class DashboardPage
       busOutline,
       timeOutline,
       checkmarkCircleOutline,
-      chevronForwardOutline
+      chevronForwardOutline,
+      callOutline
+
     });
 
   }
@@ -204,10 +242,6 @@ export class DashboardPage
       localStorage.getItem('parentId');
 
 
-    // -----------------------------------------------------
-    // AUTH CHECK
-    // -----------------------------------------------------
-
     if (!this.parentId) {
 
       this.router.navigateByUrl(
@@ -218,38 +252,24 @@ export class DashboardPage
       );
 
       return;
+
     }
 
 
-    // -----------------------------------------------------
-    // SOCKET
-    // -----------------------------------------------------
-
     this.socketService.connect();
+
 
     this.socketService.joinParentRoom(
       this.parentId
     );
 
 
-    // -----------------------------------------------------
-    // SOCKET LISTENERS
-    //
-    // Register listeners BEFORE loading dashboard.
-    // -----------------------------------------------------
-
     this.registerSocketListeners();
 
-
-    // -----------------------------------------------------
-    // INITIAL DASHBOARD
-    // -----------------------------------------------------
 
     this.loadDashboard();
 
   }
-
-
 
 
   // =====================================================
@@ -257,7 +277,6 @@ export class DashboardPage
   // =====================================================
 
   private registerSocketListeners(): void {
-
 
 
     // =====================================================
@@ -280,26 +299,28 @@ export class DashboardPage
         ) {
 
           return;
+
         }
 
 
-        const rideType =
+        const incomingRideType =
           this.normalizeRideType(
             data?.rideType
           );
 
 
-        if (rideType) {
+        if (incomingRideType) {
 
           this.rideType =
-            rideType;
+            incomingRideType;
 
         }
 
 
-        this.trackingAvailable = true;
+        this.updateRideState();
 
       });
+
 
 
     // =====================================================
@@ -322,20 +343,32 @@ export class DashboardPage
         ) {
 
           return;
+
         }
 
 
         this.trackingAvailable = false;
 
-        this.studentStatus =
-          data?.status ||
-          this.studentStatus;
+
+        if (data?.status) {
+
+          this.studentStatus =
+            this.normalizeStudentStatus(
+              data.status
+            );
+
+        }
+
+
+        this.updateRideState();
 
       });
 
-    // ===================================================
+
+
+    // =====================================================
     // RIDE STARTED
-    // ===================================================
+    // =====================================================
 
     this.rideStartedSubscription =
       this.socketService
@@ -343,141 +376,30 @@ export class DashboardPage
         .subscribe((data: any) => {
 
           console.log(
-            'Parent received ride_started:',
+            '🟢 Parent received ride_started:',
             data
           );
 
-
-          // ------------------------------------------------
-          // Ignore another driver's ride
-          // ------------------------------------------------
 
           if (
             this.driverId &&
             data?.driverId &&
             data.driverId !== this.driverId
           ) {
+
             return;
+
           }
 
-
-          // ------------------------------------------------
-          // Update ride state
-          // ------------------------------------------------
 
           this.rideStarted = true;
 
-          this.rideType =
-            this.normalizeRideType(
-              data?.rideType
-            );
-
-
-          // ------------------------------------------------
-          // VERY IMPORTANT
-          //
-          // Evening ride becomes trackable immediately.
-          // ------------------------------------------------
-
-          this.updateTrackingAvailability();
-
-
-          this.updateRideDisplay();
-
-
-          console.log(
-            'Parent ride state:',
-            {
-              rideStarted: this.rideStarted,
-              rideType: this.rideType,
-              trackingAvailable:
-                this.trackingAvailable
-            }
-          );
-
-        });
-
-
-    // ===================================================
-    // RIDE ENDED
-    // ===================================================
-
-    this.rideEndedSubscription =
-      this.socketService
-        .listenRideEnded()
-        .subscribe((data: any) => {
-
-          console.log(
-            'Parent received ride_ended:',
-            data
-          );
-
-
-          // ------------------------------------------------
-          // Ignore another driver's ride
-          // ------------------------------------------------
-
-          if (
-            this.driverId &&
-            data?.driverId &&
-            data.driverId !== this.driverId
-          ) {
-            return;
-          }
-
-
-          // ------------------------------------------------
-          // Completely stop tracking
-          // ------------------------------------------------
-
-          this.rideStarted = false;
-
-          this.trackingAvailable = false;
-
-          this.rideType = null;
-
-          this.updateRideDisplay();
-
-        });
-
-
-    // =====================================================
-    // STUDENT STATUS UPDATED
-    // =====================================================
-
-    this.studentStatusSubscription =
-      this.socketService
-        .listenStudentStatusUpdated()
-        .subscribe((data: any) => {
-
-          console.log(
-            '📡 PARENT STUDENT STATUS:',
-            data
-          );
-
-
-          // =================================================
-          // SECURITY
-          // Only process this parent's student
-          // =================================================
-
-          if (
-            this.parentId &&
-            data?.parentId &&
-            data.parentId !== this.parentId
-          ) {
-            return;
-          }
-
-
-          // =================================================
-          // RIDE TYPE
-          // =================================================
 
           const incomingRideType =
             this.normalizeRideType(
               data?.rideType
             );
+
 
           if (incomingRideType) {
 
@@ -487,166 +409,124 @@ export class DashboardPage
           }
 
 
-          // =================================================
-          // STUDENT STATUS
-          // =================================================
-
-          const status =
-            String(
-              data?.status || ''
-            )
-              .trim()
-              .toLowerCase();
-
-
-          this.studentStatus =
-            status;
-
-
-          console.log(
-            '👨‍👩‍👧 Parent student state:',
-            {
-              parentId:
-                this.parentId,
-
-              driverId:
-                this.driverId,
-
-              rideType:
-                this.rideType,
-
-              studentStatus:
-                this.studentStatus,
-
-              rideStarted:
-                this.rideStarted
-            }
-          );
-
-
-          // =================================================
-          // MORNING PICKUP
-          //
-          // HOME -> SCHOOL
-          //
-          // Student is now inside the van.
-          // =================================================
-
-          if (
-            this.rideType === 'morning' &&
-            status === 'picked_up'
-          ) {
-
-            this.rideStarted = true;
-
-            this.trackingAvailable = true;
-
-            console.log(
-              '🟢 MORNING TRACKING ENABLED'
-            );
-
-            this.updateRideDisplay();
-
-            return;
-          }
-
-
-          // =================================================
-          // MORNING DROP
-          //
-          // Student reached school.
-          // =================================================
-
-          if (
-            this.rideType === 'morning' &&
-            (
-              status === 'dropped_at_school' ||
-              status === 'dropped'
-            )
-          ) {
-
-            this.trackingAvailable = false;
-
-            console.log(
-              '🔴 MORNING TRACKING DISABLED'
-            );
-
-            this.updateRideDisplay();
-
-            return;
-          }
-
-
-          // =================================================
-          // EVENING PICKUP
-          //
-          // SCHOOL -> HOME
-          //
-          // Student is now inside the van.
-          // =================================================
-
-          if (
-            this.rideType === 'evening' &&
-            (
-              status === 'picked_from_school' ||
-              status === 'picked_up'
-            )
-          ) {
-
-            this.rideStarted = true;
-
-            this.trackingAvailable = true;
-
-            console.log(
-              '🟢 EVENING TRACKING ENABLED'
-            );
-
-            this.updateRideDisplay();
-
-            return;
-          }
-
-
-          // =================================================
-          // EVENING DROP
-          //
-          // Student reached home.
-          // =================================================
-
-          if (
-            this.rideType === 'evening' &&
-            (
-              status === 'dropped_at_home' ||
-              status === 'dropped'
-            )
-          ) {
-
-            this.trackingAvailable = false;
-
-            console.log(
-              '🔴 EVENING TRACKING DISABLED'
-            );
-
-            this.updateRideDisplay();
-
-            return;
-          }
-
-
-          // =================================================
-          // FALLBACK
-          // =================================================
-
-          this.updateTrackingAvailability();
-
-          this.updateRideDisplay();
+          this.updateRideState();
 
         });
 
 
-    // ===================================================
+
+    // =====================================================
+    // RIDE ENDED
+    // =====================================================
+
+    this.rideEndedSubscription =
+      this.socketService
+        .listenRideEnded()
+        .subscribe((data: any) => {
+
+          console.log(
+            '🔴 Parent received ride_ended:',
+            data
+          );
+
+
+          if (
+            this.driverId &&
+            data?.driverId &&
+            data.driverId !== this.driverId
+          ) {
+
+            return;
+
+          }
+
+
+          this.rideStarted = false;
+
+          this.trackingAvailable = false;
+
+          this.rideType = null;
+
+
+          this.updateRideState();
+
+        });
+
+
+
+    // =====================================================
+    // STUDENT STATUS
+    // =====================================================
+
+    this.studentStatusSubscription =
+      this.socketService
+        .listenStudentStatusUpdated()
+        .subscribe((data: any) => {
+
+          console.log(
+            '📡 Parent student status:',
+            data
+          );
+
+
+          if (
+            this.parentId &&
+            data?.parentId &&
+            data.parentId !== this.parentId
+          ) {
+
+            return;
+
+          }
+
+
+          const incomingRideType =
+            this.normalizeRideType(
+              data?.rideType
+            );
+
+
+          if (incomingRideType) {
+
+            this.rideType =
+              incomingRideType;
+
+          }
+
+
+          this.studentStatus =
+            this.normalizeStudentStatus(
+              data?.status
+            );
+
+
+          /*
+           * IMPORTANT:
+           *
+           * A student status update is authoritative
+           * for that student's ride position.
+           *
+           * Do not depend only on rideStarted.
+           */
+
+          if (
+            this.isStudentOnVan()
+          ) {
+
+            this.rideStarted = true;
+
+          }
+
+
+          this.updateRideState();
+
+        });
+
+
+
+    // =====================================================
     // DASHBOARD UPDATED
-    // ===================================================
+    // =====================================================
 
     this.dashboardSubscription =
       this.socketService
@@ -659,13 +539,13 @@ export class DashboardPage
           );
 
 
-          // Ride start/end is handled directly above.
           if (
             data?.type === 'ride_started' ||
             data?.type === 'ride_ended'
           ) {
 
             return;
+
           }
 
 
@@ -675,33 +555,6 @@ export class DashboardPage
 
   }
 
-
-  private normalizeStudentStatus(status: any): string {
-
-    const value =
-      String(status || '').trim().toLowerCase();
-    switch (value) {
-
-      case 'picked':
-      case 'picked_up':
-        return 'picked_up';
-
-      case 'picked_from_school':
-        return 'picked_from_school';
-
-      case 'dropped':
-      case 'dropped_at_home':
-      case 'dropped_at_school':
-        return value;
-
-      case 'pending':
-      case 'waiting':
-        return value;
-
-      default:
-        return value || 'waiting';
-    }
-  }
 
   // =====================================================
   // LOAD DASHBOARD
@@ -723,6 +576,7 @@ export class DashboardPage
       );
 
       return;
+
     }
 
 
@@ -743,13 +597,16 @@ export class DashboardPage
 
             this.isLoading = false;
 
+            this.resetDashboardState();
+
             return;
+
           }
 
 
-          // =============================================
+          // =================================================
           // STUDENT
-          // =============================================
+          // =================================================
 
           this.parent = {
 
@@ -768,9 +625,9 @@ export class DashboardPage
           };
 
 
-          // =============================================
+          // =================================================
           // DRIVER
-          // =============================================
+          // =================================================
 
           this.driver =
             res.driver || {};
@@ -779,10 +636,6 @@ export class DashboardPage
           this.driverId =
             res.driver?.driverId || null;
 
-
-          // ------------------------------------------------
-          // Join driver-specific parent channel
-          // ------------------------------------------------
 
           if (this.driverId) {
 
@@ -794,13 +647,14 @@ export class DashboardPage
           }
 
 
-          // =============================================
+          // =================================================
           // ATTENDANCE
-          // =============================================
+          // =================================================
 
           this.todayAttendanceStatus =
-            res.todayAttendanceStatus ||
-            'not_marked';
+            this.normalizeAttendanceStatus(
+              res.todayAttendanceStatus
+            );
 
 
           this.isPresent =
@@ -808,12 +662,12 @@ export class DashboardPage
             'present';
 
 
-          // =============================================
+          // =================================================
           // RIDE
-          // =============================================
+          // =================================================
 
           this.rideStarted =
-            res.rideStarted ?? false;
+            Boolean(res.rideStarted);
 
 
           this.rideType =
@@ -822,43 +676,44 @@ export class DashboardPage
             );
 
 
-          // =============================================
+          // =================================================
           // STUDENT STATUS
-          // =============================================
+          // =================================================
 
-          this.studentStatus = this.normalizeStudentStatus(res.studentStatus);
-
-
-          // =============================================
-          // TRACKING
-          //
-          // DO NOT blindly use:
-          //
-          // res.trackingAvailable
-          //
-          // because that can contain the old backend
-          // morning-only tracking rule.
-          //
-          // Instead derive it from current ride state.
-          // =============================================
-
-          this.updateTrackingAvailability();
+          this.studentStatus =
+            this.normalizeStudentStatus(
+              res.studentStatus
+            );
 
 
-          // =============================================
-          // MESSAGE
-          // =============================================
+          /*
+           * IMPORTANT:
+           *
+           * If backend rideStarted is stale/false but
+           * the student is already picked up, restore
+           * the active ride state.
+           */
 
-          this.updateRideDisplay();
+          if (
+            this.isStudentOnVan()
+          ) {
+
+            this.rideStarted = true;
+
+          }
 
 
-          // =============================================
-          // DEBUG
-          // =============================================
+          // =================================================
+          // UPDATE EVERYTHING FROM ONE STATE
+          // =================================================
+
+          this.updateRideState();
+
 
           console.log(
             'Parent dashboard loaded:',
             {
+
               rideStarted:
                 this.rideStarted,
 
@@ -874,8 +729,9 @@ export class DashboardPage
               trackingAvailable:
                 this.trackingAvailable,
 
-              backendTrackingAvailable:
-                res.trackingAvailable
+              rideStatusTitle:
+                this.rideStatusTitle
+
             }
           );
 
@@ -892,11 +748,50 @@ export class DashboardPage
             err
           );
 
+
           this.isLoading = false;
+
+          this.resetDashboardState();
 
         }
 
       });
+
+  }
+
+
+  // =====================================================
+  // NORMALIZE ATTENDANCE
+  // =====================================================
+
+  private normalizeAttendanceStatus(
+    value: any
+  ):
+    | 'present'
+    | 'absent'
+    | 'not_marked' {
+
+    const status =
+      String(value || '')
+        .trim()
+        .toLowerCase();
+
+
+    if (status === 'present') {
+
+      return 'present';
+
+    }
+
+
+    if (status === 'absent') {
+
+      return 'absent';
+
+    }
+
+
+    return 'not_marked';
 
   }
 
@@ -913,7 +808,9 @@ export class DashboardPage
     | null {
 
     if (!value) {
+
       return null;
+
     }
 
 
@@ -951,155 +848,715 @@ export class DashboardPage
 
 
   // =====================================================
-  // TRACKING RULE
+  // NORMALIZE STUDENT STATUS
   // =====================================================
 
-private updateTrackingAvailability(): void {
+  private normalizeStudentStatus(
+    status: any
+  ): string {
 
-  // =====================================================
-  // NO ACTIVE RIDE
-  // =====================================================
+    const value =
+      String(status || '')
+        .trim()
+        .toLowerCase();
 
-  if (!this.rideStarted) {
 
-    this.trackingAvailable = false;
+    switch (value) {
 
-    return;
+      case 'picked':
+      case 'picked_up':
+
+        return 'picked_up';
+
+
+      case 'picked_from_school':
+
+        return 'picked_from_school';
+
+
+      case 'dropped_at_school':
+
+        return 'dropped_at_school';
+
+
+      case 'dropped_at_home':
+
+        return 'dropped_at_home';
+
+
+      case 'dropped':
+
+        return 'dropped';
+
+
+      case 'pending':
+      case 'waiting':
+
+        return 'waiting';
+
+
+      default:
+
+        return 'waiting';
+
+    }
+
   }
 
 
   // =====================================================
-  // MORNING
-  // HOME -> SCHOOL
+  // STUDENT IS CURRENTLY INSIDE VAN
   // =====================================================
 
-  if (this.rideType === 'morning') {
+  private isStudentOnVan(): boolean {
 
-    this.trackingAvailable =
-      this.studentStatus === 'picked_up';
+    return (
+      this.studentStatus === 'picked_up' ||
+      this.studentStatus === 'picked_from_school'
+    );
 
-    return;
   }
 
 
   // =====================================================
-  // EVENING
-  // SCHOOL -> HOME
+  // STUDENT COMPLETED THEIR TRIP
   // =====================================================
 
-  if (this.rideType === 'evening') {
+  private isStudentTripCompleted(): boolean {
 
-    this.trackingAvailable =
-      this.studentStatus === 'picked_from_school' ||
-      this.studentStatus === 'picked_up';
+    return (
+      this.studentStatus === 'dropped_at_school' ||
+      this.studentStatus === 'dropped_at_home' ||
+      this.studentStatus === 'dropped'
+    );
 
-    return;
   }
 
 
-  this.trackingAvailable = false;
-}
-
-
   // =====================================================
-  // RIDE DISPLAY
+  // UPDATE COMPLETE RIDE STATE
   // =====================================================
 
-  private updateRideDisplay(): void {
+  private updateRideState(): void {
 
-    // -----------------------------------------------------
-    // NO ACTIVE RIDE
-    // -----------------------------------------------------
+    // ===================================================
+    // NO RIDE TYPE + NO ACTIVE RIDE
+    // ===================================================
 
-    if (!this.rideStarted) {
+    if (
+      !this.rideStarted &&
+      !this.isStudentOnVan()
+    ) {
+
+      /*
+       * If the student's trip has completed, don't show
+       * "No Active Ride" because that is misleading.
+       */
+
+      if (
+        this.isStudentTripCompleted()
+      ) {
+
+        this.updateCompletedStudentState();
+
+        return;
+
+      }
+
+
+      this.trackingAvailable = false;
+
+      this.rideStatusClass = 'inactive';
+
+      this.rideStatusTitle =
+        'No Active Ride';
+
+      this.rideStatusMessage =
+        'The school van is not currently on a trip.';
 
       this.notificationTitle =
         'No Active Ride';
 
-
       this.notificationMessage =
         'The school van is not currently on a trip.';
 
+      this.notificationTitle =
+        'No Active Ride';
 
       this.rideDirection = '';
 
+      this.rideNotificationIcon =
+        'checkmark-circle-outline';
+
+      this.rideNotificationType =
+        'waiting';
+
+      this.updateStudentDisplay();
+
       return;
 
     }
 
 
-    // -----------------------------------------------------
+    // ===================================================
     // MORNING
-    // -----------------------------------------------------
+    // ===================================================
 
-    if (this.rideType === 'morning') {
+    if (
+      this.rideType === 'morning'
+    ) {
 
-      this.rideDirection =
-        'To School';
-
-
-      this.notificationTitle =
-        'School Trip Started';
-
-
-      this.notificationMessage =
-        'The van is taking students to school.';
-
+      this.updateMorningRideState();
 
       return;
 
     }
 
 
-    // -----------------------------------------------------
+    // ===================================================
     // EVENING
-    // -----------------------------------------------------
+    // ===================================================
 
-    if (this.rideType === 'evening') {
+    if (
+      this.rideType === 'evening'
+    ) {
 
-      this.rideDirection =
-        'Return Trip';
-
-
-      this.notificationTitle =
-        'Return Trip Started';
-
-
-      this.notificationMessage =
-        'The van is bringing students home.';
-
+      this.updateEveningRideState();
 
       return;
 
     }
 
 
-    // -----------------------------------------------------
-    // UNKNOWN
-    // -----------------------------------------------------
+    // ===================================================
+    // FALLBACK
+    // ===================================================
+
+    this.trackingAvailable =
+      this.isStudentOnVan();
+
+
+    this.rideStatusClass =
+      this.trackingAvailable
+        ? 'active'
+        : 'waiting';
+
+
+    this.rideStatusTitle =
+      this.trackingAvailable
+        ? 'Ride In Progress'
+        : 'Waiting for Pickup';
+
+
+    this.rideStatusMessage =
+      this.trackingAvailable
+        ? 'Student is currently travelling in the van.'
+        : 'The van has started a trip.';
+
 
     this.notificationTitle =
-      'Ride Started';
+      this.trackingAvailable
+        ? 'Ride In Progress'
+        : 'Ride Started';
 
 
     this.notificationMessage =
-      'The school van has started a trip.';
+      this.trackingAvailable
+        ? 'Your student is currently travelling in the van.'
+        : 'The school van has started a trip.';
+
+
+    this.rideNotificationIcon =
+      'bus-outline';
+
+
+    this.rideNotificationType =
+      this.trackingAvailable
+        ? 'active'
+        : 'waiting';
+
+
+    this.updateStudentDisplay();
 
   }
 
 
   // =====================================================
-  // TRACK SCHOOL VAN
+  // MORNING STATE
   // =====================================================
 
-  // parent/dashboard/dashboard.page.ts
-  // REPLACE ONLY openTracking() WITH THIS
+  private updateMorningRideState(): void {
+
+    this.rideDirection =
+      'Home → School';
+
+
+    // ---------------------------------------------------
+    // STUDENT PICKED
+    // ---------------------------------------------------
+
+    if (
+      this.studentStatus === 'picked_up'
+    ) {
+
+      this.trackingAvailable = true;
+
+
+      this.rideStatusClass =
+        'active';
+
+
+      this.rideStatusTitle =
+        'Going To School';
+
+
+      this.rideStatusMessage =
+        'Student is on the van and travelling to school.';
+
+
+      this.notificationTitle =
+        'School Trip In Progress';
+
+
+      this.notificationMessage =
+        'Your student has been picked up and is travelling to school.';
+
+
+      this.rideNotificationIcon =
+        'bus-outline';
+
+
+      this.rideNotificationType =
+        'active';
+
+
+      this.updateStudentDisplay();
+
+      return;
+
+    }
+
+
+    // ---------------------------------------------------
+    // STUDENT REACHED SCHOOL
+    // ---------------------------------------------------
+
+    if (
+      this.studentStatus === 'dropped_at_school' ||
+      this.studentStatus === 'dropped'
+    ) {
+
+      this.trackingAvailable = false;
+
+
+      this.rideStatusClass =
+        'completed';
+
+
+      this.rideStatusTitle =
+        'Arrived at School';
+
+
+      this.rideStatusMessage =
+        'Student has reached school safely.';
+
+
+      this.notificationTitle =
+        'Arrived at School';
+
+
+      this.notificationMessage =
+        'Your student has reached school safely.';
+
+
+      this.rideNotificationIcon =
+        'checkmark-circle-outline';
+
+
+      this.rideNotificationType =
+        'completed';
+
+
+      this.updateStudentDisplay();
+
+      return;
+
+    }
+
+
+    // ---------------------------------------------------
+    // WAITING FOR PICKUP
+    // ---------------------------------------------------
+
+    this.trackingAvailable = false;
+
+
+    this.rideStatusClass =
+      'waiting';
+
+
+    this.rideStatusTitle =
+      'Waiting for Pickup';
+
+
+    this.rideStatusMessage =
+      'The school trip has started and the van will pick up your student.';
+
+
+    this.notificationTitle =
+      'School Trip Started';
+
+
+    this.notificationMessage =
+      'The van is on the way to pick up your student.';
+
+
+    this.rideNotificationIcon =
+      'bus-outline';
+
+
+    this.rideNotificationType =
+      'waiting';
+
+
+    this.updateStudentDisplay();
+
+  }
+
+
+  // =====================================================
+  // EVENING STATE
+  // =====================================================
+
+  private updateEveningRideState(): void {
+
+    this.rideDirection =
+      'School → Home';
+
+
+    // ---------------------------------------------------
+    // STUDENT PICKED FROM SCHOOL
+    // ---------------------------------------------------
+
+    if (
+      this.studentStatus === 'picked_from_school' ||
+      this.studentStatus === 'picked_up'
+    ) {
+
+      this.trackingAvailable = true;
+
+
+      this.rideStatusClass =
+        'active';
+
+
+      this.rideStatusTitle =
+        'Returning Home';
+
+
+      this.rideStatusMessage =
+        'Student is on the van and travelling home.';
+
+
+      this.notificationTitle =
+        'Return Trip In Progress';
+
+
+      this.notificationMessage =
+        'Your student has been picked up from school and is travelling home.';
+
+
+      this.rideNotificationIcon =
+        'bus-outline';
+
+
+      this.rideNotificationType =
+        'active';
+
+
+      this.updateStudentDisplay();
+
+      return;
+
+    }
+
+
+    // ---------------------------------------------------
+    // STUDENT REACHED HOME
+    // ---------------------------------------------------
+
+    if (
+      this.studentStatus === 'dropped_at_home' ||
+      this.studentStatus === 'dropped'
+    ) {
+
+      this.trackingAvailable = false;
+
+
+      this.rideStatusClass =
+        'completed';
+
+
+      this.rideStatusTitle =
+        'Arrived Home';
+
+
+      this.rideStatusMessage =
+        'Student has reached home safely.';
+
+
+      this.notificationTitle =
+        'Arrived Home';
+
+
+      this.notificationMessage =
+        'Your student has reached home safely.';
+
+
+      this.rideNotificationIcon =
+        'checkmark-circle-outline';
+
+
+      this.rideNotificationType =
+        'completed';
+
+
+      this.updateStudentDisplay();
+
+      return;
+
+    }
+
+
+    // ---------------------------------------------------
+    // WAITING FOR SCHOOL PICKUP
+    // ---------------------------------------------------
+
+    this.trackingAvailable = false;
+
+
+    this.rideStatusClass =
+      'waiting';
+
+
+    this.rideStatusTitle =
+      'Waiting for Pickup';
+
+
+    this.rideStatusMessage =
+      'The return trip has started and the van will pick up your student from school.';
+
+
+    this.notificationTitle =
+      'Return Trip Started';
+
+
+    this.notificationMessage =
+      'The van is heading to school to pick up your student.';
+
+
+    this.rideNotificationIcon =
+      'bus-outline';
+
+
+    this.rideNotificationType =
+      'waiting';
+
+
+    this.updateStudentDisplay();
+
+  }
+
+
+  // =====================================================
+  // COMPLETED STUDENT STATE
+  // =====================================================
+
+  private updateCompletedStudentState(): void {
+
+    this.trackingAvailable = false;
+
+
+    if (
+      this.rideType === 'morning'
+    ) {
+
+      this.rideStatusTitle =
+        'Arrived at School';
+
+
+      this.rideStatusMessage =
+        'Student has reached school safely.';
+
+
+      this.notificationTitle =
+        'Arrived at School';
+
+
+      this.notificationMessage =
+        'Your student has reached school safely.';
+
+    }
+    else if (
+      this.rideType === 'evening'
+    ) {
+
+      this.rideStatusTitle =
+        'Arrived Home';
+
+
+      this.rideStatusMessage =
+        'Student has reached home safely.';
+
+
+      this.notificationTitle =
+        'Arrived Home';
+
+
+      this.notificationMessage =
+        'Your student has reached home safely.';
+
+    }
+    else {
+
+      this.rideStatusTitle =
+        'Trip Completed';
+
+
+      this.rideStatusMessage =
+        'Your student has completed today’s trip.';
+
+
+      this.notificationTitle =
+        'Trip Completed';
+
+
+      this.notificationMessage =
+        'Your student has completed today’s trip.';
+
+    }
+
+
+    this.rideStatusClass =
+      'completed';
+
+
+    this.rideNotificationIcon =
+      'checkmark-circle-outline';
+
+
+    this.rideNotificationType =
+      'completed';
+
+
+    this.rideDirection =
+      '';
+
+
+    this.updateStudentDisplay();
+
+  }
+
+
+  // =====================================================
+  // STUDENT DISPLAY
+  // =====================================================
+
+  private updateStudentDisplay(): void {
+
+    switch (this.studentStatus) {
+
+      case 'picked_up':
+
+        this.studentStatusTitle =
+          'Picked Up';
+
+
+        this.studentStatusMessage =
+          'Student is safely on the van.';
+
+        break;
+
+
+      case 'picked_from_school':
+
+        this.studentStatusTitle =
+          'Picked Up From School';
+
+
+        this.studentStatusMessage =
+          'Student is safely on the return van.';
+
+        break;
+
+
+      case 'dropped_at_school':
+
+        this.studentStatusTitle =
+          'Arrived at School';
+
+
+        this.studentStatusMessage =
+          'Student reached school safely.';
+
+        break;
+
+
+      case 'dropped_at_home':
+
+        this.studentStatusTitle =
+          'Arrived Home';
+
+
+        this.studentStatusMessage =
+          'Student reached home safely.';
+
+        break;
+
+
+      case 'dropped':
+
+        this.studentStatusTitle =
+          this.rideType === 'evening'
+            ? 'Arrived Home'
+            : 'Arrived at School';
+
+
+        this.studentStatusMessage =
+          'Student completed the trip safely.';
+
+        break;
+
+
+      case 'waiting':
+      default:
+
+        this.studentStatusTitle =
+          'Waiting for Pickup';
+
+
+        this.studentStatusMessage =
+          this.rideType === 'evening'
+            ? 'Student is waiting for pickup from school.'
+            : 'Student is waiting for pickup.';
+
+        break;
+
+    }
+
+  }
+
+
+  // =====================================================
+  // TRACKING
+  // =====================================================
 
   openTracking(): void {
 
     console.log(
       '🚐 OPEN LIVE TRACKING',
       {
+
         parentId:
           this.parentId,
 
@@ -1114,23 +1571,21 @@ private updateTrackingAvailability(): void {
 
         trackingAvailable:
           this.trackingAvailable
+
       }
     );
 
-
-    // =====================================================
-    // HARD SAFETY CHECK
-    // =====================================================
 
     if (
       !this.trackingAvailable
     ) {
 
       console.warn(
-        '🚫 Tracking not available for this student'
+        '🚫 Tracking is not available'
       );
 
       return;
+
     }
 
 
@@ -1141,30 +1596,18 @@ private updateTrackingAvailability(): void {
     ) {
 
       console.error(
-        '🚫 Missing tracking parameters',
-        {
-          parentId:
-            this.parentId,
-
-          driverId:
-            this.driverId,
-
-          rideType:
-            this.rideType
-        }
+        '🚫 Missing tracking parameters'
       );
 
       return;
+
     }
 
-
-    // =====================================================
-    // NAVIGATE
-    // =====================================================
 
     this.router.navigate(
       ['/live-tracking'],
       {
+
         queryParams: {
 
           parentId:
@@ -1177,6 +1620,7 @@ private updateTrackingAvailability(): void {
             this.rideType
 
         }
+
       }
     );
 
@@ -1189,6 +1633,13 @@ private updateTrackingAvailability(): void {
 
   refreshDashboard(): void {
 
+    if (this.isLoading) {
+
+      return;
+
+    }
+
+
     this.loadDashboard();
 
   }
@@ -1197,9 +1648,6 @@ private updateTrackingAvailability(): void {
   // =====================================================
   // STUDENT PROFILE
   // =====================================================
-
-  showStudentProfile = false;
-
 
   openStudentProfile(): void {
 
@@ -1241,7 +1689,9 @@ private updateTrackingAvailability(): void {
 
 
     if (!confirmed) {
+
       return;
+
     }
 
 
@@ -1265,6 +1715,53 @@ private updateTrackingAvailability(): void {
         replaceUrl: true
       }
     );
+
+  }
+
+
+  // =====================================================
+  // RESET
+  // =====================================================
+
+  private resetDashboardState(): void {
+
+    this.parent = {};
+
+    this.driver = {};
+
+    this.driverId = null;
+
+    this.rideStarted = false;
+
+    this.rideType = null;
+
+    this.studentStatus = 'waiting';
+
+    this.trackingAvailable = false;
+
+    this.rideDirection = '';
+
+    this.rideStatusClass = 'inactive';
+
+    this.rideStatusTitle =
+      'No Active Ride';
+
+    this.rideStatusMessage =
+      'The school van is not currently on a trip.';
+
+    this.notificationTitle =
+      'No Active Ride';
+
+    this.notificationMessage =
+      'The school van is not currently on a trip.';
+
+    this.rideNotificationIcon =
+      'checkmark-circle-outline';
+
+    this.rideNotificationType =
+      'waiting';
+
+    this.updateStudentDisplay();
 
   }
 

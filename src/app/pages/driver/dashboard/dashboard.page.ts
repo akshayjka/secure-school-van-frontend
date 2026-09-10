@@ -26,13 +26,16 @@ import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
   checkmarkCircleOutline,
+  chevronBackOutline,
   chevronForwardOutline,
   closeCircleOutline,
   copyOutline,
   homeOutline,
   informationCircleOutline,
+  locationOutline,
   logOutOutline,
   menuOutline,
+  navigateOutline,
   peopleOutline,
   personOutline,
   playOutline,
@@ -40,6 +43,7 @@ import {
   shareSocialOutline,
   shieldCheckmarkOutline,
   stopOutline,
+  swapHorizontalOutline,
   timeOutline
 } from 'ionicons/icons';
 
@@ -104,6 +108,22 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   private attendanceSubscription?: Subscription;
 
+  // =====================================================
+// FLEXIBLE CAROUSEL SELECTION
+// =====================================================
+
+selectedMorningPickupIndex = 0;
+selectedMorningDropIndex = 0;
+
+selectedReturnBoardingIndex = 0;
+selectedReturnDropIndex = 0;
+
+private morningSwipeStartX = 0;
+private morningDropSwipeStartX = 0;
+
+private returnSwipeStartX = 0;
+private returnDropSwipeStartX = 0;
+
   driverId = '';
   currentView = 'dashboard';
   pageTitle = 'Driver Dashboard';
@@ -141,13 +161,16 @@ export class DashboardPage implements OnInit, OnDestroy {
     addIcons({
       arrowBackOutline,
       checkmarkCircleOutline,
+      chevronBackOutline,
       chevronForwardOutline,
       closeCircleOutline,
       copyOutline,
       homeOutline,
       informationCircleOutline,
+      locationOutline,
       logOutOutline,
       menuOutline,
+      navigateOutline,
       peopleOutline,
       personOutline,
       playOutline,
@@ -155,208 +178,546 @@ export class DashboardPage implements OnInit, OnDestroy {
       shareSocialOutline,
       shieldCheckmarkOutline,
       stopOutline,
+      swapHorizontalOutline,
       timeOutline
     });
   }
 
-ngOnInit(): void {
+  ngOnInit(): void {
 
-  this.driverId =
-    localStorage.getItem('driverId') || '';
+    this.driverId =
+      localStorage.getItem('driverId') || '';
 
-  // IMPORTANT:
-  // Never restore ride workflow from localStorage.
-  this.stage = 'morning-ready';
+    // IMPORTANT:
+    // Never restore ride workflow from localStorage.
+    this.stage = 'morning-ready';
 
-  this.morningStatuses =
-    this.restoreStatuses(
-      this.MORNING_STATUS_KEY
+    this.morningStatuses =
+      this.restoreStatuses(
+        this.MORNING_STATUS_KEY
+      );
+
+    this.eveningStatuses =
+      this.restoreStatuses(
+        this.EVENING_STATUS_KEY
+      );
+
+    if (!this.driverId) {
+      return;
+    }
+
+    this.socketService.connect();
+
+    this.socketService.joinDriverChannel(
+      this.driverId
     );
 
-  this.eveningStatuses =
-    this.restoreStatuses(
-      this.EVENING_STATUS_KEY
-    );
+    this.listenForAttendanceUpdates();
 
-  if (!this.driverId) {
-    return;
+    this.loadDashboard();
+
+    this.loadReferralDetails();
+
+    this.restoreRideFromBackend();
   }
-
-  this.socketService.connect();
-
-  this.socketService.joinDriverChannel(
-    this.driverId
-  );
-
-  this.listenForAttendanceUpdates();
-
-  this.loadDashboard();
-
-  this.loadReferralDetails();
-
-  this.restoreRideFromBackend();
-}
 
   ngOnDestroy(): void {
     this.attendanceSubscription?.unsubscribe();
   }
 
-private restoreRideFromBackend(): void {
+  private restoreRideFromBackend(): void {
 
-  this.rideService
-    .getRideStatus(
-      this.driverId,
-      'morning'
-    )
-    .subscribe({
+    this.rideService
+      .getRideStatus(
+        this.driverId,
+        'morning'
+      )
+      .subscribe({
 
-      next: response => {
+        next: response => {
 
-        const data = response?.data;
+          const data = response?.data;
 
-        /**
-         * No active morning ride.
-         *
-         * Driver MUST see START RIDE.
-         */
-        if (
-          !data ||
-          data.rideStarted !== true ||
-          data.status !== 'started'
-        ) {
+          /**
+           * No active morning ride.
+           *
+           * Driver MUST see START RIDE.
+           */
+          if (
+            !data ||
+            data.rideStarted !== true ||
+            data.status !== 'started'
+          ) {
 
+            this.locationService.stopTracking();
+
+            this.stage =
+              'morning-ready';
+
+            // localStorage.setItem(
+            //   this.STAGE_KEY,
+            //   'morning-ready'
+            // );
+
+            return;
+          }
+
+          /**
+           * Active ride really exists in backend.
+           *
+           * Only now allow pickup.
+           */
+          this.stage =
+            'morning-pickup';
+
+          // localStorage.setItem(
+          //   this.STAGE_KEY,
+          //   'morning-pickup'
+          // );
+
+          this.locationService.startTracking(
+            this.driverId,
+            'morning'
+          );
+
+        },
+
+        error: error => {
+
+          console.error(
+            'Ride status error:',
+            error
+          );
+
+          /**
+           * Fail safely.
+           *
+           * If backend cannot confirm an active ride,
+           * do NOT allow pickup.
+           */
           this.locationService.stopTracking();
 
           this.stage =
             'morning-ready';
 
-          // localStorage.setItem(
-          //   this.STAGE_KEY,
-          //   'morning-ready'
-          // );
-
-          return;
         }
 
-        /**
-         * Active ride really exists in backend.
-         *
-         * Only now allow pickup.
-         */
-        this.stage =
-          'morning-pickup';
+      });
 
-        // localStorage.setItem(
-        //   this.STAGE_KEY,
-        //   'morning-pickup'
-        // );
+  }
 
-        this.locationService.startTracking(
-          this.driverId,
-          'morning'
-        );
+  
 
-      },
+  // =====================================================
+  // SELECTED MORNING PICKUP
+  // =====================================================
 
-      error: error => {
+get selectedMorningPickup(): any | null {
+  const students = this.morningPendingStudents;
 
-        console.error(
-          'Ride status error:',
-          error
-        );
+  if (!students.length) {
+    return null;
+  }
 
-        /**
-         * Fail safely.
-         *
-         * If backend cannot confirm an active ride,
-         * do NOT allow pickup.
-         */
-        this.locationService.stopTracking();
+  this.selectedMorningPickupIndex =
+    this.normalizeCarouselIndex(
+      this.selectedMorningPickupIndex,
+      students.length
+    );
 
-        this.stage =
-          'morning-ready';
-
-      }
-
-    });
-
+  return students[this.selectedMorningPickupIndex] || null;
 }
 
-private restoreEveningRide(): void {
+// =====================================================
+// MORNING DROP CAROUSEL
+// =====================================================
 
-  this.rideService
-    .getRideStatus(
-      this.driverId,
-      'evening'
-    )
-    .subscribe({
+get selectedMorningDrop(): any | null {
+  const students = this.morningPickedStudents;
 
-      next: response => {
+  if (!students.length) {
+    return null;
+  }
 
-        const data =
-          response?.data;
+  this.selectedMorningDropIndex =
+    this.normalizeCarouselIndex(
+      this.selectedMorningDropIndex,
+      students.length
+    );
 
-        if (
-          data?.rideStarted === true &&
-          data?.status === 'started'
-        ) {
+  return students[this.selectedMorningDropIndex] || null;
+}
+
+
+// =====================================================
+// RETURN BOARDING CAROUSEL
+// =====================================================
+
+get selectedReturnBoarding(): any | null {
+  const students = this.returnWaitingStudents;
+
+  if (!students.length) {
+    return null;
+  }
+
+  this.selectedReturnBoardingIndex =
+    this.normalizeCarouselIndex(
+      this.selectedReturnBoardingIndex,
+      students.length
+    );
+
+  return students[this.selectedReturnBoardingIndex] || null;
+}
+
+
+// =====================================================
+// RETURN HOME DROP CAROUSEL
+// =====================================================
+
+get selectedReturnDrop(): any | null {
+  const students = this.returnOnboardStudents;
+
+  if (!students.length) {
+    return null;
+  }
+
+  this.selectedReturnDropIndex =
+    this.normalizeCarouselIndex(
+      this.selectedReturnDropIndex,
+      students.length
+    );
+
+  return students[this.selectedReturnDropIndex] || null;
+}
+private normalizeCarouselIndex(
+  index: number,
+  length: number
+): number {
+  if (length <= 0) {
+    return 0;
+  }
+
+  return ((index % length) + length) % length;
+}
+ 
+
+
+  // =====================================================
+  // MORNING PICKUP SELECTION
+  // =====================================================
+
+selectMorningPickup(index: number): void {
+  const students = this.morningPendingStudents;
+
+  if (!students.length) {
+    return;
+  }
+
+  this.selectedMorningPickupIndex =
+    this.normalizeCarouselIndex(index, students.length);
+}
+
+
+selectMorningPickupByStudent(student: any): void {
+  const index = this.morningPendingStudents.findIndex(
+    s => s.parentId === student.parentId
+  );
+
+  if (index === -1) {
+    return;
+  }
+
+  this.selectedMorningPickupIndex = index;
+}
+
+
+onMorningSwipeStart(event: TouchEvent): void {
+  this.morningSwipeStartX =
+    event.changedTouches[0]?.clientX || 0;
+}
+
+
+onMorningSwipeEnd(event: TouchEvent): void {
+  const endX =
+    event.changedTouches[0]?.clientX || 0;
+
+  const delta =
+    endX - this.morningSwipeStartX;
+
+  if (Math.abs(delta) < 45) {
+    return;
+  }
+
+  if (delta < 0) {
+    // Swipe left → next
+    this.selectMorningPickup(
+      this.selectedMorningPickupIndex + 1
+    );
+  } else {
+    // Swipe right → previous
+    this.selectMorningPickup(
+      this.selectedMorningPickupIndex - 1
+    );
+  }
+}
+
+selectMorningDrop(index: number): void {
+  const students = this.morningPickedStudents;
+
+  if (!students.length) {
+    return;
+  }
+
+  this.selectedMorningDropIndex =
+    this.normalizeCarouselIndex(index, students.length);
+}
+
+
+selectMorningDropByStudent(student: any): void {
+  const index = this.morningPickedStudents.findIndex(
+    s => s.parentId === student.parentId
+  );
+
+  if (index === -1) {
+    return;
+  }
+
+  this.selectedMorningDropIndex = index;
+}
+
+
+onMorningDropSwipeStart(event: TouchEvent): void {
+  this.morningDropSwipeStartX =
+    event.changedTouches[0]?.clientX || 0;
+}
+
+
+onMorningDropSwipeEnd(event: TouchEvent): void {
+  const endX =
+    event.changedTouches[0]?.clientX || 0;
+
+  const delta =
+    endX - this.morningDropSwipeStartX;
+
+  if (Math.abs(delta) < 45) {
+    return;
+  }
+
+  if (delta < 0) {
+    this.selectMorningDrop(
+      this.selectedMorningDropIndex + 1
+    );
+  } else {
+    this.selectMorningDrop(
+      this.selectedMorningDropIndex - 1
+    );
+  }
+}
+
+
+  // =====================================================
+  // RETURN BOARDING SELECTION
+  // =====================================================
+
+ selectReturnBoarding(index: number): void {
+  const students = this.returnWaitingStudents;
+
+  if (!students.length) {
+    return;
+  }
+
+  this.selectedReturnBoardingIndex =
+    this.normalizeCarouselIndex(index, students.length);
+}
+
+
+selectReturnBoardingByStudent(student: any): void {
+  const index = this.returnWaitingStudents.findIndex(
+    s => s.parentId === student.parentId
+  );
+
+  if (index === -1) {
+    return;
+  }
+
+  this.selectedReturnBoardingIndex = index;
+}
+
+
+onReturnSwipeStart(event: TouchEvent): void {
+  this.returnSwipeStartX =
+    event.changedTouches[0]?.clientX || 0;
+}
+
+
+onReturnSwipeEnd(event: TouchEvent): void {
+  const endX =
+    event.changedTouches[0]?.clientX || 0;
+
+  const delta =
+    endX - this.returnSwipeStartX;
+
+  if (Math.abs(delta) < 45) {
+    return;
+  }
+
+  if (delta < 0) {
+    this.selectReturnBoarding(
+      this.selectedReturnBoardingIndex + 1
+    );
+  } else {
+    this.selectReturnBoarding(
+      this.selectedReturnBoardingIndex - 1
+    );
+  }
+}
+
+selectReturnDrop(index: number): void {
+  const students = this.returnOnboardStudents;
+
+  if (!students.length) {
+    return;
+  }
+
+  this.selectedReturnDropIndex =
+    this.normalizeCarouselIndex(index, students.length);
+}
+
+
+selectReturnDropByStudent(student: any): void {
+  const index = this.returnOnboardStudents.findIndex(
+    s => s.parentId === student.parentId
+  );
+
+  if (index === -1) {
+    return;
+  }
+
+  this.selectedReturnDropIndex = index;
+}
+
+
+onReturnDropSwipeStart(event: TouchEvent): void {
+  this.returnDropSwipeStartX =
+    event.changedTouches[0]?.clientX || 0;
+}
+
+
+onReturnDropSwipeEnd(event: TouchEvent): void {
+  const endX =
+    event.changedTouches[0]?.clientX || 0;
+
+  const delta =
+    endX - this.returnDropSwipeStartX;
+
+  if (Math.abs(delta) < 45) {
+    return;
+  }
+
+  if (delta < 0) {
+    this.selectReturnDrop(
+      this.selectedReturnDropIndex + 1
+    );
+  } else {
+    this.selectReturnDrop(
+      this.selectedReturnDropIndex - 1
+    );
+  }
+}
+  // =====================================================
+  // ORIGINAL ROUTE POSITION
+  // =====================================================
+
+  getRoutePosition(
+    student: any
+  ): number {
+
+    const index =
+      this.presentStudents.findIndex(
+        s =>
+          s.parentId === student.parentId
+      );
+
+    return index >= 0
+      ? index + 1
+      : 0;
+  }
+
+  private restoreEveningRide(): void {
+
+    this.rideService
+      .getRideStatus(
+        this.driverId,
+        'evening'
+      )
+      .subscribe({
+
+        next: response => {
+
+          const data =
+            response?.data;
 
           if (
-            this.stage === 'return-ready'
+            data?.rideStarted === true &&
+            data?.status === 'started'
           ) {
 
+            if (
+              this.stage === 'return-ready'
+            ) {
+
+              this.setStage(
+                'return-boarding'
+              );
+
+            }
+
+            this.locationService.startTracking(
+              this.driverId,
+              'evening'
+            );
+
+            return;
+
+          }
+
+          /**
+           * No active ride.
+           *
+           * If the locally stored stage says
+           * that a ride is running, it is stale.
+           */
+          if (
+            this.isMorningRideActive ||
+            this.isReturnRideActive
+          ) {
+
+            this.locationService.stopTracking();
+
             this.setStage(
-              'return-boarding'
+              this.stage.startsWith('return')
+                ? 'return-ready'
+                : 'morning-ready'
             );
 
           }
 
-          this.locationService.startTracking(
-            this.driverId,
-            'evening'
+        },
+
+        error: error => {
+
+          console.error(
+            'Evening ride status error:',
+            error
           );
-
-          return;
-
-        }
-
-        /**
-         * No active ride.
-         *
-         * If the locally stored stage says
-         * that a ride is running, it is stale.
-         */
-        if (
-          this.isMorningRideActive ||
-          this.isReturnRideActive
-        ) {
 
           this.locationService.stopTracking();
 
-          this.setStage(
-            this.stage.startsWith('return')
-              ? 'return-ready'
-              : 'morning-ready'
-          );
-
         }
 
-      },
+      });
 
-      error: error => {
-
-        console.error(
-          'Evening ride status error:',
-          error
-        );
-
-        this.locationService.stopTracking();
-
-      }
-
-    });
-
-}
+  }
 
 
   // =====================================================
@@ -602,7 +963,7 @@ private restoreEveningRide(): void {
           this.presentStudents.forEach(student => {
             if (
               !this.morningStatuses[
-                student.parentId
+              student.parentId
               ]
             ) {
               this.morningStatuses[
@@ -612,7 +973,7 @@ private restoreEveningRide(): void {
 
             if (
               !this.eveningStatuses[
-                student.parentId
+              student.parentId
               ]
             ) {
               this.eveningStatuses[
@@ -666,29 +1027,71 @@ private restoreEveningRide(): void {
   // MORNING
   // =====================================================
 
-async confirmStartMorning(): Promise<void> {
+  async confirmStartMorning(): Promise<void> {
 
-  if (this.presentStudents.length === 0) {
+    if (this.presentStudents.length === 0) {
 
-    this.toastService.showToast(
-      'No present students available for pickup',
-      'warning'
-    );
+      this.toastService.showToast(
+        'No present students available for pickup',
+        'warning'
+      );
 
-    return;
+      return;
+    }
+
+    const confirmed =
+      await this.dialogService.confirm(
+        'Start Morning Ride?',
+        `${this.presentStudents.length} student(s) are present. Start the ride before picking up students?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.startRide('morning');
   }
 
-  const confirmed =
-    await this.dialogService.confirm(
-      'Start Morning Ride?',
-      `${this.presentStudents.length} student(s) are present. Start the ride before picking up students?`
-    );
 
-  if (!confirmed) {
-    return;
-  }
+  // =====================================================
+// RESET STUDENT STATUS FOR A NEW RIDE
+// =====================================================
 
-  this.startRide('morning');
+private resetMorningStatusesForNewRide(): void {
+  const statuses: Record<string, StudentUiStatus> = {};
+
+  this.presentStudents.forEach(student => {
+    statuses[student.parentId] = 'Pending';
+  });
+
+  this.morningStatuses = statuses;
+
+  this.selectedMorningPickupIndex = 0;
+  this.selectedMorningDropIndex = 0;
+
+  localStorage.setItem(
+    this.MORNING_STATUS_KEY,
+    JSON.stringify(this.morningStatuses)
+  );
+}
+
+
+private resetEveningStatusesForNewRide(): void {
+  const statuses: Record<string, StudentUiStatus> = {};
+
+  this.presentStudents.forEach(student => {
+    statuses[student.parentId] = 'Waiting';
+  });
+
+  this.eveningStatuses = statuses;
+
+  this.selectedReturnBoardingIndex = 0;
+  this.selectedReturnDropIndex = 0;
+
+  localStorage.setItem(
+    this.EVENING_STATUS_KEY,
+    JSON.stringify(this.eveningStatuses)
+  );
 }
 
 private startRide(
@@ -709,20 +1112,32 @@ private startRide(
           response
         );
 
-        /**
-         * Backend confirmed ride started.
-         */
+        // =================================================
+        // NEW RIDE = RESET STUDENT WORKFLOW
+        // =================================================
 
-        this.setStage(
-          rideType === 'morning'
-            ? 'morning-pickup'
-            : 'return-boarding'
-        );
+        if (rideType === 'morning') {
 
-        /**
-         * Start GPS ONLY after backend
-         * confirms the ride.
-         */
+          this.resetMorningStatusesForNewRide();
+
+          this.setStage(
+            'morning-pickup'
+          );
+
+        } else {
+
+          this.resetEveningStatusesForNewRide();
+
+          this.setStage(
+            'return-boarding'
+          );
+
+        }
+
+        // =================================================
+        // START GPS ONLY AFTER BACKEND CONFIRMATION
+        // =================================================
+
         this.locationService.startTracking(
           this.driverId,
           rideType
@@ -744,14 +1159,6 @@ private startRide(
           error
         );
 
-        /**
-         * IMPORTANT:
-         *
-         * Do NOT change stage.
-         * Do NOT start GPS.
-         * Do NOT allow pickup.
-         */
-
         this.stage =
           rideType === 'morning'
             ? 'morning-ready'
@@ -770,46 +1177,46 @@ private startRide(
 
 }
 
-async markMorningPicked(
-  student: any
-): Promise<void> {
+  async markMorningPicked(
+    student: any
+  ): Promise<void> {
 
-  if (!this.isMorningRideActive) {
+    if (!this.isMorningRideActive) {
 
-    this.toastService.showToast(
-      'Please start the ride first',
-      'warning'
+      this.toastService.showToast(
+        'Please start the ride first',
+        'warning'
+      );
+
+      return;
+    }
+
+    if (
+      this.getMorningStatus(student)
+      !== 'Pending'
+    ) {
+      return;
+    }
+
+    const confirmed =
+      await this.dialogService.confirm(
+        'Picked Up?',
+        `Confirm ${student.studentName} has been picked up.`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.updateStudentAction(
+      student,
+      'morning',
+      'picked_up',
+      'Picked',
+      `${student.studentName} picked up`
     );
 
-    return;
   }
-
-  if (
-    this.getMorningStatus(student)
-    !== 'Pending'
-  ) {
-    return;
-  }
-
-  const confirmed =
-    await this.dialogService.confirm(
-      'Picked Up?',
-      `Confirm ${student.studentName} has been picked up.`
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-  this.updateStudentAction(
-    student,
-    'morning',
-    'picked_up',
-    'Picked',
-    `${student.studentName} picked up`
-  );
-
-}
   async markDroppedAtSchool(
     student: any
   ): Promise<void> {
@@ -1044,16 +1451,81 @@ async markMorningPicked(
       .subscribe({
         next: () => {
           if (rideType === 'morning') {
+
             this.morningStatuses[
               student.parentId
             ] = uiStatus;
+
+            /*
+             * Remember the selected student before
+             * the pending list changes.
+             */
+            const pickedIndex =
+              this.morningPendingStudents.findIndex(
+                s =>
+                  s.parentId === student.parentId
+              );
+
+            /*
+             * After status update the student will
+             * disappear from pending list.
+             *
+             * Keep selection at the same visual
+             * position where possible.
+             */
+            if (pickedIndex >= 0) {
+
+              const remaining =
+                this.morningPendingStudents.length;
+
+              if (remaining > 0) {
+
+                this.selectedMorningPickupIndex =
+                  Math.min(
+                    pickedIndex,
+                    remaining - 1
+                  );
+
+              } else {
+
+                this.selectedMorningPickupIndex = 0;
+              }
+            }
+
           } else {
+
             this.eveningStatuses[
               student.parentId
             ] = uiStatus;
+
+            const pickedIndex =
+              this.returnWaitingStudents.findIndex(
+                s =>
+                  s.parentId === student.parentId
+              );
+
+            if (pickedIndex >= 0) {
+
+              const remaining =
+                this.returnWaitingStudents.length;
+
+              if (remaining > 0) {
+
+                this.selectedReturnBoardingIndex =
+                  Math.min(
+                    pickedIndex,
+                    remaining - 1
+                  );
+
+              } else {
+
+                this.selectedReturnBoardingIndex = 0;
+              }
+            }
           }
 
           this.persistStatuses();
+
           this.advanceStageIfNeeded();
 
           this.toastService.showToast(
@@ -1076,6 +1548,88 @@ async markMorningPicked(
   }
 
   private advanceStageIfNeeded(): void {
+
+
+    /*
+      * Keep morning swipe selection valid.
+      */
+    if (
+      this.morningPendingStudents.length > 0 &&
+      this.selectedMorningPickupIndex >=
+      this.morningPendingStudents.length
+    ) {
+
+      this.selectedMorningPickupIndex =
+        this.morningPendingStudents.length - 1;
+    }
+
+
+    /*
+     * Keep return swipe selection valid.
+     */
+    if (
+      this.returnWaitingStudents.length > 0 &&
+      this.selectedReturnBoardingIndex >=
+      this.returnWaitingStudents.length
+    ) {
+
+      this.selectedReturnBoardingIndex =
+        this.returnWaitingStudents.length - 1;
+    }
+
+
+    if (
+      this.stage === 'morning-pickup' &&
+      this.morningPendingStudents.length === 0
+    ) {
+
+      this.setStage(
+        'morning-school-drop'
+      );
+
+      return;
+    }
+
+
+    if (
+      this.stage === 'morning-school-drop' &&
+      this.morningPickedStudents.length === 0 &&
+      this.presentStudents.length > 0
+    ) {
+
+      this.setStage(
+        'morning-complete'
+      );
+
+      return;
+    }
+
+
+    if (
+      this.stage === 'return-boarding' &&
+      this.returnWaitingStudents.length === 0
+    ) {
+
+      this.setStage(
+        'return-home-drop'
+      );
+
+      return;
+    }
+
+
+    if (
+      this.stage === 'return-home-drop' &&
+      this.returnOnboardStudents.length === 0 &&
+      this.returnDroppedStudents.length > 0
+    ) {
+
+      this.setStage(
+        'return-complete'
+      );
+    }
+
+    //exisiting
     if (
       this.stage === 'morning-pickup' &&
       this.morningPendingStudents.length === 0
@@ -1110,26 +1664,26 @@ async markMorningPicked(
     }
   }
 
-private setStage(stage: DriverStage): void {
-  this.stage = stage;
-}
+  private setStage(stage: DriverStage): void {
+    this.stage = stage;
+  }
 
-  private getMorningStatus(
+   getMorningStatus(
     student: any
   ): StudentUiStatus {
     return (
       this.morningStatuses[
-        student.parentId
+      student.parentId
       ] || 'Pending'
     );
   }
 
-  private getEveningStatus(
+   getEveningStatus(
     student: any
   ): StudentUiStatus {
     return (
       this.eveningStatuses[
-        student.parentId
+      student.parentId
       ] || 'Waiting'
     );
   }
@@ -1301,25 +1855,25 @@ private setStage(stage: DriverStage): void {
   // DEV / NEXT-DAY RESET
   // =====================================================
 
-resetDay(): void {
+  resetDay(): void {
 
-  this.locationService.stopTracking();
+    this.locationService.stopTracking();
 
-  this.morningStatuses = {};
-  this.eveningStatuses = {};
+    this.morningStatuses = {};
+    this.eveningStatuses = {};
 
-  localStorage.removeItem(
-    this.MORNING_STATUS_KEY
-  );
+    localStorage.removeItem(
+      this.MORNING_STATUS_KEY
+    );
 
-  localStorage.removeItem(
-    this.EVENING_STATUS_KEY
-  );
+    localStorage.removeItem(
+      this.EVENING_STATUS_KEY
+    );
 
-  this.stage = 'morning-ready';
+    this.stage = 'morning-ready';
 
-  this.loadDashboard();
-}
+    this.loadDashboard();
+  }
 
   // =====================================================
   // LOGOUT
