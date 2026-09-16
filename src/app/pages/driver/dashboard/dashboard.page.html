@@ -826,65 +826,349 @@
     </ng-container>
 
 
-    <!-- ===================================================
-         RETURN BOARDING
-    ==================================================== -->
+<!-- ===================================================
+     RETURN BOARDING — FLEXIBLE SELECTION
+==================================================== -->
 
-    <ng-container *ngIf="stage === 'return-boarding'">
+<ng-container *ngIf="stage === 'return-boarding'">
 
-      <div class="running-row">
-        <span class="return-ready-badge">
-          ● RETURN READY
-        </span>
+  <div class="running-row pickup-running-row">
 
-        <span>
-          {{ returnWaitingStudents.length }}
-          waiting
-        </span>
-      </div>
+    <div class="running-status-group">
 
-      <section class="next-action-card" *ngIf="nextReturnBoarding as student">
+      <span class="return-ready-badge">
+        <span class="live-dot"></span>
+        RETURN RUNNING
+      </span>
 
-        <span class="eyebrow accent">
-          NEXT STUDENT
-        </span>
+      <span class="route-progress-text">
+        {{
+          presentStudents.length -
+          returnWaitingStudents.length
+        }}
+        /
+        {{ presentStudents.length }}
+        onboard
+      </span>
 
-        <div class="next-student">
-          <div class="next-avatar">
-            {{
-            student.studentName?.charAt(0)
-            || 'S'
-            }}
-          </div>
+    </div>
 
-          <div>
-            <h2>
-              {{ student.studentName }}
-            </h2>
+    <div class="remaining-pill">
+      {{ returnWaitingStudents.length }}
+      waiting
+    </div>
 
-            <p>
-              Boarding from school
-            </p>
-          </div>
-        </div>
-      </section>
+  </div>
 
-      <button *ngIf="nextReturnBoarding as student" type="button" class="primary-driver-action success-action"
-        (click)="markPickedFromSchool(student)">
 
-        <ion-icon name="checkmark-circle-outline">
-        </ion-icon>
+  <!-- ================================================
+       FLEXIBLE BOARDING HEADER
+  ================================================= -->
 
-        PICKED UP
-      </button>
+  <section class="flexible-pickup-header return-pickup-header">
 
-      <p class="tracking-footer">
-        Parent gets
-        “{{ nextReturnBoarding?.studentName }}
-        picked up from school.”
+    <div class="pickup-header-icon return-icon">
+      <ion-icon name="school-outline"></ion-icon>
+    </div>
+
+    <div class="pickup-header-copy">
+
+      <span class="eyebrow accent">
+        FLEXIBLE BOARDING
+      </span>
+
+      <h2>
+        Choose next student
+      </h2>
+
+      <p>
+        Swipe to select any student waiting at school.
       </p>
 
-    </ng-container>
+    </div>
+
+  </section>
+
+
+  <!-- ================================================
+       RETURN BOARDING CAROUSEL
+  ================================================= -->
+
+  <section
+    class="swipe-pickup-container"
+    *ngIf="selectedReturnBoarding as student"
+  >
+
+    <!-- SWIPE HINT -->
+
+    <div class="swipe-hint">
+
+      <ion-icon name="chevron-back-outline"></ion-icon>
+
+      <span>
+        SWIPE TO CHOOSE
+      </span>
+
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+
+    </div>
+
+
+    <!-- STUDENT CARD -->
+
+    <div
+      class="swipe-student-card return-swipe-card"
+      (touchstart)="onReturnSwipeStart($event)"
+      (touchend)="onReturnSwipeEnd($event)"
+    >
+
+      <div class="route-number-badge">
+        #{{ getRoutePosition(student) }}
+      </div>
+
+
+      <div class="swipe-student-avatar">
+
+        {{
+          student.studentName?.charAt(0)
+          || 'S'
+        }}
+
+      </div>
+
+
+      <div class="swipe-student-info">
+
+        <span class="student-selection-label">
+          SELECTED STUDENT
+        </span>
+
+        <h2>
+          {{ student.studentName }}
+        </h2>
+
+        <div class="pickup-location">
+
+          <ion-icon name="school-outline"></ion-icon>
+
+          <span>
+            {{ student.schoolName || 'School' }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="swipe-ready-status">
+
+        <span class="ready-status-dot"></span>
+
+        <span>
+          WAITING AT SCHOOL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================
+         PAGINATION
+    ================================================= -->
+
+    <div class="swipe-pagination">
+
+      <button
+        type="button"
+        *ngFor="
+          let studentItem of returnWaitingStudents;
+          let i = index
+        "
+        class="pagination-dot"
+        [class.active]="
+          selectedReturnBoarding?.parentId ===
+          studentItem.parentId
+        "
+        (click)="selectReturnBoarding(i)"
+        [attr.aria-label]="
+          'Select student ' + (i + 1)
+        "
+      >
+      </button>
+
+    </div>
+
+
+    <!-- POSITION -->
+
+    <div class="swipe-position">
+
+      Student
+      {{ selectedReturnBoardingIndex + 1 }}
+      of
+      {{ returnWaitingStudents.length }}
+
+    </div>
+
+
+    <!-- PICKUP BUTTON -->
+
+    <button
+      type="button"
+      class="primary-driver-action success-action pickup-student-action"
+      (click)="markPickedFromSchool(student)"
+    >
+
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+
+      PICK UP {{ student.studentName }}
+
+    </button>
+
+
+    <!-- INSTRUCTION -->
+
+    <div class="swipe-instruction">
+
+      <ion-icon name="swap-horizontal-outline"></ion-icon>
+
+      <span>
+        Swipe left or right to choose another student
+      </span>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================================================
+       RETURN BOARDING OVERVIEW
+  ================================================= -->
+
+  <section class="route-overview-card">
+
+    <div class="route-overview-header">
+
+      <div>
+
+        <span class="eyebrow">
+          RETURN JOURNEY
+        </span>
+
+        <h3>
+          Boarding order
+        </h3>
+
+      </div>
+
+      <span class="route-count">
+        {{ presentStudents.length }}
+        students
+      </span>
+
+    </div>
+
+
+    <div class="route-student-list">
+
+      <div
+        class="route-student-row"
+        *ngFor="
+          let routeStudent of presentStudents;
+          let i = index
+        "
+        [class.route-selected]="
+          selectedReturnBoarding?.parentId ===
+          routeStudent.parentId
+        "
+        [class.route-picked]="
+          getEveningStatus(routeStudent) ===
+          'PickedFromSchool'
+        "
+        [class.route-pending]="
+          getEveningStatus(routeStudent) ===
+          'Waiting'
+        "
+        (click)="
+          getEveningStatus(routeStudent) === 'Waiting'
+          && selectReturnBoardingByStudent(routeStudent)
+        "
+      >
+
+        <div class="route-index">
+
+          <span
+            *ngIf="
+              getEveningStatus(routeStudent) ===
+              'PickedFromSchool'
+            "
+          >
+            ✓
+          </span>
+
+          <span
+            *ngIf="
+              getEveningStatus(routeStudent) !==
+              'PickedFromSchool'
+            "
+          >
+            {{ i + 1 }}
+          </span>
+
+        </div>
+
+
+        <div class="route-student-details">
+
+          <strong>
+            {{ routeStudent.studentName }}
+          </strong>
+
+          <span>
+            {{ routeStudent.schoolName || 'School' }}
+          </span>
+
+        </div>
+
+
+        <span
+          class="route-status"
+          [class.status-picked]="
+            getEveningStatus(routeStudent) ===
+            'PickedFromSchool'
+          "
+        >
+
+          {{
+            getEveningStatus(routeStudent) ===
+            'PickedFromSchool'
+              ? 'ONBOARD'
+              : selectedReturnBoarding?.parentId ===
+                routeStudent.parentId
+                ? 'SELECTED'
+                : 'WAITING'
+          }}
+
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <p class="tracking-footer flexible-pickup-footer">
+
+    <ion-icon name="information-circle-outline"></ion-icon>
+
+    Students can board in any order.
+    Parent tracking starts only after pickup.
+
+  </p>
+
+</ng-container>
 
 
     <!-- ===================================================

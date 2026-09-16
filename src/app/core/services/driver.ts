@@ -119,4 +119,37 @@ export class Driver {
       }
     );
   }
+
+findDriver(data: {
+  driverId?: string;
+  mobile?: string;
+}) {
+
+  let params: any = {};
+
+  if (data.driverId) {
+
+    params.driverId =
+      data.driverId.trim();
+
+  }
+
+  if (data.mobile) {
+
+    params.mobile =
+      data.mobile
+        .trim()
+        .replace(/\s+/g, '');
+
+  }
+
+
+  return this.http.get<any>(
+    `${environment.apiUrl}/drivers/find`,
+    {
+      params
+    }
+  );
+
+}
 }

@@ -1317,62 +1317,79 @@ private startRide(
   }
 
   async markPickedFromSchool(
-    student: any
-  ): Promise<void> {
-    if (
-      this.getEveningStatus(student)
-      !== 'Waiting'
-    ) {
-      return;
-    }
+  student: any
+): Promise<void> {
 
-    const confirmed =
-      await this.dialogService.confirm(
-        'Picked Up From School?',
-        `Confirm ${student.studentName} has boarded the van.`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.updateStudentAction(
-      student,
-      'evening',
-      'picked_up',
-      'PickedFromSchool',
-      `${student.studentName} picked up from school`
+  if (!this.isReturnRideActive) {
+    this.toastService.showToast(
+      'Please start the return ride first',
+      'warning'
     );
+    return;
   }
 
-  async markDroppedAtHome(
-    student: any
-  ): Promise<void> {
-    if (
-      this.getEveningStatus(student)
-      !== 'PickedFromSchool'
-    ) {
-      return;
-    }
-
-    const confirmed =
-      await this.dialogService.confirm(
-        'Dropped At Home?',
-        `Confirm ${student.studentName} has been dropped home. Live tracking for this parent will end.`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.updateStudentAction(
-      student,
-      'evening',
-      'dropped_at_home',
-      'DroppedAtHome',
-      `${student.studentName} dropped home`
-    );
+  if (
+    this.getEveningStatus(student) !== 'Waiting'
+  ) {
+    return;
   }
+
+  const confirmed =
+    await this.dialogService.confirm(
+      'Picked Up From School?',
+      `Confirm ${student.studentName} has boarded the van.`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  this.updateStudentAction(
+    student,
+    'evening',
+    'picked_up',
+    'PickedFromSchool',
+    `${student.studentName} picked up from school`
+  );
+}
+
+async markDroppedAtHome(
+  student: any
+): Promise<void> {
+
+  if (!this.isReturnRideActive) {
+    this.toastService.showToast(
+      'Return ride is not active',
+      'warning'
+    );
+    return;
+  }
+
+  if (
+    this.getEveningStatus(student)
+    !== 'PickedFromSchool'
+  ) {
+    return;
+  }
+
+  const confirmed =
+    await this.dialogService.confirm(
+      'Dropped At Home?',
+      `Confirm ${student.studentName} has been dropped home. Live tracking for this parent will end.`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  this.updateStudentAction(
+    student,
+    'evening',
+    'dropped_at_home',
+    'DroppedAtHome',
+    `${student.studentName} dropped home`
+  );
+}
 
   async endReturnRide(): Promise<void> {
     const boardedCount =
@@ -1433,119 +1450,236 @@ private startRide(
   // =====================================================
 
   private updateStudentAction(
-    student: any,
-    rideType: RideType,
-    apiStatus:
-      | 'picked_up'
-      | 'dropped_at_school'
-      | 'dropped_at_home',
-    uiStatus: StudentUiStatus,
-    successMessage: string
-  ): void {
-    this.driverService
-      .updateStudentStatus(
-        student.parentId,
-        rideType,
-        apiStatus
-      )
-      .subscribe({
-        next: () => {
-          if (rideType === 'morning') {
+  student: any,
+  rideType: RideType,
+  apiStatus:
+    | 'picked_up'
+    | 'dropped_at_school'
+    | 'dropped_at_home',
+  uiStatus: StudentUiStatus,
+  successMessage: string
+): void {
 
-            this.morningStatuses[
-              student.parentId
-            ] = uiStatus;
+  // =====================================================
+  // REMEMBER CURRENT POSITION BEFORE STATUS CHANGES
+  // =====================================================
 
-            /*
-             * Remember the selected student before
-             * the pending list changes.
-             */
-            const pickedIndex =
-              this.morningPendingStudents.findIndex(
-                s =>
-                  s.parentId === student.parentId
-              );
+  let previousIndex = -1;
 
-            /*
-             * After status update the student will
-             * disappear from pending list.
-             *
-             * Keep selection at the same visual
-             * position where possible.
-             */
-            if (pickedIndex >= 0) {
+  if (rideType === 'morning') {
 
-              const remaining =
-                this.morningPendingStudents.length;
+    if (apiStatus === 'picked_up') {
 
-              if (remaining > 0) {
+      previousIndex =
+        this.morningPendingStudents.findIndex(
+          s => s.parentId === student.parentId
+        );
 
-                this.selectedMorningPickupIndex =
-                  Math.min(
-                    pickedIndex,
+    } else if (apiStatus === 'dropped_at_school') {
+
+      previousIndex =
+        this.morningPickedStudents.findIndex(
+          s => s.parentId === student.parentId
+        );
+    }
+
+  } else {
+
+    if (apiStatus === 'picked_up') {
+
+      previousIndex =
+        this.returnWaitingStudents.findIndex(
+          s => s.parentId === student.parentId
+        );
+
+    } else if (apiStatus === 'dropped_at_home') {
+
+      previousIndex =
+        this.returnOnboardStudents.findIndex(
+          s => s.parentId === student.parentId
+        );
+    }
+  }
+
+  // =====================================================
+  // API UPDATE
+  // =====================================================
+
+  this.driverService
+    .updateStudentStatus(
+      student.parentId,
+      rideType,
+      apiStatus
+    )
+    .subscribe({
+
+      next: () => {
+
+        // =================================================
+        // UPDATE LOCAL STATUS
+        // =================================================
+
+        if (rideType === 'morning') {
+
+          this.morningStatuses[
+            student.parentId
+          ] = uiStatus;
+
+        } else {
+
+          this.eveningStatuses[
+            student.parentId
+          ] = uiStatus;
+        }
+
+        this.persistStatuses();
+
+        // =================================================
+        // MAINTAIN FLEXIBLE CAROUSEL POSITION
+        // =================================================
+
+        if (rideType === 'morning') {
+
+          if (apiStatus === 'picked_up') {
+
+            const remaining =
+              this.morningPendingStudents.length;
+
+            this.selectedMorningPickupIndex =
+              remaining > 0
+                ? Math.min(
+                    previousIndex >= 0
+                      ? previousIndex
+                      : 0,
                     remaining - 1
-                  );
+                  )
+                : 0;
 
-              } else {
+          } else if (
+            apiStatus === 'dropped_at_school'
+          ) {
 
-                this.selectedMorningPickupIndex = 0;
-              }
-            }
+            const remaining =
+              this.morningPickedStudents.length;
 
-          } else {
-
-            this.eveningStatuses[
-              student.parentId
-            ] = uiStatus;
-
-            const pickedIndex =
-              this.returnWaitingStudents.findIndex(
-                s =>
-                  s.parentId === student.parentId
-              );
-
-            if (pickedIndex >= 0) {
-
-              const remaining =
-                this.returnWaitingStudents.length;
-
-              if (remaining > 0) {
-
-                this.selectedReturnBoardingIndex =
-                  Math.min(
-                    pickedIndex,
+            this.selectedMorningDropIndex =
+              remaining > 0
+                ? Math.min(
+                    previousIndex >= 0
+                      ? previousIndex
+                      : 0,
                     remaining - 1
-                  );
-
-              } else {
-
-                this.selectedReturnBoardingIndex = 0;
-              }
-            }
+                  )
+                : 0;
           }
 
-          this.persistStatuses();
+        } else {
 
-          this.advanceStageIfNeeded();
+          // ===============================================
+          // RETURN BOARDING
+          // ===============================================
 
-          this.toastService.showToast(
-            successMessage,
-            'success'
-          );
-        },
-        error: error => {
-          console.error(
-            'Student action error:',
-            error
-          );
+          if (apiStatus === 'picked_up') {
 
-          this.toastService.showToast(
-            'Unable to update student',
-            'danger'
-          );
+            const remaining =
+              this.returnWaitingStudents.length;
+
+            this.selectedReturnBoardingIndex =
+              remaining > 0
+                ? Math.min(
+                    previousIndex >= 0
+                      ? previousIndex
+                      : 0,
+                    remaining - 1
+                  )
+                : 0;
+
+            /*
+             * The newly boarded student becomes
+             * available in returnOnboardStudents.
+             *
+             * Select that student automatically for
+             * home drop.
+             */
+            const onboardIndex =
+              this.returnOnboardStudents.findIndex(
+                s =>
+                  s.parentId === student.parentId
+              );
+
+            if (onboardIndex >= 0) {
+
+              this.selectedReturnDropIndex =
+                onboardIndex;
+
+            }
+
+          }
+
+          // ===============================================
+          // RETURN HOME DROP
+          // ===============================================
+
+          if (apiStatus === 'dropped_at_home') {
+
+            const remaining =
+              this.returnOnboardStudents.length;
+
+            this.selectedReturnDropIndex =
+              remaining > 0
+                ? Math.min(
+                    previousIndex >= 0
+                      ? previousIndex
+                      : 0,
+                    remaining - 1
+                  )
+                : 0;
+          }
         }
-      });
-  }
+
+        // =================================================
+        // FORCE CHANGE DETECTION
+        // =================================================
+
+        this.morningStatuses = {
+          ...this.morningStatuses
+        };
+
+        this.eveningStatuses = {
+          ...this.eveningStatuses
+        };
+
+        // =================================================
+        // ADVANCE WORKFLOW
+        // =================================================
+
+        this.advanceStageIfNeeded();
+
+        // =================================================
+        // SUCCESS
+        // =================================================
+
+        this.toastService.showToast(
+          successMessage,
+          'success'
+        );
+      },
+
+      error: error => {
+
+        console.error(
+          'Student action error:',
+          error
+        );
+
+        this.toastService.showToast(
+          error?.error?.message ||
+          'Unable to update student',
+          'danger'
+        );
+      }
+    });
+}
 
   private advanceStageIfNeeded(): void {
 
