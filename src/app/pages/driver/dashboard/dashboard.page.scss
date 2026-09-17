@@ -1804,3 +1804,465 @@ ion-title {
   }
 
 }
+
+
+/* ============================================================
+   DAY COMPLETE — DESIGN 4
+   Friendly & Motivational
+   ============================================================ */
+
+.day-complete-card {
+  margin-top: 18px;
+  padding: 0 0 18px;
+
+  overflow: hidden;
+
+  border: 1px solid #fed7aa;
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fffaf3 0%,
+      #ffffff 42%,
+      #f8fafc 100%
+    );
+
+  box-shadow:
+    0 14px 34px rgba(15, 23, 42, 0.08),
+    0 3px 8px rgba(15, 23, 42, 0.04);
+}
+
+.day-complete-hero {
+  position: relative;
+
+  padding: 26px 18px 22px;
+
+  text-align: center;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(245, 158, 11, 0.20),
+      transparent 52%
+    ),
+    linear-gradient(
+      135deg,
+      #fff7ed 0%,
+      #fffbeb 100%
+    );
+
+  border-bottom: 1px solid #fed7aa;
+}
+
+.day-complete-hero::after {
+  content: '';
+
+  position: absolute;
+  right: -35px;
+  top: -35px;
+
+  width: 90px;
+  height: 90px;
+
+  border-radius: 50%;
+
+  border: 14px solid rgba(245, 158, 11, 0.08);
+}
+
+.completion-icon-wrap {
+  position: relative;
+  z-index: 1;
+
+  width: 68px;
+  height: 68px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 12px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  border: 5px solid #fed7aa;
+
+  box-shadow:
+    0 8px 18px rgba(245, 158, 11, 0.14);
+}
+
+.completion-icon-wrap ion-icon {
+  color: #16a34a;
+  font-size: 42px;
+}
+
+.completion-eyebrow {
+  position: relative;
+  z-index: 1;
+
+  display: block;
+
+  color: #c2410c;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 1.4px;
+}
+
+.day-complete-hero h2 {
+  position: relative;
+  z-index: 1;
+
+  margin: 5px 0 0;
+
+  color: #0f172a;
+
+  font-size: 24px;
+  font-weight: 900;
+
+  letter-spacing: -0.55px;
+}
+
+.day-complete-hero > p {
+  position: relative;
+  z-index: 1;
+
+  margin: 6px auto 0;
+
+  max-width: 280px;
+
+  color: #64748b;
+
+  font-size: 11px;
+
+  line-height: 1.5;
+}
+
+.completion-message {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  margin: 15px auto 0;
+  padding: 9px 11px;
+
+  max-width: 300px;
+
+  border-radius: 11px;
+
+  background: rgba(240, 253, 244, 0.88);
+
+  color: #166534;
+
+  border: 1px solid #bbf7d0;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  line-height: 1.35;
+}
+
+.completion-message ion-icon {
+  flex-shrink: 0;
+
+  color: #16a34a;
+
+  font-size: 16px;
+}
+
+
+/* QUICK SUMMARY */
+
+.completion-summary {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 9px;
+
+  padding: 16px;
+}
+
+.completion-stat {
+  min-height: 104px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 6px;
+
+  text-align: center;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+
+  background: #ffffff;
+}
+
+.completion-stat-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 6px;
+
+  border-radius: 10px;
+
+  font-size: 18px;
+}
+
+.completion-stat-icon.students {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.completion-stat-icon.picked {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.completion-stat-icon.dropped {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.completion-stat-icon.absent {
+  background: #fff1f2;
+  color: #dc2626;
+}
+
+.completion-stat strong {
+  color: #0f172a;
+
+  font-size: 20px;
+  font-weight: 900;
+
+  line-height: 1;
+}
+
+.completion-stat span {
+  margin-top: 5px;
+
+  color: #64748b;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+
+/* RIDE CHECKLIST */
+
+.completion-checklist {
+  margin: 0 16px;
+
+  padding: 6px 12px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+
+  background: #ffffff;
+}
+
+.completion-check-row {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  min-height: 58px;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.completion-check-row:last-child {
+  border-bottom: 0;
+}
+
+.check-row-icon {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #fff7ed;
+
+  color: #ea580c;
+
+  font-size: 15px;
+}
+
+.check-row-icon.return-check {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.completion-check-row > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.completion-check-row strong,
+.completion-check-row span {
+  display: block;
+}
+
+.completion-check-row strong {
+  color: #0f172a;
+
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.completion-check-row span {
+  margin-top: 2px;
+
+  color: #94a3b8;
+
+  font-size: 8px;
+}
+
+.check-row-done {
+  flex-shrink: 0;
+
+  color: #16a34a;
+
+  font-size: 18px;
+}
+
+
+/* MOTIVATION */
+
+.driver-motivation {
+  margin: 16px;
+
+  padding: 16px 13px;
+
+  text-align: center;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #fffbeb
+    );
+
+  border: 1px solid #fed7aa;
+}
+
+.driver-motivation p {
+  margin: 0;
+
+  color: #9a3412;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  line-height: 1.4;
+}
+
+.driver-motivation span {
+  display: block;
+
+  margin-top: 5px;
+
+  color: #78716c;
+
+  font-size: 9px;
+}
+
+.driver-motivation ion-icon {
+  display: block;
+
+  margin: 8px auto 0;
+
+  color: #ea580c;
+
+  font-size: 18px;
+}
+
+
+/* FINAL ACTION */
+
+.day-complete-action {
+  width: calc(100% - 32px);
+  min-height: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin: 0 16px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f97316,
+      #ea580c
+    );
+
+  color: #ffffff;
+
+  box-shadow:
+    0 9px 20px rgba(234, 88, 12, 0.20);
+
+  font: inherit;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  letter-spacing: 0.3px;
+}
+
+.day-complete-action ion-icon {
+  font-size: 19px;
+}
+
+.day-complete-action:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 380px) {
+  .day-complete-hero {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .completion-summary {
+    gap: 7px;
+    padding: 13px;
+  }
+
+  .completion-stat {
+    min-height: 96px;
+  }
+
+  .day-complete-hero h2 {
+    font-size: 22px;
+  }
+}

@@ -41,8 +41,10 @@
 
   <main *ngIf="currentView === 'dashboard'" class="driver-workflow">
 
-    <!-- DRIVER / RIDE STATE -->
-    <section class="driver-summary">
+    <!-- DRIVER / RIDE STATE
+         Hidden after all rides are completed so the
+         completion screen does not show "Good Morning". -->
+    <section class="driver-summary" *ngIf="stage !== 'day-complete'">
       <div>
         <span class="eyebrow">
           DRIVER
@@ -1498,36 +1500,178 @@
 
 
     <!-- ===================================================
-         DAY COMPLETE
+         DAY COMPLETE — DESIGN 4
+         Friendly & Motivational
     ==================================================== -->
 
     <ng-container *ngIf="stage === 'day-complete'">
 
-      <section class="complete-card">
-        <ion-icon name="checkmark-circle-outline">
-        </ion-icon>
+      <section class="day-complete-card">
 
-        <h2>
-          Today's Ride Complete
-        </h2>
+        <div class="day-complete-hero">
 
-        <p>
-          Driver GPS and admin live tracking are off.
-        </p>
+          <div class="completion-icon-wrap">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </div>
+
+          <span class="completion-eyebrow">
+            DAY COMPLETE
+          </span>
+
+          <h2>
+            Great Job Today!
+          </h2>
+
+          <p>
+            All scheduled rides are completed successfully.
+          </p>
+
+          <div class="completion-message">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            <span>
+              All students have been safely dropped home.
+            </span>
+          </div>
+
+        </div>
+
+
+        <!-- QUICK SUMMARY -->
+
+        <section class="completion-summary">
+
+          <div class="completion-stat">
+            <div class="completion-stat-icon students">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+
+            <strong>{{ todayStats.total }}</strong>
+            <span>Students</span>
+          </div>
+
+
+          <div class="completion-stat">
+            <div class="completion-stat-icon picked">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+
+            <strong>{{ todayStats.present }}</strong>
+            <span>Picked Up</span>
+          </div>
+
+
+          <div class="completion-stat">
+            <div class="completion-stat-icon dropped">
+              <ion-icon name="home-outline"></ion-icon>
+            </div>
+
+            <strong>{{ returnDroppedStudents.length }}</strong>
+            <span>Dropped Home</span>
+          </div>
+
+
+          <div class="completion-stat">
+            <div class="completion-stat-icon absent">
+              <ion-icon name="close-circle-outline"></ion-icon>
+            </div>
+
+            <strong>{{ todayStats.absent }}</strong>
+            <span>Absent</span>
+          </div>
+
+        </section>
+
+
+        <!-- RIDE CHECKLIST -->
+
+        <section class="completion-checklist">
+
+          <div class="completion-check-row">
+            <div class="check-row-icon">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </div>
+
+            <div>
+              <strong>Morning pickup</strong>
+              <span>
+                {{ todayStats.present }} / {{ todayStats.present }} completed
+              </span>
+            </div>
+
+            <ion-icon class="check-row-done" name="checkmark-circle-outline"></ion-icon>
+          </div>
+
+
+          <div class="completion-check-row">
+            <div class="check-row-icon">
+              <ion-icon name="school-outline"></ion-icon>
+            </div>
+
+            <div>
+              <strong>School drop</strong>
+              <span>
+                {{ morningDroppedStudents.length }} / {{ todayStats.present }} completed
+              </span>
+            </div>
+
+            <ion-icon class="check-row-done" name="checkmark-circle-outline"></ion-icon>
+          </div>
+
+
+          <div class="completion-check-row">
+            <div class="check-row-icon return-check">
+              <ion-icon name="navigate-outline"></ion-icon>
+            </div>
+
+            <div>
+              <strong>Return journey</strong>
+              <span>
+                {{ returnDroppedStudents.length }} / {{ todayStats.present }} completed
+              </span>
+            </div>
+
+            <ion-icon class="check-row-done" name="checkmark-circle-outline"></ion-icon>
+          </div>
+
+        </section>
+
+
+        <!-- MOTIVATIONAL MESSAGE -->
+
+        <div class="driver-motivation">
+          <p>
+            “You make a difference every day.”
+          </p>
+
+          <span>
+            Thank you for keeping our students safe.
+          </span>
+
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+        </div>
+
+
+        <button
+          type="button"
+          class="day-complete-action"
+          (click)="goBack()"
+        >
+          <ion-icon name="home-outline"></ion-icon>
+          BACK TO DASHBOARD
+        </button>
+
       </section>
-
-      <p class="center-message">
-        All scheduled ride activity is complete for today.
-      </p>
 
     </ng-container>
 
 
     <!-- ===================================================
          DAILY OVERVIEW
+         Hidden on the final completion screen because
+         Design 4 already contains the complete summary.
     ==================================================== -->
 
-    <section class="overview-strip">
+    <section class="overview-strip" *ngIf="stage !== 'day-complete'">
       <div>
         <strong>
           {{ todayStats.total }}
