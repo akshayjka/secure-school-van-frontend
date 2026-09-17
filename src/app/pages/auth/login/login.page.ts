@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { ToastService } from '../../../core/services/toast';
+import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -24,7 +25,8 @@ import { ToastService } from '../../../core/services/toast';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    IonicModule
+    IonicModule,
+    RouterLink
   ]
 })
 
