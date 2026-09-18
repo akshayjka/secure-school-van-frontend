@@ -235,4 +235,29 @@ export class ParentService {
 
   }
 
+  // =====================================================
+// DAILY JOURNEY REPORT
+// =====================================================
+
+getJourneyReport(
+  parentId: string,
+  date: string
+): Observable<any> {
+
+  const params =
+    new HttpParams()
+      .set(
+        'date',
+        date
+      );
+
+  return this.http.get(
+    `${environment.apiUrl}/rides/journey-report/${encodeURIComponent(parentId)}`,
+    {
+      params
+    }
+  );
+
+}
+
 }

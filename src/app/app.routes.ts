@@ -67,6 +67,16 @@ export const routes: Routes = [
     import('./pages/parent/attendance/attendance.page')
       .then(m => m.AttendancePage)
 },
+{
+  path: 'parent/journey-report',
+  loadComponent: () =>
+    import(
+      './pages/parent/journey-report/journey-report.page'
+    )
+      .then(
+        m => m.JourneyReportPage
+      )
+},
   {
     path: 'admin/dashboard',
     loadComponent: () => import('./pages/admin/dashboard/dashboard.page').then( m => m.DashboardPage)
@@ -123,5 +133,9 @@ export const routes: Routes = [
   {
     path: 'attendance',
     loadComponent: () => import('./pages/parent/attendance/attendance.page').then( m => m.AttendancePage)
+  },
+  {
+    path: 'journey-report',
+    loadComponent: () => import('./pages/parent/journey-report/journey-report.page').then( m => m.JourneyReportPage)
   },
 ];

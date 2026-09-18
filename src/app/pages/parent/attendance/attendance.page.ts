@@ -15,6 +15,7 @@ import {
 
 import {
   IonicModule,
+  AlertController,
   ToastController
 } from '@ionic/angular';
 
@@ -107,6 +108,9 @@ export class AttendancePage
 
   loading = false;
 
+  /** Snapshot of the last saved month, used to show an accurate save review. */
+  private savedAttendance = new Map<string, AttendanceDay['status']>();
+
   private attendanceSubscription?:
     Subscription;
 
@@ -134,6 +138,9 @@ export class AttendancePage
 
     private socketService:
       SocketService,
+
+    private alertCtrl:
+      AlertController,
 
     private toastCtrl:
       ToastController
@@ -367,7 +374,11 @@ export class AttendancePage
         isSunday,
 
         status:
-          'not_marked'
+          // Attendance starts as present. Parents only need to record
+          // exceptions such as an absence or a later return to present.
+          isSunday
+            ? 'not_marked'
+            : 'present'
 
       });
 
@@ -395,14 +406,14 @@ export class AttendancePage
           const records =
             res?.data?.records || [];
 
-          // Reset first
+          // Attendance is present by default; saved records override it.
           this.attendanceDays
             .forEach(day => {
 
               if (!day.isSunday) {
 
                 day.status =
-                  'not_marked';
+                  'present';
 
               }
 
@@ -427,11 +438,21 @@ export class AttendancePage
               if (day) {
 
                 day.status =
-                  record.status;
+                  this.normalizeAttendanceStatus(
+                    record.status
+                  );
 
               }
 
             }
+          );
+
+
+          this.savedAttendance = new Map(
+            this.attendanceDays.map(day => [
+              day.date,
+              day.status
+            ])
           );
 
           this.loading = false;
@@ -482,7 +503,7 @@ export class AttendancePage
         if (!day.isSunday) {
 
           day.status =
-            'not_marked';
+            'present';
 
         }
 
@@ -515,7 +536,61 @@ export class AttendancePage
   // SAVE
   // =====================================================
 
-  saveAttendance(): void {
+  async saveAttendance(): Promise<void> {
+
+    if (this.saving) {
+
+      return;
+
+    }
+
+
+    const changes = this.pendingAttendanceChanges;
+
+
+    if (changes.length === 0) {
+
+      await this.showToast(
+        'There are no attendance changes to save',
+        'warning'
+      );
+
+      return;
+
+    }
+
+
+    const alert = await this.alertCtrl.create({
+
+      cssClass: 'universal-alert attendance-confirmation-alert',
+
+      header: 'Save attendance changes?',
+
+      subHeader: `${changes.length} ${changes.length === 1 ? 'date' : 'dates'} will be updated`,
+
+      message: this.buildAttendanceChangeSummary(changes),
+
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Save changes',
+          role: 'confirm',
+          handler: () => this.persistAttendance()
+        }
+      ]
+
+    });
+
+
+    await alert.present();
+
+  }
+
+
+  private persistAttendance(): void {
 
     const records =
       this.attendanceDays
@@ -561,6 +636,13 @@ export class AttendancePage
         next: async () => {
 
           this.saving = false;
+
+          this.savedAttendance = new Map(
+            this.attendanceDays.map(day => [
+              day.date,
+              day.status
+            ])
+          );
 
           await this.showToast(
             'Attendance saved successfully',
@@ -678,6 +760,17 @@ export class AttendancePage
   }
 
 
+  private normalizeAttendanceStatus(
+    status: unknown
+  ): AttendanceDay['status'] {
+
+    return String(status || '').toLowerCase() === 'absent'
+      ? 'absent'
+      : 'present';
+
+  }
+
+
   getMonthName(
     month: number
   ): string {
@@ -747,6 +840,56 @@ export class AttendancePage
             'not_marked'
       )
       .length;
+
+  }
+
+
+  get pendingAttendanceChanges(): AttendanceDay[] {
+
+    return this.attendanceDays.filter(day =>
+      !day.isSunday &&
+      day.status !== (
+        this.savedAttendance.get(day.date) || 'present'
+      )
+    );
+
+  }
+
+
+  private buildAttendanceChangeSummary(
+    changes: AttendanceDay[]
+  ): string {
+
+    const items = changes.map(day => {
+
+      const status = day.status === 'present'
+        ? 'Present'
+        : day.status === 'absent'
+          ? 'Absent'
+          : 'Not marked';
+
+      return `• ${this.formatChangeDate(day.date)} — ${status}`;
+
+    });
+
+
+    return [
+      'Please review the following changes before saving:',
+      '',
+      ...items
+    ].join('\n');
+
+  }
+
+
+  private formatChangeDate(date: string): string {
+
+    return new Date(`${date}T00:00:00`)
+      .toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
 
   }
 

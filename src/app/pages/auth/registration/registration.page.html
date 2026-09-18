@@ -382,13 +382,29 @@
 
           <div class="school-search-wrapper">
 
+            <ion-item *ngIf="!selectedSchool">
+
+              <ion-input label="City / Area" labelPlacement="floating" formControlName="schoolSearchArea"
+                (ionInput)="onSchoolAreaChange($event)" autocomplete="address-level2">
+              </ion-input>
+
+            </ion-item>
+
+            <small class="location-hint" *ngIf="!selectedSchool && schoolLocationLoading">
+              Detecting your city…
+            </small>
+
+            <small class="location-hint" *ngIf="!selectedSchool && schoolSearchArea && !schoolLocationLoading">
+              Showing schools in {{ schoolSearchArea }}. Edit this field to search another city or area.
+            </small>
+
             <!-- =================================================
      SCHOOL SEARCH
 ================================================== -->
 
             <div class="school-search-wrapper">
 
-              <ion-item>
+              <ion-item *ngIf="!selectedSchool">
 
                 <ion-input label="School Name" labelPlacement="floating" formControlName="schoolName"
                   (ionInput)="onSchoolSearch($event)" autocomplete="off">
@@ -506,6 +522,9 @@
               Please select a school from the list
             </small>
 
+            <!-- Duplicate legacy search markup kept out of the rendered view. -->
+            <ng-container *ngIf="false">
+
             <!-- SEARCHING -->
 
             <div class="school-search-loading" *ngIf="schoolSearching">
@@ -566,6 +585,8 @@
               </div>
 
             </div>
+
+            </ng-container>
 
           </div>
 
@@ -634,7 +655,7 @@
 
         <ion-button expand="block" fill="outline" class="location-btn" (click)="searchPickupAddress()">
 
-          🔎 Search Address
+          🔎 Search Address & Pin on Map
 
         </ion-button>
 

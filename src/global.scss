@@ -1331,6 +1331,138 @@ ion-modal {
 }
 
 
+.attendance-confirmation-alert .alert-message {
+
+  white-space: pre-line;
+
+  text-align: left;
+
+}
+
+
+/* Attendance save review: keep the existing amber theme, with clearer actions. */
+.attendance-confirmation-alert .alert-wrapper {
+
+  width: min(91vw, 390px);
+
+  border: 1px solid rgba(217, 119, 6, 0.26);
+
+  border-radius: 18px;
+
+  box-shadow: 0 18px 48px rgba(73, 48, 8, 0.28);
+
+}
+
+
+.attendance-confirmation-alert .alert-head {
+
+  padding: 26px 28px 6px;
+
+  text-align: left;
+
+}
+
+
+.attendance-confirmation-alert .alert-title {
+
+  color: #172033;
+
+  font-size: 24px;
+
+  font-weight: 750;
+
+  line-height: 1.2;
+
+}
+
+
+.attendance-confirmation-alert .alert-sub-title {
+
+  margin-top: 8px;
+
+  color: #8a5a08;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+}
+
+
+.attendance-confirmation-alert .alert-message {
+
+  max-height: 220px;
+
+  overflow-y: auto;
+
+  padding: 18px 28px 14px;
+
+  color: #4b5563;
+
+  font-size: 16px;
+
+  line-height: 1.7;
+
+}
+
+
+.attendance-confirmation-alert .alert-button-group {
+
+  gap: 12px;
+
+  padding: 14px 28px 26px;
+
+}
+
+
+.attendance-confirmation-alert .alert-button {
+
+  flex: 1;
+
+  min-height: 50px;
+
+  border-radius: 12px;
+
+  font-size: 15px;
+
+  font-weight: 750;
+
+  text-transform: none;
+
+}
+
+
+.attendance-confirmation-alert .alert-button-role-cancel {
+
+  border: 1px solid #f0b64a;
+
+  background: #fffaf0;
+
+  color: #9a6708 !important;
+
+}
+
+
+.attendance-confirmation-alert .alert-button-role-confirm {
+
+  background: linear-gradient(110deg, #f59e0b, #f97316) !important;
+
+  color: #ffffff !important;
+
+  opacity: 1 !important;
+
+  box-shadow: 0 8px 18px rgba(234, 128, 12, 0.28);
+
+}
+
+
+.attendance-confirmation-alert .alert-button-role-confirm .alert-button-inner {
+
+  color: #ffffff !important;
+
+}
+
+
 /* =====================================================
    TOAST
 ===================================================== */

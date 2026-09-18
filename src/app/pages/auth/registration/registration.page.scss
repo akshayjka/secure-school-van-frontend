@@ -925,6 +925,16 @@ small {
   width: 100%;
 }
 
+.location-hint {
+  display: block;
+
+  margin: 6px 12px;
+
+  color: #718078;
+
+  font-size: 12px;
+}
+
 .school-search-loading,
 .school-search-status {
   display: flex;

@@ -158,6 +158,11 @@ export class RegistrationPage
 
   selectedSchoolName = '';
 
+  /** City/area used to keep school suggestions close to the parent. */
+  schoolSearchArea = '';
+
+  schoolLocationLoading = false;
+
   private schoolSearchTimer: any;
 
 
@@ -448,6 +453,12 @@ export class RegistrationPage
 
           ]
 
+        ],
+
+        // This is optional because location permission may be declined.
+        // Parents can always enter a city or area themselves.
+        schoolSearchArea: [
+          ''
         ],
 
 
@@ -822,6 +833,22 @@ export class RegistrationPage
   }
 
 
+  onSchoolAreaChange(event: any): void {
+
+    this.schoolSearchArea =
+      event?.detail?.value?.trim() || '';
+
+
+    /* A selected school may no longer belong to the chosen city. */
+    if (this.selectedSchool) {
+
+      this.resetSchoolSelection(false);
+
+    }
+
+  }
+
+
   // =========================================================
   // SEARCH MULTIPLE SCHOOLS
   // =========================================================
@@ -844,9 +871,16 @@ export class RegistrationPage
      * locations.
      */
 
+    const area =
+      this.schoolSearchArea ||
+      this.studentForm.get('schoolSearchArea')?.value?.trim() || '';
+
+
     const params = {
 
-      q: `${query}, India`,
+      q: area
+        ? `${query}, ${area}, India`
+        : `${query}, India`,
 
       format: 'json',
 
@@ -937,10 +971,15 @@ export class RegistrationPage
            * Remove duplicate coordinates.
            */
 
+          const areaResults = area
+            ? schoolResults.filter(result =>
+              this.belongsToSchoolArea(result, area)
+            )
+            : schoolResults;
+
+
           this.schoolSuggestions =
-            this.removeDuplicateSchools(
-              schoolResults
-            );
+            this.removeDuplicateSchools(areaResults);
 
 
           console.log(
@@ -968,6 +1007,127 @@ export class RegistrationPage
         }
 
       });
+
+  }
+
+
+  private belongsToSchoolArea(
+    school: any,
+    area: string
+  ): boolean {
+
+    const normalizedArea =
+      area.toLowerCase().trim();
+
+    const address = school?.address || {};
+
+    const searchableLocation = [
+      school?.display_name,
+      address.city,
+      address.town,
+      address.municipality,
+      address.village,
+      address.suburb,
+      address.neighbourhood,
+      address.city_district,
+      address.county,
+      address.state,
+      address.postcode
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+
+    return searchableLocation.includes(normalizedArea);
+
+  }
+
+
+  private detectSchoolSearchArea(): void {
+
+    if (
+      this.schoolSearchArea ||
+      this.schoolLocationLoading ||
+      !navigator.geolocation
+    ) {
+
+      return;
+
+    }
+
+
+    this.schoolLocationLoading = true;
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+
+        this.reverseGeocodeSchoolSearchArea(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+
+      },
+      () => {
+
+        this.schoolLocationLoading = false;
+
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
+
+  }
+
+
+  private reverseGeocodeSchoolSearchArea(
+    latitude: number,
+    longitude: number
+  ): void {
+
+    this.http.get<any>(
+      'https://nominatim.openstreetmap.org/reverse',
+      {
+        params: {
+          lat: latitude,
+          lon: longitude,
+          format: 'json',
+          addressdetails: '1',
+          'accept-language': 'en'
+        }
+      }
+    ).subscribe({
+      next: result => {
+
+        const address = result?.address || {};
+        const area =
+          address.city ||
+          address.town ||
+          address.municipality ||
+          address.village ||
+          address.suburb ||
+          '';
+
+
+        if (area && !this.schoolSearchArea) {
+
+          this.schoolSearchArea = area;
+          this.studentForm.patchValue({ schoolSearchArea: area });
+
+        }
+
+        this.schoolLocationLoading = false;
+
+      },
+      error: () => {
+
+        this.schoolLocationLoading = false;
+
+      }
+    });
 
   }
 
@@ -1361,7 +1521,9 @@ export class RegistrationPage
   // RESET SCHOOL
   // =========================================================
 
-  private resetSchoolSelection(): void {
+  private resetSchoolSelection(
+    clearSearchArea = false
+  ): void {
 
     this.selectedSchool = null;
 
@@ -1384,9 +1546,17 @@ export class RegistrationPage
 
       this.studentForm.patchValue({
 
-        schoolName: ''
+        schoolName: '',
+        ...(clearSearchArea ? { schoolSearchArea: '' } : {})
 
       });
+
+    }
+
+
+    if (clearSearchArea) {
+
+      this.schoolSearchArea = '';
 
     }
 
@@ -1493,6 +1663,13 @@ export class RegistrationPage
     ) {
 
       this.parentStep++;
+
+
+      if (this.parentStep === 3) {
+
+        this.detectSchoolSearchArea();
+
+      }
 
     }
 
@@ -1862,6 +2039,20 @@ export class RegistrationPage
   }
 
 
+  private openPickupPinSelection(): void {
+
+    this.parentStep = 5;
+
+
+    setTimeout(() => {
+
+      this.initializePickupMap();
+
+    }, 100);
+
+  }
+
+
   // =========================================================
   // SEARCH SCHOOL ADDRESS
   //
@@ -2048,6 +2239,14 @@ export class RegistrationPage
                 17
 
               );
+
+
+            /*
+             * A manually searched address is only an approximate point.
+             * Open the map so the parent can place the pickup pin exactly.
+             */
+
+            this.openPickupPinSelection();
 
           } else {
 

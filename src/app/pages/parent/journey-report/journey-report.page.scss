@@ -1,0 +1,268 @@
+/* =====================================================
+   DAILY JOURNEY REPORT
+===================================================== */
+
+.journey-report-card {
+  margin: 16px 0;
+  padding: 18px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #e7ebf2;
+  box-shadow: 0 8px 24px rgba(20, 30, 50, 0.06);
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.journey-report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.journey-title-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.journey-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #f97316;
+  margin-bottom: 3px;
+}
+
+.journey-title-wrapper h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.journey-calendar-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff3e6;
+}
+
+.journey-calendar-icon ion-icon {
+  font-size: 22px;
+  color: #f97316;
+}
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+.journey-date-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.journey-date-wrapper label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.journey-date-wrapper input {
+  width: 100%;
+  height: 46px;
+  padding: 0 13px;
+  border: 1px solid #dfe5ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.journey-date-wrapper input:focus {
+  border-color: #f97316;
+  background: #ffffff;
+}
+
+
+/* =====================================================
+   JOURNEY SECTION
+===================================================== */
+
+.journey-section {
+  padding: 15px;
+  margin-top: 14px;
+  border-radius: 17px;
+  background: #f8fafc;
+}
+
+.journey-section-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 15px;
+}
+
+.journey-section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.morning-icon {
+  background: #dcfce7;
+}
+
+.morning-icon ion-icon {
+  color: #16a34a;
+  font-size: 21px;
+}
+
+.evening-icon {
+  background: #ede9fe;
+}
+
+.evening-icon ion-icon {
+  color: #7c3aed;
+  font-size: 21px;
+}
+
+.journey-section-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #172033;
+}
+
+.journey-section-header span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+
+/* =====================================================
+   TIMELINE
+===================================================== */
+
+.journey-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.journey-event {
+  display: flex;
+  min-height: 60px;
+}
+
+.journey-event-line {
+  width: 24px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.journey-event-line::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: -2px;
+  width: 2px;
+  background: #dce2ea;
+}
+
+.journey-event:last-child
+.journey-event-line::after {
+  display: none;
+}
+
+.journey-dot {
+  position: relative;
+  z-index: 2;
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 4px #dcfce7;
+}
+
+.journey-event-content {
+  flex: 1;
+  padding-left: 10px;
+  padding-bottom: 14px;
+}
+
+.journey-event-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.journey-event-content strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #172033;
+}
+
+.not-recorded {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.journey-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 80px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.journey-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 70px;
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.journey-empty ion-icon {
+  font-size: 18px;
+}

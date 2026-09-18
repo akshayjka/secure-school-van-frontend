@@ -1,0 +1,454 @@
+<ion-header>
+
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+
+      <ion-button
+        (click)="goBack()">
+
+        <ion-icon
+          slot="icon-only"
+          name="arrow-back-outline">
+        </ion-icon>
+
+      </ion-button>
+
+    </ion-buttons>
+
+
+    <ion-title>
+      Journey Report
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+
+
+<ion-content>
+
+  <main class="journey-report-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <section class="journey-page-header">
+
+      <div>
+
+        <span class="journey-eyebrow">
+          JOURNEY REPORT
+        </span>
+
+        <h1>
+          Daily Journey
+        </h1>
+
+        <p>
+          View your student's complete daily journey.
+        </p>
+
+      </div>
+
+
+      <div class="journey-calendar-icon">
+
+        <ion-icon
+          name="calendar-outline">
+        </ion-icon>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         DATE
+    ====================================================== -->
+
+    <section class="journey-date-card">
+
+      <label>
+        Select Date
+      </label>
+
+
+      <input
+        type="date"
+        [value]="selectedReportDate"
+        [max]="todayDate"
+        (change)="onReportDateChange($event)"
+      />
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
+
+    <div
+      class="journey-loading"
+      *ngIf="journeyReportLoading">
+
+      <ion-spinner></ion-spinner>
+
+      <span>
+        Loading journey...
+      </span>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         REPORT
+    ====================================================== -->
+
+    <ng-container
+      *ngIf="
+        !journeyReportLoading &&
+        journeyReport
+      ">
+
+
+      <!-- =================================================
+           MORNING
+      ================================================== -->
+
+      <section class="journey-section">
+
+        <div class="journey-section-header">
+
+          <div
+            class="journey-section-icon morning-icon">
+
+            <ion-icon
+              name="home-outline">
+            </ion-icon>
+
+          </div>
+
+
+          <div>
+
+            <h3>
+              Morning
+            </h3>
+
+            <span>
+              Home → School
+            </span>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- TIMELINE -->
+
+        <div class="journey-timeline">
+
+
+          <!-- PICKUP -->
+
+          <div class="journey-event">
+
+            <div class="journey-event-line">
+
+              <span class="journey-dot"></span>
+
+            </div>
+
+
+            <div class="journey-event-content">
+
+              <span class="journey-event-label">
+                Student Picked Up
+              </span>
+
+
+              <strong
+                *ngIf="
+                  journeyReport.morning?.pickedUpAt
+                ">
+
+                {{
+                  formatJourneyTime(
+                    journeyReport.morning.pickedUpAt
+                  )
+                }}
+
+              </strong>
+
+
+              <span
+                class="not-recorded"
+                *ngIf="
+                  !journeyReport.morning?.pickedUpAt
+                ">
+
+                Not recorded
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- SCHOOL DROP -->
+
+          <div class="journey-event">
+
+            <div class="journey-event-line">
+
+              <span class="journey-dot"></span>
+
+            </div>
+
+
+            <div class="journey-event-content">
+
+              <span class="journey-event-label">
+                Dropped at School
+              </span>
+
+
+              <strong
+                *ngIf="
+                  journeyReport.morning?.droppedAtSchoolAt
+                ">
+
+                {{
+                  formatJourneyTime(
+                    journeyReport.morning.droppedAtSchoolAt
+                  )
+                }}
+
+              </strong>
+
+
+              <span
+                class="not-recorded"
+                *ngIf="
+                  !journeyReport.morning?.droppedAtSchoolAt
+                ">
+
+                Not recorded
+
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =================================================
+           EVENING
+      ================================================== -->
+
+      <section class="journey-section">
+
+        <div class="journey-section-header">
+
+          <div
+            class="journey-section-icon evening-icon">
+
+            <ion-icon
+              name="school-outline">
+            </ion-icon>
+
+          </div>
+
+
+          <div>
+
+            <h3>
+              Evening
+            </h3>
+
+            <span>
+              School → Home
+            </span>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- TIMELINE -->
+
+        <div class="journey-timeline">
+
+
+          <!-- SCHOOL PICKUP -->
+
+          <div class="journey-event">
+
+            <div class="journey-event-line">
+
+              <span class="journey-dot"></span>
+
+            </div>
+
+
+            <div class="journey-event-content">
+
+              <span class="journey-event-label">
+                Picked Up From School
+              </span>
+
+
+              <strong
+                *ngIf="
+                  journeyReport.evening?.pickedFromSchoolAt
+                ">
+
+                {{
+                  formatJourneyTime(
+                    journeyReport.evening.pickedFromSchoolAt
+                  )
+                }}
+
+              </strong>
+
+
+              <span
+                class="not-recorded"
+                *ngIf="
+                  !journeyReport.evening?.pickedFromSchoolAt
+                ">
+
+                Not recorded
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- HOME DROP -->
+
+          <div class="journey-event">
+
+            <div class="journey-event-line">
+
+              <span class="journey-dot"></span>
+
+            </div>
+
+
+            <div class="journey-event-content">
+
+              <span class="journey-event-label">
+                Dropped at Home
+              </span>
+
+
+              <strong
+                *ngIf="
+                  journeyReport.evening?.droppedAtHomeAt
+                ">
+
+                {{
+                  formatJourneyTime(
+                    journeyReport.evening.droppedAtHomeAt
+                  )
+                }}
+
+              </strong>
+
+
+              <span
+                class="not-recorded"
+                *ngIf="
+                  !journeyReport.evening?.droppedAtHomeAt
+                ">
+
+                Not recorded
+
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </ng-container>
+
+
+
+    <!-- =====================================================
+         NO JOURNEY
+    ====================================================== -->
+
+    <div
+      class="journey-empty"
+      *ngIf="
+        !journeyReportLoading &&
+        journeyReport &&
+        !journeyReport.morning?.pickedUpAt &&
+        !journeyReport.morning?.droppedAtSchoolAt &&
+        !journeyReport.evening?.pickedFromSchoolAt &&
+        !journeyReport.evening?.droppedAtHomeAt
+      ">
+
+      <ion-icon
+        name="information-circle-outline">
+      </ion-icon>
+
+
+      <span>
+        No journey recorded for this date.
+      </span>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         NO REPORT RESPONSE
+    ====================================================== -->
+
+    <div
+      class="journey-empty"
+      *ngIf="
+        !journeyReportLoading &&
+        !journeyReport
+      ">
+
+      <ion-icon
+        name="information-circle-outline">
+      </ion-icon>
+
+
+      <span>
+        No journey report available for this date.
+      </span>
+
+    </div>
+
+
+  </main>
+
+</ion-content>

@@ -1,14 +1,155 @@
+<!-- =====================================================
+     PARENT MENU
+====================================================== -->
+
+<ion-menu
+  side="start"
+  menuId="parent-menu"
+  contentId="parent-dashboard-content">
+
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>
+        Parent Menu
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+
+    <ion-list>
+
+      <!-- DASHBOARD -->
+
+      <ion-item
+        button
+        detail="false"
+        (click)="openDashboard()">
+
+        <ion-icon
+          slot="start"
+          name="home-outline">
+        </ion-icon>
+
+        <ion-label>
+          Dashboard
+        </ion-label>
+
+      </ion-item>
+
+
+      <!-- ATTENDANCE -->
+
+      <ion-item
+        button
+        detail="false"
+        (click)="openAttendanceFromMenu()">
+
+        <ion-icon
+          slot="start"
+          name="calendar-outline">
+        </ion-icon>
+
+        <ion-label>
+          Attendance
+        </ion-label>
+
+      </ion-item>
+
+
+      <!-- JOURNEY REPORT -->
+
+      <ion-item
+        button
+        detail="false"
+        (click)="openJourneyReport()">
+
+        <ion-icon
+          slot="start"
+          name="time-outline">
+        </ion-icon>
+
+        <ion-label>
+          Journey Report
+        </ion-label>
+
+      </ion-item>
+
+
+      <!-- LIVE TRACKING -->
+
+      <ion-item
+        button
+        detail="false"
+        [disabled]="!trackingAvailable"
+        (click)="openTrackingFromMenu()">
+
+        <ion-icon
+          slot="start"
+          name="location-outline">
+        </ion-icon>
+
+        <ion-label>
+          Live Tracking
+        </ion-label>
+
+      </ion-item>
+
+
+      <!-- LOGOUT -->
+
+      <ion-item
+        button
+        detail="false"
+        (click)="logout()">
+
+        <ion-icon
+          slot="start"
+          name="log-out-outline">
+        </ion-icon>
+
+        <ion-label>
+          Logout
+        </ion-label>
+
+      </ion-item>
+
+    </ion-list>
+
+  </ion-content>
+
+</ion-menu>
+
+
+
+<!-- =====================================================
+     DASHBOARD HEADER
+====================================================== -->
+
 <ion-header>
 
   <ion-toolbar>
+
+    <!-- MENU -->
+
+    <ion-buttons slot="start">
+
+      <ion-menu-button
+        menu="parent-menu">
+      </ion-menu-button>
+
+    </ion-buttons>
+
 
     <ion-title>
       Parent Dashboard
     </ion-title>
 
+
     <ion-buttons slot="end">
 
-      <!-- Refresh -->
+      <!-- REFRESH -->
+
       <ion-button
         class="toolbar-action"
         (click)="refreshDashboard()"
@@ -22,7 +163,8 @@
       </ion-button>
 
 
-      <!-- Logout -->
+      <!-- LOGOUT -->
+
       <ion-button
         class="toolbar-action"
         (click)="logout()">
@@ -41,7 +183,13 @@
 </ion-header>
 
 
-<ion-content>
+
+<!-- =====================================================
+     DASHBOARD CONTENT
+====================================================== -->
+
+<ion-content
+  id="parent-dashboard-content">
 
   <main class="parent-dashboard">
 
@@ -58,7 +206,9 @@
         (click)="openAttendance()"
         aria-label="Open attendance">
 
-        <ion-icon name="calendar-outline"></ion-icon>
+        <ion-icon
+          name="calendar-outline">
+        </ion-icon>
 
       </button>
 
@@ -68,6 +218,7 @@
         <span class="card-label">
           ATTENDANCE
         </span>
+
 
         <h2>
           Today's Attendance
@@ -83,7 +234,8 @@
           <span class="status-dot"></span>
 
 
-          <ng-container [ngSwitch]="todayAttendanceStatus">
+          <ng-container
+            [ngSwitch]="todayAttendanceStatus">
 
             <span *ngSwitchCase="'present'">
               Present
@@ -104,7 +256,9 @@
 
         <div class="attendance-hint">
 
-          <ion-icon name="calendar-outline"></ion-icon>
+          <ion-icon
+            name="calendar-outline">
+          </ion-icon>
 
           <span>
             Tap calendar to manage attendance
@@ -129,18 +283,14 @@
 
     <!-- =====================================================
          RIDE NOTIFICATION
-         ONLY ONE NOTIFICATION CARD
     ====================================================== -->
 
     <section
       class="ride-notification"
-
       [class.notification-success]="rideNotificationType === 'active'"
       [class.notification-ended]="rideNotificationType === 'completed'"
       [class.notification-waiting]="rideNotificationType === 'waiting'">
 
-
-      <!-- ICON -->
 
       <div class="notification-icon">
 
@@ -150,8 +300,6 @@
 
       </div>
 
-
-      <!-- CONTENT -->
 
       <div class="notification-content">
 
@@ -170,8 +318,6 @@
 
       </div>
 
-
-      <!-- LIVE -->
 
       <span
         class="live-badge"
@@ -212,7 +358,9 @@
 
           <div class="student-profile-hint">
 
-            <ion-icon name="person-outline"></ion-icon>
+            <ion-icon
+              name="person-outline">
+            </ion-icon>
 
             <span>
               Tap profile to view student details
@@ -223,15 +371,15 @@
         </div>
 
 
-        <!-- PROFILE -->
-
         <button
           type="button"
           class="student-avatar"
           (click)="openStudentProfile()"
           aria-label="View student details">
 
-          <ion-icon name="person-outline"></ion-icon>
+          <ion-icon
+            name="person-outline">
+          </ion-icon>
 
         </button>
 
@@ -248,9 +396,7 @@
     <div class="dashboard-info-grid">
 
 
-      <!-- ===================================================
-           DRIVER
-      ==================================================== -->
+      <!-- DRIVER -->
 
       <section class="mini-info-card">
 
@@ -258,7 +404,9 @@
 
           <div class="mini-icon driver-icon">
 
-            <ion-icon name="person-outline"></ion-icon>
+            <ion-icon
+              name="person-outline">
+            </ion-icon>
 
           </div>
 
@@ -280,6 +428,7 @@
             {{ driver.mobileNumber }}
           </p>
 
+
           <p *ngIf="!driver.mobileNumber">
             Contact not available
           </p>
@@ -290,9 +439,7 @@
 
 
 
-      <!-- ===================================================
-           RIDE STATUS
-      ==================================================== -->
+      <!-- RIDE STATUS -->
 
       <section class="mini-info-card">
 
@@ -300,7 +447,9 @@
 
           <div class="mini-icon ride-icon">
 
-            <ion-icon name="bus-outline"></ion-icon>
+            <ion-icon
+              name="bus-outline">
+            </ion-icon>
 
           </div>
 
@@ -313,10 +462,8 @@
 
         <div class="mini-card-body">
 
-
           <div
             class="ride-status"
-
             [class.ride-active]="rideStatusClass === 'active'"
             [class.ride-inactive]="rideStatusClass === 'inactive'"
             [class.ride-waiting]="rideStatusClass === 'waiting'"
@@ -347,7 +494,6 @@
 
     <section
       class="student-status-card"
-
       [class.status-waiting]="studentStatus === 'waiting'"
       [class.status-picked]="
         studentStatus === 'picked_up' ||
@@ -366,7 +512,9 @@
         class="student-status-icon"
         *ngIf="studentStatus === 'waiting'">
 
-        <ion-icon name="time-outline"></ion-icon>
+        <ion-icon
+          name="time-outline">
+        </ion-icon>
 
       </div>
 
@@ -375,13 +523,14 @@
 
       <div
         class="student-status-icon"
-
         *ngIf="
           studentStatus === 'picked_up' ||
           studentStatus === 'picked_from_school'
         ">
 
-        <ion-icon name="bus-outline"></ion-icon>
+        <ion-icon
+          name="bus-outline">
+        </ion-icon>
 
       </div>
 
@@ -390,14 +539,15 @@
 
       <div
         class="student-status-icon"
-
         *ngIf="
           studentStatus === 'dropped_at_school' ||
           studentStatus === 'dropped_at_home' ||
           studentStatus === 'dropped'
         ">
 
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <ion-icon
+          name="checkmark-circle-outline">
+        </ion-icon>
 
       </div>
 
@@ -410,15 +560,97 @@
 
 
         <strong>
-
           {{ studentStatusTitle }}
-
         </strong>
 
 
         <small>
           {{ studentStatusMessage }}
         </small>
+
+
+        <!-- MORNING PICKUP -->
+
+        <div
+          class="journey-time"
+          *ngIf="
+            studentStatus === 'picked_up' &&
+            pickupTime
+          ">
+
+          <ion-icon
+            name="time-outline">
+          </ion-icon>
+
+          <span>
+            Pickup:
+            {{ formatJourneyTime(pickupTime) }}
+          </span>
+
+        </div>
+
+
+        <!-- SCHOOL DROP -->
+
+        <div
+          class="journey-time"
+          *ngIf="
+            studentStatus === 'dropped_at_school' &&
+            schoolDropTime
+          ">
+
+          <ion-icon
+            name="checkmark-circle-outline">
+          </ion-icon>
+
+          <span>
+            Dropped at school:
+            {{ formatJourneyTime(schoolDropTime) }}
+          </span>
+
+        </div>
+
+
+        <!-- EVENING SCHOOL PICKUP -->
+
+        <div
+          class="journey-time"
+          *ngIf="
+            studentStatus === 'picked_from_school' &&
+            schoolPickupTime
+          ">
+
+          <ion-icon
+            name="time-outline">
+          </ion-icon>
+
+          <span>
+            School pickup:
+            {{ formatJourneyTime(schoolPickupTime) }}
+          </span>
+
+        </div>
+
+
+        <!-- EVENING HOME DROP -->
+
+        <div
+          class="journey-time"
+          *ngIf="
+            studentStatus === 'dropped_at_home' &&
+            homeDropTime
+          ">
+
+          <ion-icon
+            name="checkmark-circle-outline">
+          </ion-icon>
+
+          <span>
+            Dropped at home:
+            {{ formatJourneyTime(homeDropTime) }}
+          </span>
+
+        </div>
 
       </div>
 
@@ -427,7 +659,7 @@
 
 
     <!-- =====================================================
-         TRACKING FOOTER
+         TRACKING
     ====================================================== -->
 
     <div
@@ -455,8 +687,6 @@
 
     </div>
 
-
-    <!-- Bottom spacing -->
 
     <div
       class="bottom-space"
@@ -489,13 +719,14 @@
 
     <div class="student-popup-header">
 
-
       <button
         type="button"
         class="popup-close"
         (click)="closeStudentProfile()">
 
-        <ion-icon name="close-outline"></ion-icon>
+        <ion-icon
+          name="close-outline">
+        </ion-icon>
 
       </button>
 
@@ -535,7 +766,9 @@
 
         <div class="popup-detail-icon popup-school">
 
-          <ion-icon name="school-outline"></ion-icon>
+          <ion-icon
+            name="school-outline">
+          </ion-icon>
 
         </div>
 
@@ -562,7 +795,9 @@
 
         <div class="popup-detail-icon popup-pickup">
 
-          <ion-icon name="location-outline"></ion-icon>
+          <ion-icon
+            name="location-outline">
+          </ion-icon>
 
         </div>
 
@@ -589,7 +824,9 @@
 
         <div class="popup-detail-icon popup-drop">
 
-          <ion-icon name="navigate-outline"></ion-icon>
+          <ion-icon
+            name="navigate-outline">
+          </ion-icon>
 
         </div>
 
@@ -616,7 +853,9 @@
 
         <div class="popup-detail-icon popup-driver">
 
-          <ion-icon name="person-outline"></ion-icon>
+          <ion-icon
+            name="person-outline">
+          </ion-icon>
 
         </div>
 
@@ -643,7 +882,9 @@
 
         <div class="popup-detail-icon popup-phone">
 
-          <ion-icon name="call-outline"></ion-icon>
+          <ion-icon
+            name="call-outline">
+          </ion-icon>
 
         </div>
 
@@ -670,7 +911,6 @@
 
         <div
           class="popup-detail-icon"
-
           [class.popup-ride-active]="rideStatusClass === 'active'"
           [class.popup-ride-ended]="rideStatusClass !== 'active'">
 

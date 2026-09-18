@@ -1449,7 +1449,7 @@ async markDroppedAtHome(
   // ACTION API + STATE ADVANCE
   // =====================================================
 
-  private updateStudentAction(
+ private updateStudentAction(
   student: any,
   rideType: RideType,
   apiStatus:
@@ -1460,64 +1460,192 @@ async markDroppedAtHome(
   successMessage: string
 ): void {
 
+
   // =====================================================
-  // REMEMBER CURRENT POSITION BEFORE STATUS CHANGES
+  // VALIDATE DRIVER
+  // =====================================================
+
+  if (!this.driverId) {
+
+    this.toastService.showToast(
+
+      'Driver ID is missing. Please login again.',
+
+      'danger'
+
+    );
+
+    return;
+
+  }
+
+
+  // =====================================================
+  // VALIDATE STUDENT
+  // =====================================================
+
+  if (!student?.parentId) {
+
+    this.toastService.showToast(
+
+      'Student information is missing.',
+
+      'danger'
+
+    );
+
+    return;
+
+  }
+
+
+  // =====================================================
+  // REMEMBER CURRENT POSITION
+  // BEFORE STATUS CHANGES
   // =====================================================
 
   let previousIndex = -1;
 
+
   if (rideType === 'morning') {
+
+
+    // ---------------------------------------------------
+    // MORNING PICKUP
+    // ---------------------------------------------------
 
     if (apiStatus === 'picked_up') {
 
       previousIndex =
         this.morningPendingStudents.findIndex(
-          s => s.parentId === student.parentId
+
+          s =>
+            s.parentId ===
+            student.parentId
+
         );
 
-    } else if (apiStatus === 'dropped_at_school') {
+    }
+
+
+    // ---------------------------------------------------
+    // MORNING SCHOOL DROP
+    // ---------------------------------------------------
+
+    else if (
+      apiStatus === 'dropped_at_school'
+    ) {
 
       previousIndex =
         this.morningPickedStudents.findIndex(
-          s => s.parentId === student.parentId
+
+          s =>
+            s.parentId ===
+            student.parentId
+
         );
+
     }
 
-  } else {
+  }
+
+
+  else {
+
+
+    // ---------------------------------------------------
+    // EVENING SCHOOL PICKUP
+    // ---------------------------------------------------
 
     if (apiStatus === 'picked_up') {
 
       previousIndex =
         this.returnWaitingStudents.findIndex(
-          s => s.parentId === student.parentId
+
+          s =>
+            s.parentId ===
+            student.parentId
+
         );
 
-    } else if (apiStatus === 'dropped_at_home') {
+    }
+
+
+    // ---------------------------------------------------
+    // EVENING HOME DROP
+    // ---------------------------------------------------
+
+    else if (
+      apiStatus === 'dropped_at_home'
+    ) {
 
       previousIndex =
         this.returnOnboardStudents.findIndex(
-          s => s.parentId === student.parentId
+
+          s =>
+            s.parentId ===
+            student.parentId
+
         );
+
     }
+
   }
 
+
+
   // =====================================================
-  // API UPDATE
+  // LOG
+  // =====================================================
+
+  console.log(
+    '🚐 STUDENT ACTION',
+    {
+      driverId: this.driverId,
+      parentId: student.parentId,
+      rideType,
+      status: apiStatus
+    }
+  );
+
+
+
+  // =====================================================
+  // CALL DEDICATED RIDE API
   // =====================================================
 
   this.driverService
+
     .updateStudentStatus(
+
+      this.driverId,
+
       student.parentId,
+
       rideType,
+
       apiStatus
+
     )
+
     .subscribe({
 
-      next: () => {
+      // =================================================
+      // SUCCESS
+      // =================================================
 
-        // =================================================
+      next: (response: any) => {
+
+
+        console.log(
+          '✅ STUDENT ACTION SUCCESS:',
+          response
+        );
+
+
+        // ===============================================
         // UPDATE LOCAL STATUS
-        // =================================================
+        // ===============================================
 
         if (rideType === 'morning') {
 
@@ -1525,87 +1653,158 @@ async markDroppedAtHome(
             student.parentId
           ] = uiStatus;
 
-        } else {
+        }
+
+        else {
 
           this.eveningStatuses[
             student.parentId
           ] = uiStatus;
+
         }
+
+
+        // ===============================================
+        // SAVE LOCAL STATUS
+        // ===============================================
 
         this.persistStatuses();
 
-        // =================================================
-        // MAINTAIN FLEXIBLE CAROUSEL POSITION
-        // =================================================
+
+
+        // ===============================================
+        // MAINTAIN MORNING CAROUSEL
+        // ===============================================
 
         if (rideType === 'morning') {
 
-          if (apiStatus === 'picked_up') {
 
-            const remaining =
-              this.morningPendingStudents.length;
+          // ---------------------------------------------
+          // MORNING PICKUP
+          // ---------------------------------------------
 
-            this.selectedMorningPickupIndex =
-              remaining > 0
-                ? Math.min(
-                    previousIndex >= 0
-                      ? previousIndex
-                      : 0,
-                    remaining - 1
-                  )
-                : 0;
-
-          } else if (
-            apiStatus === 'dropped_at_school'
+          if (
+            apiStatus === 'picked_up'
           ) {
 
-            const remaining =
-              this.morningPickedStudents.length;
 
-            this.selectedMorningDropIndex =
+            const remaining =
+
+              this.morningPendingStudents.length;
+
+
+            this.selectedMorningPickupIndex =
+
               remaining > 0
+
                 ? Math.min(
+
                     previousIndex >= 0
                       ? previousIndex
                       : 0,
+
                     remaining - 1
+
                   )
+
                 : 0;
+
           }
 
-        } else {
 
-          // ===============================================
-          // RETURN BOARDING
-          // ===============================================
+          // ---------------------------------------------
+          // MORNING SCHOOL DROP
+          // ---------------------------------------------
 
-          if (apiStatus === 'picked_up') {
+          else if (
+
+            apiStatus ===
+            'dropped_at_school'
+
+          ) {
+
 
             const remaining =
-              this.returnWaitingStudents.length;
 
-            this.selectedReturnBoardingIndex =
+              this.morningPickedStudents.length;
+
+
+            this.selectedMorningDropIndex =
+
               remaining > 0
+
                 ? Math.min(
+
                     previousIndex >= 0
                       ? previousIndex
                       : 0,
+
                     remaining - 1
+
                   )
+
                 : 0;
 
-            /*
-             * The newly boarded student becomes
-             * available in returnOnboardStudents.
-             *
-             * Select that student automatically for
-             * home drop.
-             */
+          }
+
+        }
+
+
+
+        // ===============================================
+        // MAINTAIN EVENING CAROUSEL
+        // ===============================================
+
+        else {
+
+
+          // ---------------------------------------------
+          // SCHOOL PICKUP
+          // ---------------------------------------------
+
+          if (
+            apiStatus === 'picked_up'
+          ) {
+
+
+            const remaining =
+
+              this.returnWaitingStudents.length;
+
+
+            this.selectedReturnBoardingIndex =
+
+              remaining > 0
+
+                ? Math.min(
+
+                    previousIndex >= 0
+                      ? previousIndex
+                      : 0,
+
+                    remaining - 1
+
+                  )
+
+                : 0;
+
+
+
+            // -------------------------------------------
+            // AUTO SELECT NEWLY BOARDED STUDENT
+            // FOR HOME DROP
+            // -------------------------------------------
+
             const onboardIndex =
+
               this.returnOnboardStudents.findIndex(
+
                 s =>
-                  s.parentId === student.parentId
+                  s.parentId ===
+                  student.parentId
+
               );
+
 
             if (onboardIndex >= 0) {
 
@@ -1616,69 +1815,123 @@ async markDroppedAtHome(
 
           }
 
-          // ===============================================
-          // RETURN HOME DROP
-          // ===============================================
 
-          if (apiStatus === 'dropped_at_home') {
+          // ---------------------------------------------
+          // HOME DROP
+          // ---------------------------------------------
+
+          if (
+            apiStatus ===
+            'dropped_at_home'
+          ) {
+
 
             const remaining =
+
               this.returnOnboardStudents.length;
 
+
             this.selectedReturnDropIndex =
+
               remaining > 0
+
                 ? Math.min(
+
                     previousIndex >= 0
                       ? previousIndex
                       : 0,
+
                     remaining - 1
+
                   )
+
                 : 0;
+
           }
+
         }
 
-        // =================================================
-        // FORCE CHANGE DETECTION
-        // =================================================
+
+
+        // ===============================================
+        // FORCE ANGULAR CHANGE DETECTION
+        // ===============================================
 
         this.morningStatuses = {
+
           ...this.morningStatuses
+
         };
+
 
         this.eveningStatuses = {
+
           ...this.eveningStatuses
+
         };
 
-        // =================================================
-        // ADVANCE WORKFLOW
-        // =================================================
+
+
+        // ===============================================
+        // ADVANCE DRIVER WORKFLOW
+        // ===============================================
 
         this.advanceStageIfNeeded();
 
-        // =================================================
-        // SUCCESS
-        // =================================================
+
+
+        // ===============================================
+        // SUCCESS TOAST
+        // ===============================================
 
         this.toastService.showToast(
+
           successMessage,
+
           'success'
+
         );
+
       },
 
-      error: error => {
+
+      // =================================================
+      // ERROR
+      // =================================================
+
+      error: (error: any) => {
+
 
         console.error(
-          'Student action error:',
+
+          '❌ STUDENT ACTION ERROR:',
+
           error
+
         );
 
-        this.toastService.showToast(
+
+        const message =
+
           error?.error?.message ||
-          'Unable to update student',
+
+          error?.message ||
+
+          'Unable to update student';
+
+
+        this.toastService.showToast(
+
+          message,
+
           'danger'
+
         );
+
       }
+
     });
+
 }
 
   private advanceStageIfNeeded(): void {
