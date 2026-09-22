@@ -192,15 +192,15 @@ private returnDropSwipeStartX = 0;
     // Never restore ride workflow from localStorage.
     this.stage = 'morning-ready';
 
-    this.morningStatuses =
-      this.restoreStatuses(
-        this.MORNING_STATUS_KEY
-      );
+    // =====================================================
+// DO NOT RESTORE STUDENT WORKFLOW FROM LOCAL STORAGE
+//
+// Backend/MongoDB is the source of truth.
+// =====================================================
 
-    this.eveningStatuses =
-      this.restoreStatuses(
-        this.EVENING_STATUS_KEY
-      );
+this.morningStatuses = {};
+
+this.eveningStatuses = {};
 
     if (!this.driverId) {
       return;
@@ -947,57 +947,190 @@ onReturnDropSwipeEnd(event: TouchEvent): void {
   // LOAD
   // =====================================================
 
-  loadDashboard(): void {
-    this.driverService
-      .getDashboard(this.driverId)
-      .subscribe({
-        next: res => {
-          this.students =
-            res.students || [];
+  private loadDashboard(): void {
 
-          this.rebuildAttendanceGroups();
+  this.driverService
+    .getDashboard(this.driverId)
+    .subscribe({
 
-          /*
-           * Initialize only missing states.
-           */
-          this.presentStudents.forEach(student => {
-            if (
-              !this.morningStatuses[
-              student.parentId
-              ]
-            ) {
-              this.morningStatuses[
+      next: res => {
+
+        this.students =
+          res.students || [];
+
+        this.rebuildAttendanceGroups();
+
+        // =================================================
+        // SYNC UI STATUS FROM BACKEND
+        // DATABASE IS THE SOURCE OF TRUTH
+        // =================================================
+
+        const morningStatuses:
+          Record<string, StudentUiStatus> = {};
+
+        const eveningStatuses:
+          Record<string, StudentUiStatus> = {};
+
+        this.presentStudents.forEach(student => {
+
+          // =================================================
+          // MORNING
+          // =================================================
+
+          switch (student.morningStatus) {
+
+            case 'picked_up':
+
+              morningStatuses[
+                student.parentId
+              ] = 'Picked';
+
+              break;
+
+            case 'dropped_at_school':
+
+              morningStatuses[
+                student.parentId
+              ] = 'DroppedAtSchool';
+
+              break;
+
+            case 'waiting':
+            case 'pending':
+            default:
+
+              morningStatuses[
                 student.parentId
               ] = 'Pending';
-            }
 
-            if (
-              !this.eveningStatuses[
-              student.parentId
-              ]
-            ) {
-              this.eveningStatuses[
+              break;
+
+          }
+
+
+          // =================================================
+          // EVENING
+          // =================================================
+
+          switch (student.eveningStatus) {
+
+            case 'picked_from_school':
+
+              eveningStatuses[
+                student.parentId
+              ] = 'PickedFromSchool';
+
+              break;
+
+            case 'dropped_at_home':
+
+              eveningStatuses[
+                student.parentId
+              ] = 'DroppedAtHome';
+
+              break;
+
+            case 'waiting_school_finish':
+            case 'waiting_at_school':
+            case 'waiting':
+            default:
+
+              eveningStatuses[
                 student.parentId
               ] = 'Waiting';
-            }
-          });
 
-          this.persistStatuses();
-          this.advanceStageIfNeeded();
-        },
-        error: err => {
-          console.error(
-            'Dashboard loading error:',
-            err
-          );
+              break;
 
-          this.toastService.showToast(
-            'Unable to load dashboard',
-            'danger'
-          );
+          }
+
+        });
+
+
+        // =================================================
+        // REPLACE LOCAL UI STATE
+        // =================================================
+
+        this.morningStatuses =
+          morningStatuses;
+
+        this.eveningStatuses =
+          eveningStatuses;
+
+
+        // =================================================
+        // SAVE ONLY AS CACHE
+        //
+        // localStorage is NOT the source of truth.
+        // =================================================
+
+        this.persistStatuses();
+
+
+        // =================================================
+        // RESET INVALID CAROUSEL INDEXES
+        // =================================================
+
+        if (
+          this.returnWaitingStudents.length === 0
+        ) {
+
+          this.selectedReturnBoardingIndex = 0;
+
         }
-      });
-  }
+        else if (
+          this.selectedReturnBoardingIndex >=
+          this.returnWaitingStudents.length
+        ) {
+
+          this.selectedReturnBoardingIndex =
+            this.returnWaitingStudents.length - 1;
+
+        }
+
+
+        if (
+          this.returnOnboardStudents.length === 0
+        ) {
+
+          this.selectedReturnDropIndex = 0;
+
+        }
+        else if (
+          this.selectedReturnDropIndex >=
+          this.returnOnboardStudents.length
+        ) {
+
+          this.selectedReturnDropIndex =
+            this.returnOnboardStudents.length - 1;
+
+        }
+
+
+        // =================================================
+        // ADVANCE WORKFLOW
+        // =================================================
+
+        this.advanceStageIfNeeded();
+
+      },
+
+      error: err => {
+
+        console.error(
+          'Dashboard loading error:',
+          err
+        );
+
+        this.toastService.showToast(
+          'Unable to load dashboard',
+          'danger'
+        );
+
+      }
+
+    });
+
+}
 
   private rebuildAttendanceGroups(): void {
     this.presentStudents =
@@ -1112,30 +1245,71 @@ private startRide(
           response
         );
 
+
+        const alreadyStarted =
+          response?.alreadyStarted === true;
+
+
         // =================================================
-        // NEW RIDE = RESET STUDENT WORKFLOW
+        // IMPORTANT
+        //
+        // ONLY RESET STUDENTS WHEN A BRAND NEW RIDE
+        // WAS CREATED.
         // =================================================
 
-        if (rideType === 'morning') {
+        if (!alreadyStarted) {
 
-          this.resetMorningStatusesForNewRide();
+          if (rideType === 'morning') {
 
-          this.setStage(
-            'morning-pickup'
-          );
+            this.resetMorningStatusesForNewRide();
 
-        } else {
+            this.setStage(
+              'morning-pickup'
+            );
 
-          this.resetEveningStatusesForNewRide();
+          }
+          else {
 
-          this.setStage(
-            'return-boarding'
-          );
+            this.resetEveningStatusesForNewRide();
+
+            this.setStage(
+              'return-boarding'
+            );
+
+          }
+
+        }
+        else {
+
+          // =================================================
+          // EXISTING RIDE
+          //
+          // DO NOT RESET STUDENT STATUS.
+          // Reload backend state.
+          // =================================================
+
+          if (rideType === 'morning') {
+
+            this.setStage(
+              'morning-pickup'
+            );
+
+          }
+          else {
+
+            this.setStage(
+              'return-boarding'
+            );
+
+          }
+
+          this.loadDashboard();
 
         }
 
+
         // =================================================
-        // START GPS ONLY AFTER BACKEND CONFIRMATION
+        // START GPS AFTER BACKEND CONFIRMATION
         // =================================================
 
         this.locationService.startTracking(
@@ -1143,11 +1317,29 @@ private startRide(
           rideType
         );
 
+
+        // =================================================
+        // MESSAGE
+        // =================================================
+
         this.toastService.showToast(
-          rideType === 'morning'
-            ? 'Ride started. You can now pick up students.'
-            : 'Return ride started. You can now pick up students.',
+
+          alreadyStarted
+
+            ? (
+              rideType === 'morning'
+                ? 'Morning ride resumed'
+                : 'Return ride resumed'
+            )
+
+            : (
+              rideType === 'morning'
+                ? 'Ride started. You can now pick up students.'
+                : 'Return ride started. You can now pick up students.'
+            ),
+
           'success'
+
         );
 
       },
@@ -1167,6 +1359,7 @@ private startRide(
         this.locationService.stopTracking();
 
         this.toastService.showToast(
+          error?.error?.message ||
           'Ride could not be started',
           'danger'
         );
@@ -1932,6 +2125,180 @@ async markDroppedAtHome(
 
     });
 
+}
+
+// =====================================================
+// STUDENT ADDRESS + GOOGLE MAPS DIRECTIONS
+// =====================================================
+
+/**
+ * Shows only the useful area portion of the address.
+ *
+ * Example:
+ * "12, Gandhi Nagar\nCoimbatore\nTamil Nadu - 641001"
+ *
+ * Displays:
+ * "12, Gandhi Nagar"
+ * "Gandhi Nagar"
+ *
+ * If the address is comma separated, it removes
+ * city/state/pincode information as much as possible.
+ */
+getShortStudentAddress(student: any): string {
+  if (!student) {
+    return 'Home location';
+  }
+
+  const address =
+    student.pickupAddress ||
+    student.homeAddress ||
+    student.address ||
+    student.pickupArea ||
+    student.dropArea ||
+    '';
+
+  if (!address) {
+    return 'Home location';
+  }
+
+  // Normalize line breaks
+  const lines = address
+    .split(/\r?\n/)
+    .map((line: string) => line.trim())
+    .filter(Boolean);
+
+  // If address has multiple lines,
+  // use only first two useful lines.
+  if (lines.length > 0) {
+    return lines
+      .slice(0, 2)
+      .join(', ');
+  }
+
+  return address
+    .replace(/\b\d{6}\b/g, '')
+    .replace(/,\s*(Tamil Nadu|Karnataka|Kerala|Andhra Pradesh|Telangana).*$/i, '')
+    .trim();
+}
+
+
+/**
+ * Opens Google Maps directions from the driver's
+ * current GPS position to the student's home.
+ *
+ * IMPORTANT:
+ * The driver must allow location permission.
+ */
+async showStudentDirections(student: any): Promise<void> {
+
+  if (!student) {
+    this.toastService.showToast(
+      'Student location is unavailable',
+      'warning'
+    );
+
+    return;
+  }
+
+  const destination =
+    this.getStudentMapDestination(student);
+
+  if (!destination) {
+    this.toastService.showToast(
+      'Student home address is unavailable',
+      'warning'
+    );
+
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    this.toastService.showToast(
+      'Location is not supported on this device',
+      'danger'
+    );
+
+    return;
+  }
+
+  this.toastService.showToast(
+    'Getting your current location...',
+    'warning'
+  );
+
+  navigator.geolocation.getCurrentPosition(
+
+    position => {
+
+      const driverLatitude =
+        position.coords.latitude;
+
+      const driverLongitude =
+        position.coords.longitude;
+
+      const origin =
+        `${driverLatitude},${driverLongitude}`;
+
+      const mapsUrl =
+        'https://www.google.com/maps/dir/?api=1' +
+        `&origin=${encodeURIComponent(origin)}` +
+        `&destination=${encodeURIComponent(destination)}` +
+        '&travelmode=driving';
+
+      window.open(
+        mapsUrl,
+        '_system'
+      );
+
+    },
+
+    error => {
+
+      console.error(
+        'Driver location error:',
+        error
+      );
+
+      this.toastService.showToast(
+        'Unable to get your current location. Please enable GPS.',
+        'danger'
+      );
+
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 10000
+    }
+
+  );
+}
+
+
+/**
+ * Determines the student's destination.
+ *
+ * Priority:
+ * 1. Full pickup/home address
+ * 2. Home address
+ * 3. Pickup area
+ *
+ * If later your backend provides latitude/longitude,
+ * this method can be upgraded to use coordinates.
+ */
+private getStudentMapDestination(
+  student: any
+): string {
+
+  return (
+    student.pickupAddress ||
+    student.homeAddress ||
+    student.address ||
+    student.pickupArea ||
+    student.dropArea ||
+    ''
+  ).trim();
 }
 
   private advanceStageIfNeeded(): void {

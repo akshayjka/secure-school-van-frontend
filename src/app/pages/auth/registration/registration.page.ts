@@ -37,7 +37,9 @@ import { HttpClient } from '@angular/common/http';
 import { Driver } from 'src/app/core/services/driver';
 import { ToastService } from 'src/app/core/services/toast';
 
-import * as L from 'leaflet';
+// import * as L from 'leaflet';
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -169,15 +171,16 @@ export class RegistrationPage
   // =========================================================
   // MAPS
   // =========================================================
+  private pickupMap?: any;
+  private pickupMarker?: any;
+  private schoolMap?: any;
+  private schoolMarker?: any;
 
-  private pickupMap?: L.Map;
+  private googleMapsLoaded = false;
+  private googleMapsLoading?: Promise<void>;
 
-  private pickupMarker?: L.Marker;
-
-  private schoolMap?: L.Map;
-
-  private schoolMarker?: L.Marker;
-
+  private googleMapsLibrary?: any;
+  private googleMarkerLibrary?: any;
 
   // =========================================================
   // DRIVER
@@ -241,6 +244,159 @@ export class RegistrationPage
 
   }
 
+  // =========================================================
+  // GOOGLE MAPS LOADER
+  // =========================================================
+
+  private async loadGoogleMaps(): Promise<void> {
+
+    if (this.googleMapsLoaded) {
+      return;
+    }
+
+    if (this.googleMapsLoading) {
+      return this.googleMapsLoading;
+    }
+
+    this.googleMapsLoading = (async () => {
+
+      try {
+
+        const apiKey =
+          String(
+            (environment as any)?.googleMapsApiKey || ''
+          ).trim();
+
+        if (!apiKey) {
+
+          throw new Error(
+            'Google Maps API key is missing. Add googleMapsApiKey to src/environments/environment.ts'
+          );
+
+        }
+
+        setOptions({
+          key: apiKey,
+          v: 'weekly'
+        });
+
+        this.googleMapsLibrary =
+          await importLibrary('maps');
+
+        this.googleMarkerLibrary =
+          await importLibrary('marker');
+
+        if (
+          !this.googleMarkerLibrary?.AdvancedMarkerElement
+        ) {
+
+          throw new Error(
+            'Google AdvancedMarkerElement library is unavailable'
+          );
+
+        }
+
+        this.googleMapsLoaded = true;
+
+      } catch (error) {
+
+        console.error(
+          'Google Maps loading failed:',
+          error
+        );
+
+        this.toastService.showToast(
+          error instanceof Error
+            ? error.message
+            : 'Unable to load Google Maps',
+          'danger'
+        );
+
+        throw error;
+      }
+
+    })();
+
+    return this.googleMapsLoading;
+  }
+
+  // =========================================================
+  // WAIT FOR MAP CONTAINER
+  // =========================================================
+
+  private async waitForMapContainer(
+    elementId: string,
+    attempts = 20
+  ): Promise<HTMLElement> {
+
+    for (let i = 0; i < attempts; i++) {
+
+      const element =
+        document.getElementById(elementId);
+
+      if (
+        element &&
+        element.offsetWidth > 0 &&
+        element.offsetHeight > 0
+      ) {
+
+        return element;
+      }
+
+      await new Promise<void>(resolve => {
+
+        setTimeout(
+          resolve,
+          50
+        );
+
+      });
+
+    }
+
+    throw new Error(
+      `${elementId} map container is not ready or has no size`
+    );
+  }
+
+  // =========================================================
+  // ADVANCED MARKER POSITION HELPER
+  // =========================================================
+
+  private getMarkerPosition(
+    marker: any
+  ): { lat: number; lng: number } | null {
+
+    const position =
+      marker?.position;
+
+    if (!position) {
+      return null;
+    }
+
+    const lat =
+      typeof position.lat === 'function'
+        ? Number(position.lat())
+        : Number(position.lat);
+
+    const lng =
+      typeof position.lng === 'function'
+        ? Number(position.lng())
+        : Number(position.lng);
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+
+      return null;
+    }
+
+    return {
+      lat,
+      lng
+    };
+  }
 
   // =========================================================
   // DRIVER FORM
@@ -1437,28 +1593,21 @@ export class RegistrationPage
      * Move school map if it already exists.
      */
 
-    this.schoolMarker?.setLatLng([
+    if (this.schoolMarker) {
+      this.schoolMarker.position = {
+        lat: latitude,
+        lng: longitude
+      };
+    }
 
-      latitude,
+    this.schoolMap?.setCenter({
 
-      longitude
+      lat: latitude,
 
-    ]);
+      lng: longitude
 
-
-    this.schoolMap?.setView(
-
-      [
-
-        latitude,
-
-        longitude
-
-      ],
-
-      17
-
-    );
+    });
+    this.schoolMap?.setZoom(17);
 
 
     /*
@@ -1723,141 +1872,180 @@ export class RegistrationPage
   // PICKUP MAP
   // =========================================================
 
-  initializePickupMap(): void {
+  async initializePickupMap(): Promise<void> {
 
-    if (this.pickupMap) {
+    try {
 
-      setTimeout(() => {
+      await this.loadGoogleMaps();
 
-        this.pickupMap?.invalidateSize();
+      const mapLibrary =
+        this.googleMapsLibrary;
 
-      }, 100);
+      const markerLibrary =
+        this.googleMarkerLibrary;
 
-      return;
+      if (
+        !mapLibrary?.Map ||
+        !markerLibrary?.AdvancedMarkerElement
+      ) {
 
-    }
-
-
-    const latitude =
-      this.pickupLatitude ??
-      11.0168;
-
-
-    const longitude =
-      this.pickupLongitude ??
-      76.9558;
-
-
-    this.pickupMap =
-      L.map('pickupMap')
-        .setView(
-
-          [
-            latitude,
-            longitude
-          ],
-
-          this.pickupLatitude !== null
-            ? 17
-            : 13
-
+        throw new Error(
+          'Google Maps Map/AdvancedMarkerElement library is not available'
         );
-
-
-    L.tileLayer(
-
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-      {
-
-        maxZoom: 19,
-
-        attribution:
-          '&copy; OpenStreetMap contributors'
-
       }
 
-    ).addTo(
-      this.pickupMap
-    );
+      const mapElement =
+        await this.waitForMapContainer(
+          'pickupMap'
+        );
 
+      const latitude =
+        this.pickupLatitude ??
+        11.0168;
 
-    this.pickupMarker =
-      L.marker(
+      const longitude =
+        this.pickupLongitude ??
+        76.9558;
 
-        [
-          latitude,
-          longitude
-        ],
+      if (this.pickupMap) {
 
-        {
+        this.pickupMap.setCenter({
+          lat: latitude,
+          lng: longitude
+        });
 
-          draggable: true
+        if (
+          this.pickupLatitude !== null &&
+          this.pickupLongitude !== null
+        ) {
+
+          this.pickupMap.setZoom(17);
+        }
+
+        if (this.pickupMarker) {
+
+          this.pickupMarker.position = {
+            lat: latitude,
+            lng: longitude
+          };
 
         }
 
-      ).addTo(
-        this.pickupMap
+        return;
+      }
+
+      this.pickupMap =
+        new mapLibrary.Map(
+          mapElement,
+          {
+            center: {
+              lat: latitude,
+              lng: longitude
+            },
+
+            zoom:
+              this.pickupLatitude !== null
+                ? 17
+                : 13,
+
+            /*
+             * Required by AdvancedMarkerElement.
+             * Use your own Map ID in production.
+             */
+            mapId: 'DEMO_MAP_ID',
+
+            mapTypeControl: false,
+
+            streetViewControl: false,
+
+            fullscreenControl: true,
+
+            zoomControl: true,
+
+            gestureHandling: 'greedy',
+
+            clickableIcons: false
+          }
+        );
+
+      this.pickupMarker =
+        new markerLibrary.AdvancedMarkerElement({
+
+          position: {
+            lat: latitude,
+            lng: longitude
+          },
+
+          map: this.pickupMap,
+
+          gmpDraggable: true,
+
+          title: 'Pickup Location'
+
+        });
+
+      this.pickupMarker.addListener(
+        'dragend',
+        () => {
+
+          const position =
+            this.getMarkerPosition(
+              this.pickupMarker
+            );
+
+          if (!position) {
+            return;
+          }
+
+          this.setPickupLocation(
+            position.lat,
+            position.lng
+          );
+
+        }
       );
 
+      this.pickupMap.addListener(
+        'click',
+        (event: any) => {
 
-    /*
-     * Drag marker.
-     */
+          if (!event?.latLng) {
+            return;
+          }
 
-    this.pickupMarker.on(
-      'dragend',
-      () => {
+          this.setPickupLocation(
+            event.latLng.lat(),
+            event.latLng.lng()
+          );
 
-        const position =
-          this.pickupMarker!
-            .getLatLng();
+        }
+      );
 
+    } catch (error) {
 
-        this.setPickupLocation(
+      console.error(
+        'Pickup Google Map initialization failed:',
+        error
+      );
 
-          position.lat,
+      this.toastService.showToast(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load the pickup map',
+        'danger'
+      );
 
-          position.lng
-
-        );
-
-      }
-    );
-
-
-    /*
-     * Tap map.
-     */
-
-    this.pickupMap.on(
-      'click',
-      event => {
-
-        this.setPickupLocation(
-
-          event.latlng.lat,
-
-          event.latlng.lng
-
-        );
-
-      }
-    );
+    }
 
   }
-
 
   // =========================================================
   // SET PICKUP LOCATION
   // =========================================================
 
   setPickupLocation(
-
     latitude: number,
-
     longitude: number
-
   ): void {
 
     this.pickupLatitude =
@@ -1867,23 +2055,27 @@ export class RegistrationPage
       longitude;
 
 
-    this.pickupMarker?.setLatLng([
+    if (this.pickupMarker) {
+      this.pickupMarker.position = {
+        lat: latitude,
+        lng: longitude
+      };
+    }
 
-      latitude,
 
-      longitude
+    this.pickupMap?.setCenter({
 
-    ]);
+      lat: latitude,
+
+      lng: longitude
+
+    });
 
 
     this.reverseGeocode(
-
       latitude,
-
       longitude,
-
       'pickup'
-
     );
 
   }
@@ -1898,15 +2090,11 @@ export class RegistrationPage
     if (!navigator.geolocation) {
 
       this.toastService.showToast(
-
         'Location is not supported on this device',
-
         'danger'
-
       );
 
       return;
-
     }
 
 
@@ -1917,7 +2105,6 @@ export class RegistrationPage
         const latitude =
           position.coords.latitude;
 
-
         const longitude =
           position.coords.longitude;
 
@@ -1925,43 +2112,34 @@ export class RegistrationPage
         this.pickupLatitude =
           latitude;
 
-
         this.pickupLongitude =
           longitude;
 
 
-        this.pickupMarker?.setLatLng([
+        if (this.pickupMarker) {
+          this.pickupMarker.position = {
+            lat: latitude,
+            lng: longitude
+          };
+        }
 
-          latitude,
 
-          longitude
+        this.pickupMap?.setCenter({
 
-        ]);
+          lat: latitude,
+
+          lng: longitude
+
+        });
 
 
-        this.pickupMap?.setView(
-
-          [
-
-            latitude,
-
-            longitude
-
-          ],
-
-          17
-
-        );
+        this.pickupMap?.setZoom(17);
 
 
         this.reverseGeocode(
-
           latitude,
-
           longitude,
-
           'pickup'
-
         );
 
       },
@@ -1970,6 +2148,7 @@ export class RegistrationPage
       error => {
 
         console.error(
+          'Current location error:',
           error
         );
 
@@ -2214,31 +2393,23 @@ export class RegistrationPage
 
               });
 
-
-            this.pickupMarker
-              ?.setLatLng([
-
-                latitude,
-
-                longitude
-
-              ]);
+            if (this.pickupMarker) {
+              this.pickupMarker.position = {
+                lat: latitude,
+                lng: longitude
+              };
+            }
 
 
-            this.pickupMap
-              ?.setView(
+            this.pickupMap?.setCenter({
 
-                [
+              lat: latitude,
 
-                  latitude,
+              lng: longitude
 
-                  longitude
+            });
 
-                ],
-
-                17
-
-              );
+            this.pickupMap?.setZoom(17);
 
 
             /*
@@ -2276,30 +2447,22 @@ export class RegistrationPage
               });
 
 
-            this.schoolMarker
-              ?.setLatLng([
+            if (this.schoolMarker) {
+              this.schoolMarker.position = {
+                lat: latitude,
+                lng: longitude
+              };
+            }
 
-                latitude,
+            this.schoolMap?.setCenter({
 
-                longitude
+              lat: latitude,
 
-              ]);
+              lng: longitude
 
+            });
 
-            this.schoolMap
-              ?.setView(
-
-                [
-
-                  latitude,
-
-                  longitude
-
-                ],
-
-                17
-
-              );
+            this.schoolMap?.setZoom(17);
 
           }
 
@@ -2426,232 +2589,205 @@ export class RegistrationPage
   // =========================================================
   // SCHOOL MAP
   // =========================================================
+  async initializeSchoolMap(): Promise<void> {
 
-  initializeSchoolMap(): void {
+    try {
 
-    if (this.schoolMap) {
+      await this.loadGoogleMaps();
 
-      /*
-       * If school was already selected,
-       * make sure map is centered there.
-       */
+      const mapLibrary =
+        this.googleMapsLibrary;
+
+      const markerLibrary =
+        this.googleMarkerLibrary;
 
       if (
-        Number.isFinite(
-          this.schoolLatitude
-        ) &&
-        Number.isFinite(
-          this.schoolLongitude
-        )
+        !mapLibrary?.Map ||
+        !markerLibrary?.AdvancedMarkerElement
       ) {
 
-        this.schoolMap.setView(
-
-          [
-
-            this.schoolLatitude!,
-
-            this.schoolLongitude!
-
-          ],
-
-          17
-
+        throw new Error(
+          'Google Maps Map/AdvancedMarkerElement library is not available'
         );
-
-
-        this.schoolMarker
-          ?.setLatLng([
-
-            this.schoolLatitude!,
-
-            this.schoolLongitude!
-
-          ]);
-
       }
 
-
-      setTimeout(() => {
-
-        this.schoolMap?.invalidateSize();
-
-      }, 100);
-
-      return;
-
-    }
-
-
-    const latitude =
-
-      Number.isFinite(
-        this.schoolLatitude
-      )
-
-        ? this.schoolLatitude!
-
-        : (
-
-          this.pickupLatitude ??
-          11.0168
-
+      const mapElement =
+        await this.waitForMapContainer(
+          'schoolMap'
         );
 
+      const latitude =
+        Number.isFinite(this.schoolLatitude)
+          ? this.schoolLatitude!
+          : (
+            this.pickupLatitude ??
+            11.0168
+          );
 
-    const longitude =
+      const longitude =
+        Number.isFinite(this.schoolLongitude)
+          ? this.schoolLongitude!
+          : (
+            this.pickupLongitude ??
+            76.9558
+          );
 
-      Number.isFinite(
-        this.schoolLongitude
-      )
+      if (this.schoolMap) {
 
-        ? this.schoolLongitude!
+        this.schoolMap.setCenter({
+          lat: latitude,
+          lng: longitude
+        });
 
-        : (
-
-          this.pickupLongitude ??
-          76.9558
-
-        );
-
-
-    this.schoolMap =
-      L.map('schoolMap')
-        .setView(
-
-          [
-
-            latitude,
-
-            longitude
-
-          ],
-
-          Number.isFinite(
-            this.schoolLatitude
-          )
+        this.schoolMap.setZoom(
+          Number.isFinite(this.schoolLatitude)
             ? 17
             : 14
-
         );
 
+        if (this.schoolMarker) {
 
-    L.tileLayer(
-
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-      {
-
-        maxZoom: 19,
-
-        attribution:
-          '&copy; OpenStreetMap contributors'
-
-      }
-
-    ).addTo(
-      this.schoolMap
-    );
-
-
-    this.schoolMarker =
-      L.marker(
-
-        [
-
-          latitude,
-
-          longitude
-
-        ],
-
-        {
-
-          draggable: true
+          this.schoolMarker.position = {
+            lat: latitude,
+            lng: longitude
+          };
 
         }
 
-      ).addTo(
-        this.schoolMap
+        return;
+      }
+
+      this.schoolMap =
+        new mapLibrary.Map(
+          mapElement,
+          {
+            center: {
+              lat: latitude,
+              lng: longitude
+            },
+
+            zoom:
+              Number.isFinite(
+                this.schoolLatitude
+              )
+                ? 17
+                : 14,
+
+            mapId: 'DEMO_MAP_ID',
+
+            mapTypeControl: false,
+
+            streetViewControl: false,
+
+            fullscreenControl: true,
+
+            zoomControl: true,
+
+            gestureHandling: 'greedy',
+
+            clickableIcons: false
+          }
+        );
+
+      this.schoolMarker =
+        new markerLibrary.AdvancedMarkerElement({
+
+          position: {
+            lat: latitude,
+            lng: longitude
+          },
+
+          map: this.schoolMap,
+
+          gmpDraggable: true,
+
+          title: 'School Location'
+
+        });
+
+      this.schoolMarker.addListener(
+        'dragend',
+        () => {
+
+          const position =
+            this.getMarkerPosition(
+              this.schoolMarker
+            );
+
+          if (!position) {
+            return;
+          }
+
+          this.schoolLatitude =
+            position.lat;
+
+          this.schoolLongitude =
+            position.lng;
+
+          this.reverseGeocode(
+            position.lat,
+            position.lng,
+            'school'
+          );
+
+        }
       );
 
+      this.schoolMap.addListener(
+        'click',
+        (event: any) => {
 
-    /*
-     * Drag marker.
-     */
+          if (!event?.latLng) {
+            return;
+          }
 
-    this.schoolMarker.on(
-      'dragend',
-      () => {
+          const latitude =
+            event.latLng.lat();
 
-        const position =
-          this.schoolMarker!
-            .getLatLng();
+          const longitude =
+            event.latLng.lng();
 
+          this.schoolLatitude =
+            latitude;
 
-        this.schoolLatitude =
-          position.lat;
+          this.schoolLongitude =
+            longitude;
 
+          if (this.schoolMarker) {
 
-        this.schoolLongitude =
-          position.lng;
+            this.schoolMarker.position = {
+              lat: latitude,
+              lng: longitude
+            };
 
+          }
 
-        this.reverseGeocode(
+          this.reverseGeocode(
+            latitude,
+            longitude,
+            'school'
+          );
 
-          position.lat,
+        }
+      );
 
-          position.lng,
+    } catch (error) {
 
-          'school'
+      console.error(
+        'School Google Map initialization failed:',
+        error
+      );
 
-        );
+      this.toastService.showToast(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load the school map',
+        'danger'
+      );
 
-      }
-    );
-
-
-    /*
-     * Click map.
-     */
-
-    this.schoolMap.on(
-      'click',
-      event => {
-
-        this.schoolLatitude =
-          event.latlng.lat;
-
-
-        this.schoolLongitude =
-          event.latlng.lng;
-
-
-        this.schoolMarker
-          ?.setLatLng([
-
-            event.latlng.lat,
-
-            event.latlng.lng
-
-          ]);
-
-
-        this.reverseGeocode(
-
-          event.latlng.lat,
-
-          event.latlng.lng,
-
-          'school'
-
-        );
-
-      }
-    );
+    }
 
   }
-
 
   // =========================================================
   // DRIVER SEARCH
@@ -2786,209 +2922,251 @@ export class RegistrationPage
   // PARENT REGISTRATION
   // =========================================================
 
-  registerParent(): void {
+registerParent(): void {
 
-    this.parentSubmitted = true;
+  this.parentSubmitted = true;
 
+  // =====================================================
+  // VALIDATE REVIEW
+  // =====================================================
 
-    /*
-     * Review screen = Step 8.
-     */
+  if (!this.isParentStepValid()) {
+    return;
+  }
 
-    if (
-      !this.isParentStepValid()
-    ) {
+  // =====================================================
+  // VALIDATE PICKUP LOCATION
+  // =====================================================
 
-      return;
+  if (
+    !Number.isFinite(this.pickupLatitude) ||
+    !Number.isFinite(this.pickupLongitude)
+  ) {
 
-    }
+    this.toastService.showToast(
+      'Valid pickup location is required',
+      'warning'
+    );
 
+    return;
+  }
 
-    this.isLoading = true;
+  // =====================================================
+  // VALIDATE SCHOOL LOCATION
+  // =====================================================
 
+  if (
+    !Number.isFinite(this.schoolLatitude) ||
+    !Number.isFinite(this.schoolLongitude)
+  ) {
 
-    const parent =
-      this.parentRegistrationForm.value;
+    this.toastService.showToast(
+      'Valid school location is required',
+      'warning'
+    );
 
+    return;
+  }
 
-    const parentDetails =
-      this.parentDetailsForm.value;
+  this.isLoading = true;
 
+  // =====================================================
+  // FORM DATA
+  // =====================================================
 
-    const student =
-      this.studentForm.value;
+  const parent =
+    this.parentRegistrationForm.value;
 
+  const parentDetails =
+    this.parentDetailsForm.value;
 
-    /*
-     * Structured school data.
-     */
+  const student =
+    this.studentForm.value;
 
-    const schoolData = {
+  // =====================================================
+  // SCHOOL METADATA
+  // =====================================================
 
-      name:
-        this.selectedSchoolName ||
-        student.schoolName,
+  const schoolData = {
 
-      address:
-        this.schoolAddress,
+    name:
+      this.selectedSchoolName ||
+      student.schoolName,
+
+    address:
+      this.schoolAddress,
+
+    latitude:
+      this.schoolLatitude,
+
+    longitude:
+      this.schoolLongitude,
+
+    placeId:
+      this.selectedSchool?.place_id ||
+      null,
+
+    city:
+      this.selectedSchool?.address?.city ||
+      this.selectedSchool?.address?.town ||
+      this.selectedSchool?.address?.municipality ||
+      this.selectedSchool?.address?.village ||
+      null,
+
+    state:
+      this.selectedSchool?.address?.state ||
+      null,
+
+    postcode:
+      this.selectedSchool?.address?.postcode ||
+      null
+  };
+
+  // =====================================================
+  // FINAL PAYLOAD
+  // =====================================================
+
+  const payload = {
+
+    role: 'parent',
+
+    // ---------------------------------------------------
+    // PARENT
+    // ---------------------------------------------------
+
+    name:
+      parent.name,
+
+    mobileNumber:
+      parent.mobileNumber,
+
+    password:
+      parent.password,
+
+    email:
+      parentDetails.email ||
+      null,
+
+    emergencyContact:
+      parentDetails.emergencyContact,
+
+    // ---------------------------------------------------
+    // STUDENT
+    // ---------------------------------------------------
+
+    studentName:
+      student.studentName,
+
+    studentClass:
+      student.studentClass,
+
+    schoolName:
+      this.selectedSchoolName ||
+      student.schoolName,
+
+    // ---------------------------------------------------
+    // PICKUP / HOME
+    // ---------------------------------------------------
+
+    pickupArea:
+      this.pickupAddress,
+
+    pickupAddress:
+      this.pickupAddress,
+
+    pickupLocation: {
+
+      latitude:
+        this.pickupLatitude,
+
+      longitude:
+        this.pickupLongitude
+    },
+
+    // ---------------------------------------------------
+    // SCHOOL
+    // ---------------------------------------------------
+
+    dropArea:
+      this.schoolAddress,
+
+    schoolAddress:
+      this.schoolAddress,
+
+    schoolLocation: {
 
       latitude:
         this.schoolLatitude,
 
       longitude:
-        this.schoolLongitude,
+        this.schoolLongitude
+    },
 
-      placeId:
-        this.selectedSchool?.place_id ||
-        null,
+    // ---------------------------------------------------
+    // SCHOOL METADATA
+    // ---------------------------------------------------
 
-      city:
-        this.selectedSchool?.address?.city ||
-        this.selectedSchool?.address?.town ||
-        this.selectedSchool?.address?.municipality ||
-        this.selectedSchool?.address?.village ||
-        null,
+    school:
+      schoolData,
 
-      state:
-        this.selectedSchool?.address?.state ||
-        null,
+    // ---------------------------------------------------
+    // DRIVER
+    // ---------------------------------------------------
 
-      postcode:
-        this.selectedSchool?.address?.postcode ||
-        null
+    driverId:
+      this.driverDetails?.driverId ||
+      this.driverDetails?._id ||
+      null
+  };
 
-    };
+  console.log(
+    '🚐 Parent Registration Payload:',
+    payload
+  );
 
+  // =====================================================
+  // REGISTER
+  // =====================================================
 
-    const payload = {
+  this.driverService
+    .register(payload)
+    .subscribe({
 
-      role: 'parent',
+      next: response => {
 
-      name:
-        parent.name,
+        console.log(
+          'Parent registration successful:',
+          response
+        );
 
-      mobileNumber:
-        parent.mobileNumber,
+        this.isLoading = false;
 
-      password:
-        parent.password,
+        this.parentStep = 9;
 
-      email:
-        parentDetails.email || null,
+        this.toastService.showToast(
+          'Parent registration completed successfully',
+          'success'
+        );
+      },
 
-      emergencyContact:
-        parentDetails.emergencyContact,
+      error: error => {
 
-      studentName:
-        student.studentName,
+        console.error(
+          'Parent registration error:',
+          error
+        );
 
-      schoolName:
-        this.selectedSchoolName ||
-        student.schoolName,
+        this.isLoading = false;
 
-      studentClass:
-        student.studentClass,
+        this.toastService.showToast(
+          error?.error?.message ||
+          'Parent registration failed',
+          'danger'
+        );
+      }
 
-      pickupArea:
-        this.pickupAddress,
-
-      dropArea:
-        this.schoolAddress,
-
-      pickupAddress:
-        this.pickupAddress,
-
-      pickupLatitude:
-        this.pickupLatitude,
-
-      pickupLongitude:
-        this.pickupLongitude,
-
-      schoolAddress:
-        this.schoolAddress,
-
-      schoolLatitude:
-        this.schoolLatitude,
-
-      schoolLongitude:
-        this.schoolLongitude,
-
-      /*
-       * New structured school object.
-       */
-
-      school:
-        schoolData,
-
-      driverId:
-        this.driverDetails?.driverId ||
-        this.driverDetails?._id ||
-        null
-
-    };
-
-
-    console.log(
-      'Parent Registration Payload:',
-      payload
-    );
-
-
-    this.driverService
-      .register(payload)
-
-      .subscribe({
-
-        next: response => {
-
-          console.log(
-            'Parent registration successful:',
-            response
-          );
-
-
-          this.isLoading = false;
-
-
-          this.parentStep = 9;
-
-
-          this.toastService.showToast(
-
-            'Parent registration completed successfully',
-
-            'success'
-
-          );
-
-        },
-
-
-        error: error => {
-
-          console.error(
-            'Parent registration error:',
-            error
-          );
-
-
-          this.isLoading = false;
-
-
-          this.toastService.showToast(
-
-            error?.error?.message ||
-            'Parent registration failed',
-
-            'danger'
-
-          );
-
-        }
-
-      });
-
-  }
+    });
+}
 
 
   // =========================================================
@@ -3010,31 +3188,31 @@ export class RegistrationPage
 
   private destroyMaps(): void {
 
-    if (this.pickupMap) {
+    if (this.pickupMarker) {
 
-      this.pickupMap.remove();
+      this.pickupMarker.setMap(null);
 
-      this.pickupMap =
+      this.pickupMarker =
         undefined;
 
     }
 
 
-    if (this.schoolMap) {
+    if (this.schoolMarker) {
 
-      this.schoolMap.remove();
+      this.schoolMarker.setMap(null);
 
-      this.schoolMap =
+      this.schoolMarker =
         undefined;
 
     }
 
 
-    this.pickupMarker =
+    this.pickupMap =
       undefined;
 
 
-    this.schoolMarker =
+    this.schoolMap =
       undefined;
 
   }

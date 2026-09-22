@@ -280,10 +280,247 @@
     </section>
 
 
+    <!-- =====================================================
+         NEXT DAY PREPARATION
+         Shown only after the evening ride is completed.
+         Existing dashboard UI remains unchanged for all
+         active / waiting / morning states.
+    ====================================================== -->
+
+    <ng-container *ngIf="showNextDayPreparation">
+
+      <!-- TODAY'S COMPLETED JOURNEY -->
+
+      <section class="completed-journey-card">
+
+        <div class="completed-journey-header">
+
+          <div class="completed-check-icon">
+            <ion-icon name="checkmark-outline"></ion-icon>
+          </div>
+
+          <div class="completed-journey-heading">
+
+            <h2>
+              Today's Ride Completed!
+            </h2>
+
+            <p>
+              Your child has been safely dropped at home.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="journey-timeline">
+
+          <div class="journey-timeline-item">
+
+            <div class="journey-timeline-icon pickup">
+              <ion-icon name="bus-outline"></ion-icon>
+            </div>
+
+            <div class="journey-timeline-content">
+
+              <strong>
+                Picked Up
+              </strong>
+
+              <span>
+                From Home
+              </span>
+
+            </div>
+
+            <time>
+              {{ formatJourneyTimeOrDash(pickupTime) }}
+            </time>
+
+          </div>
+
+
+          <div class="journey-timeline-item">
+
+            <div class="journey-timeline-icon school">
+              <ion-icon name="school-outline"></ion-icon>
+            </div>
+
+            <div class="journey-timeline-content">
+
+              <strong>
+                Dropped at School
+              </strong>
+
+            </div>
+
+            <time>
+              {{ formatJourneyTimeOrDash(schoolDropTime) }}
+            </time>
+
+          </div>
+
+
+          <div class="journey-timeline-item">
+
+            <div class="journey-timeline-icon pickup">
+              <ion-icon name="bus-outline"></ion-icon>
+            </div>
+
+            <div class="journey-timeline-content">
+
+              <strong>
+                Picked Up from School
+              </strong>
+
+            </div>
+
+            <time>
+              {{ formatJourneyTimeOrDash(schoolPickupTime) }}
+            </time>
+
+          </div>
+
+
+          <div class="journey-timeline-item">
+
+            <div class="journey-timeline-icon home">
+              <ion-icon name="home-outline"></ion-icon>
+            </div>
+
+            <div class="journey-timeline-content">
+
+              <strong>
+                Dropped at Home
+              </strong>
+
+            </div>
+
+            <time>
+              {{ formatJourneyTimeOrDash(homeDropTime) }}
+            </time>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- TOMORROW ATTENDANCE -->
+
+      <section class="tomorrow-attendance-card">
+
+        <div class="tomorrow-attendance-heading">
+
+          <div class="tomorrow-calendar-icon">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+
+          <div>
+
+            <span>
+              TOMORROW'S ATTENDANCE
+            </span>
+
+            <strong>
+              {{ tomorrowAttendanceDateLabel }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="tomorrow-attendance-row"
+          (click)="openAttendance()"
+          aria-label="Manage tomorrow's attendance">
+
+          <div
+            class="tomorrow-status-icon"
+            [class.present]="tomorrowAttendanceStatus === 'present'"
+            [class.absent]="tomorrowAttendanceStatus === 'absent'"
+            [class.not-marked]="
+              tomorrowAttendanceStatus === 'not_marked'
+            ">
+
+            <ion-icon
+              [name]="tomorrowAttendanceStatus === 'absent'
+                ? 'close-outline'
+                : tomorrowAttendanceStatus === 'present'
+                  ? 'checkmark-outline'
+                  : 'help-outline'">
+            </ion-icon>
+
+          </div>
+
+
+          <div class="tomorrow-attendance-content">
+
+            <strong>
+              {{ tomorrowAttendanceLabel }}
+            </strong>
+
+            <span>
+              {{ tomorrowAttendanceMessage }}
+            </span>
+
+          </div>
+
+
+          <ion-icon
+            class="tomorrow-attendance-arrow"
+            name="chevron-forward-outline">
+          </ion-icon>
+
+        </button>
+
+
+        <div class="tomorrow-attendance-hint">
+
+          <ion-icon name="create-outline"></ion-icon>
+
+          <span>
+            Tap to change if needed
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- PREPARE FOR NEXT DAY -->
+
+      <button
+        type="button"
+        class="prepare-next-day-button"
+        (click)="openAttendance()">
+
+        <ion-icon name="calendar-outline"></ion-icon>
+
+        <span>
+          Prepare for Next Day
+        </span>
+
+        <ion-icon
+          name="arrow-forward-outline"
+          class="prepare-next-day-arrow">
+        </ion-icon>
+
+      </button>
+
+    </ng-container>
+
+
 
     <!-- =====================================================
-         RIDE NOTIFICATION
+         EXISTING RIDE NOTIFICATION
     ====================================================== -->
+
+    <ng-container *ngIf="!showNextDayPreparation">
 
     <section
       class="ride-notification"
@@ -693,6 +930,8 @@
       *ngIf="trackingAvailable">
     </div>
 
+
+    </ng-container>
 
   </main>
 

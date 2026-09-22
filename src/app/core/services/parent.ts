@@ -141,12 +141,12 @@ export class ParentService {
           parentId
         );
 
-    return this.http.get(
-      `${environment.apiUrl}/rides/live-location/${encodeURIComponent(driverId)}/${encodeURIComponent(rideType)}`,
-      {
-        params
-      }
-    );
+   return this.http.get(
+  `${environment.apiUrl}/rides/live/${encodeURIComponent(driverId)}/${encodeURIComponent(rideType)}`,
+  {
+    params
+  }
+);
 
   }
 

@@ -263,16 +263,37 @@
               {{ student.studentName }}
             </h2>
 
-            <div class="pickup-location">
+          <!-- HOME / PICKUP AREA -->
 
-              <ion-icon name="location-outline"></ion-icon>
+<div class="student-home-location">
 
-              <span>
-                {{ student.pickupArea || 'Pickup location' }}
-              </span>
+  <div class="student-address">
 
-            </div>
+    <ion-icon name="location-outline"></ion-icon>
 
+    <span>
+      {{ getShortStudentAddress(student) }}
+    </span>
+
+  </div>
+
+  <!-- GOOGLE MAPS DIRECTIONS -->
+
+  <button
+    type="button"
+    class="student-direction-button"
+    (click)="showStudentDirections(student); $event.stopPropagation()"
+  >
+
+    <ion-icon name="navigate-outline"></ion-icon>
+
+    <span>
+      SHOW DIRECTIONS
+    </span>
+
+  </button>
+
+</div>
           </div>
 
 
@@ -1268,15 +1289,37 @@
               {{ student.studentName }}
             </h2>
 
-            <div class="pickup-location">
+          <!-- HOME DROP LOCATION -->
 
-              <ion-icon name="home-outline"></ion-icon>
+<div class="student-home-location">
 
-              <span>
-                {{ student.pickupArea || 'Home drop location' }}
-              </span>
+  <div class="student-address">
 
-            </div>
+    <ion-icon name="home-outline"></ion-icon>
+
+    <span>
+      {{ getShortStudentAddress(student) }}
+    </span>
+
+  </div>
+
+  <!-- GOOGLE MAPS DIRECTIONS -->
+
+  <button
+    type="button"
+    class="student-direction-button"
+    (click)="showStudentDirections(student); $event.stopPropagation()"
+  >
+
+    <ion-icon name="navigate-outline"></ion-icon>
+
+    <span>
+      SHOW DIRECTIONS
+    </span>
+
+  </button>
+
+</div>
 
           </div>
 

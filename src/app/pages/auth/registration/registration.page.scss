@@ -806,30 +806,59 @@ small {
 
 
 /* ============================================================
-   MAP
+   GOOGLE MAP
 ============================================================ */
 
 .map-container {
   width: 100%;
+  height: 350px;
+  min-height: 350px;
 
-  height: 290px;
+  display: block;
+  position: relative;
 
-  margin:
-    14px
-    0
-    15px;
+  margin: 14px 0 15px;
+  padding: 0;
 
+  box-sizing: border-box;
   overflow: hidden;
 
   border-radius: 18px;
-
   border: 1px solid #dce5ee;
+
+  background: #e5e7eb;
 
   box-shadow:
     0 8px 22px rgba(18, 40, 70, 0.08);
+
+  isolation: isolate;
 }
 
+/*
+ * Google Maps owns everything inside this element.
+ * Do not allow application styles to collapse the map.
+ */
+.map-container > div {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+}
 
+/*
+ * Google Maps internal root.
+ */
+.map-container .gm-style {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/*
+ * Prevent global Ionic/app image rules from
+ * breaking Google Maps tiles and controls.
+ */
+.map-container img {
+  max-width: none !important;
+}
 /* ============================================================
    SELECTED LOCATION
 ============================================================ */
@@ -1498,7 +1527,8 @@ small {
   }
 
   .map-container {
-    height: 275px;
+    height: 320px;
+    min-height: 320px;
   }
 }
 
@@ -1525,6 +1555,20 @@ small {
 
   .onboarding-card h3 {
     font-size: 20px;
+  }
+
+}
+
+
+/* ============================================================
+   GOOGLE MAP - SMALL DEVICES
+============================================================ */
+
+@media (max-width: 360px) {
+
+  .map-container {
+    height: 300px;
+    min-height: 300px;
   }
 
 }

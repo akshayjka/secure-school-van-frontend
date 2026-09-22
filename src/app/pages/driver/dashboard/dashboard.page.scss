@@ -2266,3 +2266,109 @@ ion-title {
     font-size: 22px;
   }
 }
+/* =====================================================
+   STUDENT HOME LOCATION
+===================================================== */
+
+.student-home-location {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.student-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  width: 100%;
+
+  color: #475569;
+
+  font-size: 11px;
+  font-weight: 650;
+
+  line-height: 1.45;
+}
+
+.student-address ion-icon {
+  flex-shrink: 0;
+
+  margin-top: 2px;
+
+  color: #2563eb;
+
+  font-size: 16px;
+}
+
+.student-address span {
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   SHOW DIRECTIONS BUTTON
+===================================================== */
+
+.student-direction-button {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top: 10px;
+
+  min-height: 38px;
+
+  padding: 0 14px;
+
+  border: 1px solid #2563eb;
+
+  border-radius: 10px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 10px;
+  font-weight: 850;
+
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.student-direction-button ion-icon {
+  font-size: 16px;
+}
+
+.student-direction-button:active {
+  transform: scale(0.96);
+
+  background: #dbeafe;
+}
+
+
+/* =====================================================
+   RETURN CARD
+===================================================== */
+
+.return-swipe-card .student-direction-button {
+  border-color: #2563eb;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+}

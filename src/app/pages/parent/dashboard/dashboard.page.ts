@@ -66,7 +66,12 @@ import {
   checkmarkCircleOutline,
   chevronForwardOutline,
   callOutline,
-  homeOutline
+  homeOutline,
+  checkmarkOutline,
+  closeOutline,
+  helpOutline,
+  createOutline,
+  arrowForwardOutline
 } from 'ionicons/icons';
 
 
@@ -167,6 +172,24 @@ export class DashboardPage
     | 'present'
     | 'absent'
     | 'not_marked' = 'not_marked';
+
+
+  // =====================================================
+  // TOMORROW ATTENDANCE
+  // =====================================================
+
+  tomorrowAttendanceStatus:
+    | 'present'
+    | 'absent'
+    | 'not_marked' = 'not_marked';
+
+
+  // Keeps the completed evening ride context even after
+  // the backend marks the active ride as ended.
+  completedRideType:
+    | 'morning'
+    | 'evening'
+    | null = null;
 
 
 
@@ -301,7 +324,17 @@ export class DashboardPage
 
       callOutline,
 
-      homeOutline
+      homeOutline,
+
+      checkmarkOutline,
+
+      closeOutline,
+
+      helpOutline,
+
+      createOutline,
+
+      arrowForwardOutline
 
     });
 
@@ -568,9 +601,37 @@ export class DashboardPage
 
           this.trackingAvailable = false;
 
-          this.rideType = null;
+
+          const endedRideType =
+
+            this.normalizeRideType(
+              data?.rideType
+            ) ||
+
+            this.rideType ||
+
+            (
+              this.studentStatus === 'dropped_at_home'
+                ? 'evening'
+                : this.studentStatus === 'dropped_at_school'
+                  ? 'morning'
+                  : null
+            );
 
 
+          if (endedRideType) {
+
+            this.completedRideType =
+              endedRideType;
+
+          }
+
+
+          /*
+           * Do not clear rideType immediately.
+           * The completed dashboard needs the evening context
+           * to show the full-day journey summary.
+           */
           this.updateRideState();
 
         });
@@ -631,6 +692,25 @@ export class DashboardPage
             this.normalizeStudentStatus(
               data?.status
             );
+
+
+          if (this.isStudentTripCompleted()) {
+
+            this.completedRideType =
+
+              incomingRideType ||
+
+              this.completedRideType ||
+
+              (
+                this.studentStatus === 'dropped_at_home'
+                  ? 'evening'
+                  : this.studentStatus === 'dropped_at_school'
+                    ? 'morning'
+                    : null
+              );
+
+          }
 
 
           this.extractJourneyTimes(data);
@@ -809,6 +889,15 @@ export class DashboardPage
             'present';
 
 
+          // =================================================
+          // TOMORROW ATTENDANCE
+          // =================================================
+
+          this.tomorrowAttendanceStatus =
+
+            this.extractTomorrowAttendanceStatus(res);
+
+
 
           // =================================================
           // RIDE
@@ -838,6 +927,14 @@ export class DashboardPage
 
 
           this.extractJourneyTimes(res);
+
+
+          this.completedRideType =
+
+            this.resolveCompletedRideType(
+              this.normalizeRideType(res.rideType),
+              this.studentStatus
+            );
 
 
 
@@ -914,6 +1011,173 @@ export class DashboardPage
 
 
   // =====================================================
+  // NEXT DAY PREPARATION
+  // =====================================================
+
+  /**
+   * The new completion screen is intentionally limited to
+   * the completed evening ride. All existing dashboard
+   * states continue using the current UI.
+   */
+  get showNextDayPreparation(): boolean {
+
+    return (
+
+      this.completedRideType === 'evening' &&
+
+      this.isStudentTripCompleted()
+
+    );
+
+  }
+
+
+  get tomorrowAttendanceDateLabel(): string {
+
+    const tomorrow = new Date();
+
+    tomorrow.setDate(
+      tomorrow.getDate() + 1
+    );
+
+    return tomorrow.toLocaleDateString(
+
+      'en-IN',
+
+      {
+
+        weekday: 'short',
+
+        day: '2-digit',
+
+        month: 'short'
+
+      }
+
+    );
+
+  }
+
+
+  get tomorrowAttendanceLabel(): string {
+
+    switch (
+      this.tomorrowAttendanceStatus
+    ) {
+
+      case 'present':
+        return 'Will Be Present';
+
+      case 'absent':
+        return 'Absent';
+
+      default:
+        return 'Not Marked';
+
+    }
+
+  }
+
+
+  get tomorrowAttendanceMessage(): string {
+
+    switch (
+      this.tomorrowAttendanceStatus
+    ) {
+
+      case 'present':
+        return 'Your child is marked to attend school tomorrow.';
+
+      case 'absent':
+        return 'Your child is marked absent for tomorrow.';
+
+      default:
+        return 'Tomorrow’s attendance has not been marked yet.';
+
+    }
+
+  }
+
+
+  private extractTomorrowAttendanceStatus(
+    data: any
+  ):
+    | 'present'
+    | 'absent'
+    | 'not_marked' {
+
+    return this.normalizeAttendanceStatus(
+
+      data?.tomorrowAttendanceStatus ??
+
+      data?.tomorrowAttendance?.status ??
+
+      data?.nextDayAttendanceStatus ??
+
+      data?.attendance?.tomorrow?.status ??
+
+      null
+
+    );
+
+  }
+
+
+  private resolveCompletedRideType(
+    incomingRideType:
+      | 'morning'
+      | 'evening'
+      | null,
+    status: string
+  ):
+    | 'morning'
+    | 'evening'
+    | null {
+
+    if (!this.isStudentTripCompleted()) {
+
+      return null;
+
+    }
+
+    if (incomingRideType) {
+
+      return incomingRideType;
+
+    }
+
+    if (status === 'dropped_at_home') {
+
+      return 'evening';
+
+    }
+
+    if (status === 'dropped_at_school') {
+
+      return 'morning';
+
+    }
+
+    return this.completedRideType;
+
+  }
+
+
+  formatJourneyTimeOrDash(
+    value: string | Date | null
+  ): string {
+
+    return value
+
+      ? this.formatJourneyTime(value)
+
+      : '—';
+
+  }
+
+
+
+  // =====================================================
   // NORMALIZE ATTENDANCE
   // =====================================================
 
@@ -923,6 +1187,20 @@ export class DashboardPage
     | 'present'
     | 'absent'
     | 'not_marked' {
+
+
+    if (value === true) {
+
+      return 'present';
+
+    }
+
+
+    if (value === false) {
+
+      return 'absent';
+
+    }
 
 
     const status =
@@ -1659,8 +1937,15 @@ export class DashboardPage
     this.trackingAvailable = false;
 
 
+    const completedType =
+
+      this.completedRideType ||
+
+      this.rideType;
+
+
     if (
-      this.rideType === 'morning'
+      completedType === 'morning'
     ) {
 
 
@@ -1683,7 +1968,7 @@ export class DashboardPage
 
 
     else if (
-      this.rideType === 'evening'
+      completedType === 'evening'
     ) {
 
 
@@ -2355,6 +2640,10 @@ export class DashboardPage
     this.rideStarted = false;
 
     this.rideType = null;
+
+    this.completedRideType = null;
+
+    this.tomorrowAttendanceStatus = 'not_marked';
 
     this.pickupTime = null;
 
