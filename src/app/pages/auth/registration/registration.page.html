@@ -5,1154 +5,680 @@
 </ion-header>
 
 <ion-content>
-
   <div class="container">
 
-    <!-- =====================================================
-         COMMON HEADER
-    ====================================================== -->
-
-    <div class="logo">
-      🚐
-    </div>
-
+    <div class="logo">🚐</div>
     <h2>Welcome</h2>
+    <p class="subtitle">Select your role and register</p>
 
-    <p class="subtitle">
-      Select your role and register
-    </p>
-
-
-    <!-- =====================================================
-         ROLE SELECTION
-    ====================================================== -->
-
-
-    <small *ngIf="
-    parentSubmitted &&
-    studentForm.get('schoolName')?.invalid
-  ">
-      Please select a school from the search results
-    </small>
+    <!-- ROLE -->
     <ion-segment [(ngModel)]="selectedRole" (ionChange)="changeRole()"
       *ngIf="selectedRole === 'driver' || parentStep === 1">
-
       <ion-segment-button value="driver">
         <ion-label>Driver</ion-label>
       </ion-segment-button>
-
       <ion-segment-button value="parent">
         <ion-label>Parent</ion-label>
       </ion-segment-button>
-
     </ion-segment>
 
-
     <!-- =====================================================
-         =====================================================
-         DRIVER REGISTRATION
-         EXISTING FLOW - DO NOT CHANGE
-         =====================================================
-         ====================================================== -->
-
+         DRIVER REGISTRATION - EXISTING FLOW
+    ====================================================== -->
     <div class="driver-registration" *ngIf="selectedRole === 'driver'">
-
       <form [formGroup]="registrationForm">
 
-        <!-- NAME -->
-
         <ion-item>
-
-          <ion-input label="Name" labelPlacement="floating" formControlName="name">
-          </ion-input>
-
+          <ion-input label="Name" labelPlacement="floating" formControlName="name"></ion-input>
         </ion-item>
-
-        <small *ngIf="
-            submitted &&
-            registrationForm.get('name')?.invalid
-          ">
+        <small *ngIf="submitted && registrationForm.get('name')?.invalid">
           Enter valid name
         </small>
 
-
-        <!-- MOBILE -->
-
         <ion-item>
-
-          <ion-input type="tel" label="Mobile Number" labelPlacement="floating" formControlName="mobileNumber">
-          </ion-input>
-
+          <ion-input type="tel" label="Mobile Number" labelPlacement="floating"
+            formControlName="mobileNumber"></ion-input>
         </ion-item>
-
-        <small *ngIf="
-            submitted &&
-            registrationForm.get('mobileNumber')?.invalid
-          ">
+        <small *ngIf="submitted && registrationForm.get('mobileNumber')?.invalid">
           Enter valid mobile number
         </small>
 
-
-        <!-- PASSWORD -->
-
         <ion-item>
-
-          <ion-input type="password" label="Password" labelPlacement="floating" formControlName="password">
+          <ion-input [type]="showDriverPassword ? 'text' : 'password'" label="Password" labelPlacement="floating"
+            formControlName="password" autocomplete="new-password">
+            <button type="button" slot="end" class="password-toggle" aria-label="Toggle driver password visibility"
+              (click)="toggleDriverPasswordVisibility()">
+              {{ showDriverPassword ? '🙈' : '👁️' }}
+            </button>
           </ion-input>
-
         </ion-item>
-
-        <small *ngIf="
-            submitted &&
-            registrationForm.get('password')?.invalid
-          ">
+        <small *ngIf="submitted && registrationForm.get('password')?.invalid">
           Password must be at least 6 characters
         </small>
 
-
-        <!-- VEHICLE -->
-
         <ion-item>
-
-          <ion-input label="Vehicle Number" labelPlacement="floating" formControlName="vehicleNumber">
-          </ion-input>
-
+          <ion-input label="Vehicle Number" labelPlacement="floating" formControlName="vehicleNumber"></ion-input>
         </ion-item>
-
-        <small *ngIf="
-            submitted &&
-            registrationForm.get('vehicleNumber')?.invalid
-          ">
+        <small *ngIf="submitted && registrationForm.get('vehicleNumber')?.invalid">
           Vehicle number required
         </small>
 
-
-        <!-- ROUTE -->
-
         <ion-item>
-
-          <ion-input label="Route / Area" labelPlacement="floating" formControlName="routeArea">
-          </ion-input>
-
+          <ion-input label="Route / Area" labelPlacement="floating" formControlName="routeArea"></ion-input>
         </ion-item>
-
-        <small *ngIf="
-            submitted &&
-            registrationForm.get('routeArea')?.invalid
-          ">
+        <small *ngIf="submitted && registrationForm.get('routeArea')?.invalid">
           Route area required
         </small>
 
-
-        <!-- REFERRAL -->
-
         <ion-item>
-
-          <ion-input label="Referral Code (Optional)" labelPlacement="floating" formControlName="referredByCode">
-          </ion-input>
-
+          <ion-input label="Referral Code (Optional)" labelPlacement="floating"
+            formControlName="referredByCode"></ion-input>
         </ion-item>
 
-
-        <!-- REGISTER -->
-
         <ion-button expand="block" class="register-btn" (click)="register()">
-
           Register
-
         </ion-button>
-
       </form>
-
     </div>
 
-
     <!-- =====================================================
-         =====================================================
-         PARENT ONBOARDING
-         =====================================================
-         ====================================================== -->
-
+         PARENT ONBOARDING - 7 STEPS
+    ====================================================== -->
     <div class="parent-onboarding" *ngIf="selectedRole === 'parent'">
 
-
-      <!-- =================================================
-           PROGRESS
-      ================================================== -->
-
-      <div class="progress-section" *ngIf="parentStep < 8">
-
-        <div class="progress-top">
-
-          <span>
-            Step {{ parentStep }} of {{ totalParentSteps }}
-          </span>
-
-          <span>
-            {{ parentProgress }}%
-          </span>
-
-        </div>
-
-        <div class="progress-track">
-
-          <div class="progress-value" [style.width.%]="parentProgress">
-          </div>
-
-        </div>
-
+      <div class="autosave-note">
+        💾 Your registration is automatically saved while you fill it.
       </div>
 
+      <!-- PROGRESS -->
+      <div class="progress-section" *ngIf="parentStep < 7">
+        <div class="progress-top">
+          <span>Step {{ parentStep }} of {{ totalParentSteps }}</span>
+          <span>{{ parentProgress }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-value" [style.width.%]="parentProgress"></div>
+        </div>
+      </div>
 
       <!-- =================================================
-           STEP 1
-           PARENT REGISTRATION
+           STEP 1 - PARENT ACCOUNT + OPTIONAL CONTACTS
       ================================================== -->
-
       <div class="onboarding-card" *ngIf="parentStep === 1">
+        <div class="step-icon">👤</div>
+        <h3>Parent Registration</h3>
+        <p>Create your parent account to get started.</p>
 
-        <div class="step-icon">
-          👤
-        </div>
-
-        <h3>
-          Parent Registration
-        </h3>
-
-        <p>
-          Create your parent account to get started.
-        </p>
-
-
-        <form [formGroup]="parentRegistrationForm">
-
-          <!-- NAME -->
-
+        <form [formGroup]="parentRegistrationForm" autocomplete="off">
           <ion-item>
-
-            <ion-input label="Parent Name" labelPlacement="floating" formControlName="name">
-            </ion-input>
-
+            <ion-input label="Parent Name" labelPlacement="floating" formControlName="name"></ion-input>
           </ion-item>
-
-          <small *ngIf="
-              parentSubmitted &&
-              parentRegistrationForm.get('name')?.invalid
-            ">
+          <small *ngIf="parentSubmitted && parentRegistrationForm.get('name')?.invalid">
             Enter valid name
           </small>
 
-
-          <!-- MOBILE -->
-
           <ion-item>
-
-            <ion-input type="tel" label="Mobile Number" labelPlacement="floating" formControlName="mobileNumber">
-            </ion-input>
-
+            <ion-input type="tel" label="Mobile Number" labelPlacement="floating" formControlName="mobileNumber"
+              inputmode="numeric"></ion-input>
           </ion-item>
-
-          <small *ngIf="
-              parentSubmitted &&
-              parentRegistrationForm
-                .get('mobileNumber')
-                ?.invalid
-            ">
+          <small *ngIf="parentSubmitted && parentRegistrationForm.get('mobileNumber')?.invalid">
             Enter valid mobile number
           </small>
 
-
-          <!-- PASSWORD -->
-
           <ion-item>
-
-            <ion-input type="password" label="Password" labelPlacement="floating" formControlName="password">
+            <ion-input [type]="showParentPassword ? 'text' : 'password'" label="Password" labelPlacement="floating"
+              formControlName="password" name="parent-registration-password" autocomplete="new-password"
+              [readonly]="parentPasswordReadonly" (ionFocus)="enableParentPasswordInput()">
+              <button type="button" slot="end" class="password-toggle" aria-label="Toggle parent password visibility"
+                (click)="toggleParentPasswordVisibility()">
+                {{ showParentPassword ? '🙈' : '👁️' }}
+              </button>
             </ion-input>
-
           </ion-item>
-
-          <small *ngIf="
-              parentSubmitted &&
-              parentRegistrationForm
-                .get('password')
-                ?.invalid
-            ">
+          <small *ngIf="parentSubmitted && parentRegistrationForm.get('password')?.invalid">
             Password must be at least 6 characters
           </small>
 
-        </form>
-
-      </div>
-
-
-      <!-- =================================================
-           STEP 2
-           PARENT DETAILS
-      ================================================== -->
-
-      <div class="onboarding-card" *ngIf="parentStep === 2">
-
-        <div class="step-icon">
-          🛡️
-        </div>
-
-        <h3>
-          Parent Details
-        </h3>
-
-        <p>
-          Add additional contact information for your child's
-          safety.
-        </p>
-
-
-        <form [formGroup]="parentDetailsForm">
-
           <ion-item>
-
-            <ion-input type="tel" label="Emergency Contact" labelPlacement="floating"
-              formControlName="emergencyContact">
-            </ion-input>
-
+            <ion-input type="tel" label="Emergency Contact (Optional)" labelPlacement="floating"
+              formControlName="emergencyContact" inputmode="numeric"></ion-input>
           </ion-item>
-
-          <small *ngIf="
-              parentSubmitted &&
-              parentDetailsForm
-                .get('emergencyContact')
-                ?.invalid
-            ">
-            Enter a valid emergency contact
+          <small *ngIf="parentSubmitted && parentRegistrationForm.get('emergencyContact')?.invalid">
+            Enter a valid 10-digit emergency contact or leave it empty
           </small>
 
-
           <ion-item>
-
-            <ion-input type="email" label="Email (Optional)" labelPlacement="floating" formControlName="email">
-            </ion-input>
-
+            <ion-input type="email" label="Email (Optional)" labelPlacement="floating" formControlName="email"
+              autocomplete="email"></ion-input>
           </ion-item>
-
+          <small *ngIf="parentSubmitted && parentRegistrationForm.get('email')?.invalid">
+            Enter a valid email address or leave it empty
+          </small>
         </form>
-
       </div>
 
-
       <!-- =================================================
-           STEP 3
-           STUDENT DETAILS
+           STEP 2 - STUDENT + SCHOOL
       ================================================== -->
+      <div class="onboarding-card student-details-card" *ngIf="parentStep === 2">
+        <div class="step-icon">🎒</div>
+        <h3>Student Details</h3>
+        <p>Enter your child's details and select the school near you.</p>
 
-      <div class="onboarding-card" *ngIf="parentStep === 3">
-
-        <div class="step-icon">
-          🎒
+        <!-- DETECTED AREA / CITY -->
+        <div class="detected-location-card">
+          <div class="detected-location-icon">📍</div>
+          <div class="detected-location-content"
+            *ngIf="parentLocationAvailable && (parentArea || parentCity || parentState)">
+            <span class="detected-location-caption">Your detected location</span>
+            <strong *ngIf="parentArea">{{ parentArea }}</strong>
+            <span *ngIf="parentCity || parentState">{{ parentCity }}{{ parentCity && parentState ? ', ' : '' }}{{
+              parentState }}</span>
+          </div>
+          <div class="detected-location-content" *ngIf="parentLocationLoading">
+            <span class="detected-location-caption">Detecting your area and city...</span>
+            <span>Please allow location access.</span>
+          </div>
+          <div class="detected-location-content" *ngIf="!parentLocationLoading && !parentLocationAvailable">
+            <span class="detected-location-caption">Location not detected</span>
+            <span>{{ parentLocationError || 'We need your location to show nearby schools.' }}</span>
+            <button type="button" class="detect-location-retry" (click)="detectParentLocationAgain()">Try Again</button>
+          </div>
         </div>
-
-        <h3>
-          Student Details
-        </h3>
-
-        <p>
-          Enter the details of the student travelling in
-          the school van.
-        </p>
-
 
         <form [formGroup]="studentForm">
-
-          <!-- STUDENT NAME -->
-
-          <ion-item>
-
-            <ion-input label="Student Name" labelPlacement="floating" formControlName="studentName">
-            </ion-input>
-
-          </ion-item>
-
-          <small *ngIf="
-              parentSubmitted &&
-              studentForm.get('studentName')?.invalid
-            ">
-            Student name required
-          </small>
-
-
-          <!-- SCHOOL SEARCH -->
-
-          <div class="school-search-wrapper">
-
-            <ion-item *ngIf="!selectedSchool">
-
-              <ion-input label="City / Area" labelPlacement="floating" formControlName="schoolSearchArea"
-                (ionInput)="onSchoolAreaChange($event)" autocomplete="address-level2">
-              </ion-input>
-
+          <div class="form-field">
+            <ion-item class="custom-input-item">
+              <ion-input label="Student Name" labelPlacement="floating" formControlName="studentName"
+                type="text"></ion-input>
             </ion-item>
-
-            <small class="location-hint" *ngIf="!selectedSchool && schoolLocationLoading">
-              Detecting your city…
+            <small class="field-error" *ngIf="parentSubmitted && studentForm.get('studentName')?.invalid">
+              Student name required
             </small>
+          </div>
 
-            <small class="location-hint" *ngIf="!selectedSchool && schoolSearchArea && !schoolLocationLoading">
-              Showing schools in {{ schoolSearchArea }}. Edit this field to search another city or area.
+          <div class="form-field">
+            <ion-item class="custom-input-item">
+              <ion-input label="Class" labelPlacement="floating" formControlName="studentClass" type="text"
+                placeholder="e.g. 5"></ion-input>
+            </ion-item>
+            <small class="field-error" *ngIf="parentSubmitted && studentForm.get('studentClass')?.invalid">
+              Class required
             </small>
+          </div>
 
-            <!-- =================================================
-     SCHOOL SEARCH
-================================================== -->
-
-            <div class="school-search-wrapper">
-
-              <ion-item *ngIf="!selectedSchool">
-
-                <ion-input label="School Name" labelPlacement="floating" formControlName="schoolName"
-                  (ionInput)="onSchoolSearch($event)" autocomplete="off">
-                </ion-input>
-
-              </ion-item>
-
-
-              <!-- LOADING -->
-
-              <div class="school-search-status" *ngIf="schoolSearching">
-
-                <ion-spinner name="crescent">
-                </ion-spinner>
-
-                <span>
-                  Searching schools...
-                </span>
-
-              </div>
-
-
-              <!-- RESULTS -->
-
-              <div class="school-results" *ngIf="
-      schoolSuggestions.length > 0 &&
-      !schoolSearching
-    ">
-
-                <div class="school-result" *ngFor="
-        let school of schoolSuggestions
-      " (click)="selectSchool(school)">
-
-                  <div class="school-icon">
-                    🏫
-                  </div>
-
-
-                  <div class="school-result-info">
-
-                    <strong>
-                      {{ getSchoolName(school) }}
-                    </strong>
-
-                    <span>
-                      📍 {{ getSchoolLocation(school) }}
-                    </span>
-
-                  </div>
-
-                  <span class="school-arrow">
-                    ›
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <!-- NO RESULTS -->
-
-              <div class="school-no-results" *ngIf="
-      schoolSearchCompleted &&
-      !schoolSearching &&
-      schoolSuggestions.length === 0
-    ">
-
-                <strong>
-                  No schools found
-                </strong>
-
-                <small>
-                  Try school name + city
-                </small>
-
-              </div>
-
-
-              <!-- SELECTED SCHOOL -->
-
-              <div class="selected-school" *ngIf="selectedSchool">
-
-                <div class="selected-school-check">
-                  ✓
-                </div>
-
-                <div class="selected-school-info">
-
-                  <strong>
-                    {{ selectedSchoolName }}
-                  </strong>
-
-                  <span>
-                    📍 {{ schoolAddress }}
-                  </span>
-
-                </div>
-
-
-                <button type="button" class="change-school-btn" (click)="changeSchool()">
-
-                  Change
-
-                </button>
-
-              </div>
-
-            </div>
-
-
-            <small *ngIf="
-    parentSubmitted &&
-    studentForm.get('schoolName')?.invalid
-  ">
-              Please select a school from the list
+          <div class="form-field">
+            <ion-item class="custom-input-item">
+              <ion-input label="Section" labelPlacement="floating" formControlName="studentSection" type="text"
+                placeholder="e.g. A"></ion-input>
+            </ion-item>
+            <small class="field-error" *ngIf="parentSubmitted && studentForm.get('studentSection')?.invalid">
+              Section required
             </small>
+          </div>
 
-            <!-- Duplicate legacy search markup kept out of the rendered view. -->
-            <ng-container *ngIf="false">
-
-            <!-- SEARCHING -->
-
-            <div class="school-search-loading" *ngIf="schoolSearching">
-
-              Searching schools...
-
-            </div>
-
-
-            <!-- SCHOOL RESULTS -->
-
-            <div class="school-results" *ngIf="
-      schoolSuggestions.length > 0 &&
-      !schoolSearching
-    ">
-
-              <div class="school-result" *ngFor="let school of schoolSuggestions" (click)="selectSchool(school)">
-
-                <div class="school-result-icon">
-                  🏫
-                </div>
-
-                <div class="school-result-content">
-
-                  <strong>
-                    {{ getSchoolName(school) }}
-                  </strong>
-
-                  <span>
-                    {{ school.display_name }}
-                  </span>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <!-- SELECTED SCHOOL -->
-
-            <div class="selected-school" *ngIf="selectedSchool">
-
-              <div class="selected-school-icon">
-                ✓
-              </div>
-
+          <div class="school-section">
+            <div class="school-section-header">
               <div>
-
-                <strong>
-                  {{ selectedSchoolName }}
-                </strong>
-
-                <span>
-                  {{ schoolAddress }}
-                </span>
-
+                <h4>Select School</h4>
+                <p class="school-location-text">📍 Schools near your current location</p>
+                <div class="detected-location source-note" *ngIf="parentLocationAvailable && parentLocationLabel">
+                  {{ parentLocationSource === 'approximate' ? 'Approximate location' : 'Detected location' }}:
+                  <strong>{{ parentLocationLabel }}</strong>
+                </div>
               </div>
-
             </div>
 
-            </ng-container>
+            <div class="school-search-box" *ngIf="!selectedSchool">
+              <ion-item class="custom-input-item school-input-item">
+                <ion-input label="School Name" labelPlacement="floating" formControlName="schoolName" type="text"
+                  autocomplete="off" placeholder="Search your school" (ionInput)="onSchoolSearch($event)"></ion-input>
+              </ion-item>
+            </div>
 
+            <div class="school-status" *ngIf="!selectedSchool && schoolSearching">
+              <ion-spinner name="crescent"></ion-spinner>
+              <span>Finding schools near your location...</span>
+            </div>
+
+            <div class="school-results" *ngIf="!selectedSchool && !schoolSearching && schoolSuggestions.length > 0">
+              <button type="button" class="school-result" *ngFor="let school of schoolSuggestions"
+                (click)="selectSchool(school)">
+                <div class="school-result-icon">🏫</div>
+                <div class="school-result-content">
+                  <strong>{{ getSchoolName(school) }}</strong>
+                  <span>{{ getSchoolLocation(school) }}</span>
+                  <small *ngIf="school?.distanceMeters !== undefined">
+                    📍 {{ getSchoolDistance(school) }}
+                  </small>
+                </div>
+                <div class="school-result-arrow">›</div>
+              </button>
+            </div>
+
+            <div class="school-no-results"
+              *ngIf="!selectedSchool && schoolSearchCompleted && !schoolSearching && schoolSuggestions.length === 0">
+              <div class="no-school-icon">🏫</div>
+              <strong>No schools found</strong>
+              <span>Try entering a different school name.</span>
+            </div>
+
+            <div class="selected-school-card" *ngIf="selectedSchool">
+              <div class="selected-school-icon">✓</div>
+              <div class="selected-school-info">
+                <span class="selected-label">Selected School</span>
+                <strong>{{ selectedSchoolName }}</strong>
+                <span class="selected-address">📍 {{ schoolAddress }}</span>
+              </div>
+              <button type="button" class="change-school-btn" (click)="changeSchool()">
+                Change
+              </button>
+            </div>
+
+            <small class="field-error school-error"
+              *ngIf="parentSubmitted && (!selectedSchool || studentForm.get('schoolName')?.invalid)">
+              Please select a school from the list.
+            </small>
           </div>
-
-
-          <small *ngIf="
-    parentSubmitted &&
-    studentForm.get('schoolName')?.invalid
-  ">
-            Please select a school from the search results
-          </small>
-
-
-          <!-- CLASS -->
-
-          <ion-item>
-
-            <ion-input label="Class" labelPlacement="floating" formControlName="studentClass">
-            </ion-input>
-
-          </ion-item>
-
-          <small *ngIf="
-              parentSubmitted &&
-              studentForm.get('studentClass')?.invalid
-            ">
-            Class required
-          </small>
-
         </form>
-
       </div>
 
-
       <!-- =================================================
-           STEP 4
-           PICKUP ADDRESS
+           STEP 3 - CONFIRM SCHOOL LOCATION
       ================================================== -->
-
-      <div class="onboarding-card location-card" *ngIf="parentStep === 4">
-
-        <div class="step-icon">
-          🏠
-        </div>
-
-        <h3>
-          Home / Pickup Location
-        </h3>
-
-        <p>
-          Enter the address where your child should be
-          picked up.
-        </p>
-
-
-        <form [formGroup]="locationForm">
-
-          <ion-item>
-
-            <ion-input label="Pickup Address" labelPlacement="floating" formControlName="pickupAddress">
-            </ion-input>
-
-          </ion-item>
-
-        </form>
-
-
-        <ion-button expand="block" fill="outline" class="location-btn" (click)="searchPickupAddress()">
-
-          🔎 Search Address & Pin on Map
-
-        </ion-button>
-
-
-        <div class="or-divider">
-          <span>OR</span>
-        </div>
-
-
-        <ion-button expand="block" class="location-btn" (click)="useCurrentLocation()">
-
-          📍 Use Current Location
-
-        </ion-button>
-
-
-        <div class="location-note">
-
-          <span>
-            💡
-          </span>
-
-          <p>
-            You can manually move the pin to the exact
-            pickup point in the next step.
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <!-- =================================================
-           STEP 5
-           PICKUP MAP
-      ================================================== -->
-
-      <div class="onboarding-card location-card" *ngIf="parentStep === 5">
-
-        <div class="step-icon">
-          📍
-        </div>
-
-        <h3>
-          Confirm Pickup Point
-        </h3>
-
-        <p>
-          Drag the pin or tap on the map to select the exact
-          location where the van should pick up the student.
-        </p>
-
-
-        <div id="pickupMap" class="map-container">
-        </div>
-
-
-        <div class="selected-location" *ngIf="pickupAddress">
-
-          <div class="location-pin">
-            📍
-          </div>
-
-          <div>
-
-            <strong>
-              Pickup Location
-            </strong>
-
-            <p>
-              {{ pickupAddress }}
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="coordinates" *ngIf="pickupLatitude !== null">
-
-          <span>
-            Lat:
-            {{ pickupLatitude | number:'1.6-6' }}
-          </span>
-
-          <span>
-            Lng:
-            {{ pickupLongitude | number:'1.6-6' }}
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- =================================================
-           STEP 6
-           SCHOOL LOCATION
-      ================================================== -->
-
-      <div class="onboarding-card location-card" *ngIf="parentStep === 6">
-
-        <div class="step-icon">
-          🏫
-        </div>
-
-        <h3>
-          Confirm School Location
-        </h3>
-
-        <p>
-          Confirm the location of the selected school.
-        </p>
-
-
-        <!-- SELECTED SCHOOL -->
+      <div class="onboarding-card location-card" *ngIf="parentStep === 3">
+        <div class="step-icon">🏫</div>
+        <h3>Confirm School Location</h3>
+        <p>Confirm the exact school location. Drag the pin or tap the map if needed.</p>
 
         <div class="selected-school school-confirmation" *ngIf="selectedSchool">
-
-          <div class="selected-school-icon">
-            🏫
-          </div>
-
+          <div class="selected-school-icon">🏫</div>
           <div>
-
-            <strong>
-              {{ selectedSchoolName }}
-            </strong>
-
-            <span>
-              {{ schoolAddress }}
-            </span>
-
+            <strong>{{ selectedSchoolName }}</strong>
+            <span>{{ schoolAddress }}</span>
           </div>
-
         </div>
 
-
-        <!-- MAP -->
-
-        <div id="schoolMap" class="map-container">
-        </div>
-
-
-        <!-- COORDINATES -->
+        <div id="schoolMap" class="map-container"></div>
 
         <div class="coordinates" *ngIf="schoolLatitude !== null">
-
-          <span>
-            Lat:
-            {{ schoolLatitude | number:'1.6-6' }}
-          </span>
-
-          <span>
-            Lng:
-            {{ schoolLongitude | number:'1.6-6' }}
-          </span>
-
+          <span>Lat: {{ schoolLatitude | number:'1.6-6' }}</span>
+          <span>Lng: {{ schoolLongitude | number:'1.6-6' }}</span>
         </div>
-
       </div>
 
-
       <!-- =================================================
-           STEP 7
-           DRIVER CONNECTION
+           STEP 4 - PICKUP ADDRESS
       ================================================== -->
+      <div class="onboarding-card location-card" *ngIf="parentStep === 4">
+        <div class="step-icon">🏠</div>
+        <h3>Home / Pickup Location</h3>
+        <p>Enter the address where your child should be picked up.</p>
 
-      <div class="onboarding-card" *ngIf="parentStep === 7">
-
-        <div class="step-icon">
-          🚐
-        </div>
-
-        <h3>
-          Connect Your Driver
-        </h3>
-
-        <p>
-          Enter the driver details provided by your school
-          van driver.
-        </p>
-
-
-        <form [formGroup]="driverConnectionForm">
-
+        <form [formGroup]="locationForm">
           <ion-item>
-
-            <ion-input type="tel" label="Driver Mobile Number" labelPlacement="floating" formControlName="driverMobile">
-            </ion-input>
-
+            <ion-input label="Pickup Address" labelPlacement="floating" formControlName="pickupAddress"></ion-input>
           </ion-item>
-
-
-          <div class="or-divider">
-            <span>OR</span>
-          </div>
-
-
-          <ion-item>
-
-            <ion-input label="Driver ID" labelPlacement="floating" formControlName="driverId">
-            </ion-input>
-
-          </ion-item>
-
+          <small class="field-error" *ngIf="parentSubmitted && locationForm.get('pickupAddress')?.invalid">
+            Pickup address required
+          </small>
         </form>
 
+        <div class="detected-location" *ngIf="parentLocationLabel">
+          📍 Detected area: <strong>{{ parentLocationLabel }}</strong>
+        </div>
 
-        <ion-button expand="block" class="location-btn" (click)="findDriver()">
-
-          🔎 Find Driver
-
+        <ion-button expand="block" fill="outline" class="location-btn" (click)="searchPickupAddress()">
+          🔎 Search Address & Pin on Map
         </ion-button>
 
+        <div class="or-divider"><span>OR</span></div>
 
-        <!-- DRIVER FOUND -->
+        <ion-button expand="block" class="location-btn" (click)="useCurrentLocation()">
+          📍 Use Current Location
+        </ion-button>
+
+        <div class="location-note">
+          <span>💡</span>
+          <p>Your detected area is pre-filled. You can still edit the address.</p>
+        </div>
+      </div>
+
+      <!-- =================================================
+           STEP 5 - CONFIRM PICKUP POINT
+      ================================================== -->
+      <div class="onboarding-card location-card" *ngIf="parentStep === 5">
+        <div class="step-icon">📍</div>
+        <h3>Confirm Pickup Point</h3>
+        <p>Drag the pin or tap the map to choose the exact pickup location.</p>
+
+        <div class="pickup-confirm-overlay" *ngIf="pickupConfirmDialogOpen" role="dialog" aria-modal="true">
+          <div class="pickup-confirm-dialog">
+            <div class="pickup-confirm-icon">📍</div>
+            <h4>Confirm Pickup Point</h4>
+            <p>
+              Check the pin carefully. This is the exact location where the van will pick up your child.
+            </p>
+            <div class="pickup-confirm-tips">
+              <div><span>1</span><strong>Check the pickup pin</strong></div>
+              <div><span>2</span><strong>Drag the pin or tap the map</strong></div>
+              <div><span>3</span><strong>Press Continue after confirming</strong></div>
+            </div>
+            <ion-button expand="block" class="pickup-confirm-btn" (click)="confirmPickupPointEntry()">
+              Got it, Confirm Location
+            </ion-button>
+          </div>
+        </div>
+
+        <div id="pickupMap" class="map-container"></div>
+
+        <div class="selected-location" *ngIf="pickupAddress">
+          <div class="location-pin">📍</div>
+          <div>
+            <strong>Pickup Location</strong>
+            <p>{{ pickupAddress }}</p>
+          </div>
+        </div>
+
+        <div class="coordinates" *ngIf="pickupLatitude !== null">
+          <span>Lat: {{ pickupLatitude | number:'1.6-6' }}</span>
+          <span>Lng: {{ pickupLongitude | number:'1.6-6' }}</span>
+        </div>
+      </div>
+
+      <!-- =================================================
+           STEP 6 - DRIVER
+      ================================================== -->
+      <div class="onboarding-card" *ngIf="parentStep === 6">
+        <div class="step-icon">🚐</div>
+        <h3>Connect Your Driver</h3>
+        <p>
+          Enter the driver mobile number or Driver ID. If the driver does not exist,
+          you can still continue and the backend will create the driver.
+        </p>
+
+        <form [formGroup]="driverConnectionForm">
+          <ion-item>
+            <ion-input type="tel" label="Driver Mobile Number" labelPlacement="floating" formControlName="driverMobile"
+              inputmode="numeric"></ion-input>
+          </ion-item>
+
+          <small class="field-error" *ngIf="parentSubmitted && driverConnectionForm.get('driverMobile')?.invalid">
+            Enter a valid driver mobile number
+          </small>
+
+          <div class="or-divider"><span>OR</span></div>
+
+          <ion-item>
+            <ion-input label="Driver ID (Optional)" labelPlacement="floating" formControlName="driverId"></ion-input>
+          </ion-item>
+
+          <div class="or-divider">
+            <span>New Driver Details</span>
+          </div>
+
+          <div class="new-driver-helper">
+            <strong>New driver details</strong>
+            <span>
+              Only the driver's mobile number is required.
+              Driver name is optional. Vehicle number and route/area
+              can be added later by the driver/admin.
+            </span>
+          </div>
+
+          <ion-item>
+            <ion-input label="Driver Name (Optional)" labelPlacement="floating" formControlName="driverName" type="text"
+              autocomplete="name"></ion-input>
+          </ion-item>
+        </form>
+
+        <ion-button expand="block" class="location-btn" (click)="findDriver()" [disabled]="driverLookupLoading">
+          {{ driverLookupLoading ? 'Checking Driver...' : '🔎 Find Driver' }}
+        </ion-button>
 
         <div class="driver-card" *ngIf="driverFound">
-
-          <div class="driver-avatar">
-            🚐
-          </div>
-
+          <div class="driver-avatar">🚐</div>
           <div class="driver-info">
-
-            <strong>
-              {{ driverDetails?.name }}
-            </strong>
-
-            <span>
-              Driver ID:
-              {{ driverDetails?.driverId }}
-            </span>
-
-            <span>
-              Vehicle:
-              {{ driverDetails?.vehicleNumber }}
-            </span>
-
-            <small>
-              ✓ Driver Found
-            </small>
-
+            <strong>{{ driverDetails?.name }}</strong>
+            <span>Driver ID: {{ driverDetails?.driverId }}</span>
+            <span>Mobile: {{ driverDetails?.mobileNumber }}</span>
+            <span>Vehicle: {{ driverDetails?.vehicleNumber }}</span>
+            <small>✓ Existing driver found</small>
           </div>
-
         </div>
 
+        <div class="driver-card new-driver-card" *ngIf="driverIsNew && !driverFound">
+          <div class="driver-avatar">➕🚐</div>
+          <div class="driver-info">
+            <strong>New Driver</strong>
+            <span>{{ driverConnectionForm.get('driverName')?.value || 'Pending Driver' }}</span>
+            <span>{{ driverConnectionForm.get('driverMobile')?.value }}</span>
+            <small *ngIf="driverConnectionForm.get('driverName')?.value">
+              Name: {{ driverConnectionForm.get('driverName')?.value }}
+            </small>
+            <small>✓ Mobile number captured · Driver will be created automatically</small>
+          </div>
+        </div>
+
+        <div class="driver-status-message" *ngIf="driverLookupMessage">
+          {{ driverLookupMessage }}
+        </div>
       </div>
 
-
       <!-- =================================================
-           STEP 8
-           REVIEW
+           STEP 7 - REVIEW
       ================================================== -->
-
-      <div class="onboarding-card review-card" *ngIf="parentStep === 8">
-
-        <div class="step-icon">
-          ✅
-        </div>
-
-        <h3>
-          Review & Finish
-        </h3>
-
-        <p>
-          Check your information before completing
-          registration.
-        </p>
-
-
-        <!-- PARENT -->
+      <div class="onboarding-card review-card" *ngIf="parentStep === 7">
+        <div class="step-icon">✅</div>
+        <h3>Review & Finish</h3>
+        <p>Review every detail. Edit anything before registration.</p>
 
         <div class="review-item">
-
-          <span class="review-icon">
-            👤
-          </span>
-
-          <div>
-
-            <label>
-              Parent
-            </label>
-
-            <strong>
-              {{ parentRegistrationForm.get('name')?.value }}
-            </strong>
-
-            <small>
-              {{
-              parentRegistrationForm
-              .get('mobileNumber')
-              ?.value
-              }}
+          <span class="review-icon">👤</span>
+          <div class="review-content">
+            <label>Parent Details</label>
+            <strong>{{ parentRegistrationForm.get('name')?.value }}</strong>
+            <small>{{ parentRegistrationForm.get('mobileNumber')?.value }}</small>
+            <small *ngIf="parentRegistrationForm.get('email')?.value">
+              Email: {{ parentRegistrationForm.get('email')?.value }}
             </small>
+            <small *ngIf="parentRegistrationForm.get('emergencyContact')?.value">
+              Emergency: {{ parentRegistrationForm.get('emergencyContact')?.value }}
+            </small>
+          </div>
+          <ion-button fill="clear" size="small" (click)="editReviewSection(1)">Edit</ion-button>
+        </div>
 
+        <div class="review-item">
+          <span class="review-icon">🎒</span>
+          <div class="review-content">
+            <label>Student</label>
+            <strong>{{ studentForm.get('studentName')?.value }}</strong>
+            <small>
+              Class {{ studentForm.get('studentClass')?.value }} ·
+              Section {{ studentForm.get('studentSection')?.value }}
+            </small>
+            <small>{{ selectedSchoolName }}</small>
+          </div>
+          <ion-button fill="clear" size="small" (click)="editReviewSection(2)">Edit</ion-button>
+        </div>
+
+        <div class="review-item">
+          <span class="review-icon">🏫</span>
+          <div class="review-content">
+            <label>School Location</label>
+            <strong>Confirmed</strong>
+            <small>{{ schoolAddress }}</small>
+          </div>
+          <ion-button fill="clear" size="small" (click)="editReviewSection(3)">Edit</ion-button>
+        </div>
+
+        <div class="review-item">
+          <span class="review-icon">🏠</span>
+          <div class="review-content">
+            <label>Pickup Address</label>
+            <strong>Saved</strong>
+            <small>{{ pickupAddress }}</small>
+          </div>
+          <ion-button fill="clear" size="small" (click)="editReviewSection(4)">Edit</ion-button>
+        </div>
+
+        <div class="review-item">
+          <span class="review-icon">📍</span>
+          <div class="review-content">
+            <label>Pickup Point</label>
+            <strong>Confirmed</strong>
+            <small>{{ pickupAddress }}</small>
+          </div>
+          <ion-button fill="clear" size="small" (click)="editReviewSection(5)">Edit</ion-button>
+        </div>
+
+        <div class="review-item">
+          <span class="review-icon">🚐</span>
+          <div class="review-content">
+            <label>Driver</label>
+            <strong>
+              {{ driverDetails?.name || driverConnectionForm.get('driverName')?.value || 'New Driver' }}
+            </strong>
+            <small>
+              Mobile: {{ driverDetails?.mobileNumber || driverConnectionForm.get('driverMobile')?.value }}
+            </small>
+            <small>
+              ID: {{ driverDetails?.driverId || driverConnectionForm.get('driverId')?.value || 'Generated by server' }}
+            </small>
+            <small>
+              Vehicle: {{ driverDetails?.vehicleNumber || driverConnectionForm.get('driverVehicleNumber')?.value ||
+              'Pending' }}
+            </small>
+            <small *ngIf="driverIsNew">New driver will be created during registration.</small>
+          </div>
+          <ion-button fill="clear" size="small" (click)="editReviewSection(6)">Edit</ion-button>
+        </div>
+
+        <!-- =================================================
+             TERMS & CONDITIONS CONSENT
+        ================================================== -->
+        <div class="terms-consent-section">
+
+          <div class="terms-consent-header">
+            <div class="terms-consent-icon" aria-hidden="true">
+              🔒
+            </div>
+
+            <div class="terms-consent-heading">
+              <strong>Terms &amp; Conditions</strong>
+              <span>
+                Please review and confirm your agreement before creating your account.
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="terms-consent-row"
+            [class.accepted]="termsAccepted"
+          >
+            <ion-checkbox
+              [checked]="termsAccepted"
+              (ionChange)="onTermsAcceptedChange($event)"
+              aria-label="Agree to Terms and Conditions"
+            ></ion-checkbox>
+
+            <div class="terms-consent-text">
+              <span>
+                I agree to the
+                <button
+                  type="button"
+                  class="terms-link"
+                  (click)="$event.stopPropagation()"
+                >
+                  Terms &amp; Conditions
+                </button>
+                and
+                <button
+                  type="button"
+                  class="terms-link"
+                  (click)="$event.stopPropagation()"
+                >
+                  Privacy Policy
+                </button>
+                of Secure School Van.
+              </span>
+
+              <small>
+                By continuing, you confirm that the information provided above
+                is accurate and that you agree to the applicable terms.
+              </small>
+            </div>
+          </div>
+
+          <div
+            class="terms-validation-message"
+            *ngIf="parentSubmitted && !termsAccepted"
+          >
+            Please agree to the Terms &amp; Conditions to continue.
           </div>
 
         </div>
 
-
-        <!-- STUDENT -->
-
-        <div class="review-item">
-
-          <span class="review-icon">
-            🎒
-          </span>
-
-          <div>
-
-            <label>
-              Student
-            </label>
-
-            <strong>
-              {{ studentForm.get('studentName')?.value }}
-            </strong>
-
-            <small>
-              {{ studentForm.get('schoolName')?.value }}
-              ·
-              {{ studentForm.get('studentClass')?.value }}
-            </small>
-
-          </div>
-
-        </div>
-
-
-        <!-- PICKUP -->
-
-        <div class="review-item">
-
-          <span class="review-icon">
-            📍
-          </span>
-
-          <div>
-
-            <label>
-              Pickup Location
-            </label>
-
-            <strong>
-              Confirmed
-            </strong>
-
-            <small>
-              {{ pickupAddress }}
-            </small>
-
-          </div>
-
-        </div>
-
-
-        <!-- SCHOOL -->
-
-        <div class="review-item">
-
-          <span class="review-icon">
-            🏫
-          </span>
-
-          <div>
-
-            <label>
-              School Location
-            </label>
-
-            <strong>
-              Confirmed
-            </strong>
-
-            <small>
-              {{ schoolAddress }}
-            </small>
-
-          </div>
-
-        </div>
-
-
-        <!-- DRIVER -->
-
-        <div class="review-item">
-
-          <span class="review-icon">
-            🚐
-          </span>
-
-          <div>
-
-            <label>
-              Driver
-            </label>
-
-            <strong>
-              {{ driverDetails?.name }}
-            </strong>
-
-            <small>
-              {{ driverDetails?.vehicleNumber }}
-            </small>
-
-          </div>
-
-        </div>
-
-
-        <ion-button expand="block" class="register-btn" (click)="registerParent()" [disabled]="isLoading">
-
-          {{
-          isLoading
-          ? 'Creating Account...'
-          : 'Confirm & Register'
-          }}
-
+        <ion-button expand="block" class="register-btn" (click)="registerParent()" [disabled]="isLoading || !termsAccepted">
+          {{ isLoading ? 'Creating Account...' : 'Confirm & Register' }}
         </ion-button>
-
       </div>
 
 
-      <!-- =================================================
-           STEP 9
-           COMPLETE
-      ================================================== -->
-
-      <div class="onboarding-card complete-card" *ngIf="parentStep === 9">
-
-        <div class="success-icon">
-          ✓
+      <!-- REVIEW EDIT CONFIRMATION -->
+      <div class="pickup-confirm-overlay" *ngIf="reviewEditConfirmationOpen" role="dialog" aria-modal="true">
+        <div class="pickup-confirm-dialog">
+          <div class="pickup-confirm-icon">✏️</div>
+          <h4>Save Changes?</h4>
+          <p>
+            You have edited this section. Save the changes and return to Review & Finish?
+          </p>
+          <ion-button expand="block" class="pickup-confirm-btn" (click)="confirmReviewEdit()">
+            Save Changes & Return to Review
+          </ion-button>
+          <ion-button expand="block" fill="outline" (click)="continueEditing()">
+            Continue Editing
+          </ion-button>
+          <ion-button expand="block" fill="clear" (click)="cancelReviewEdit()">
+            Cancel Edit
+          </ion-button>
         </div>
+      </div>
 
-        <h3>
-          You're all set!
-        </h3>
-
+      <!-- =================================================
+           STEP 8 - COMPLETE
+      ================================================== -->
+      <div class="onboarding-card complete-card" *ngIf="parentStep === 8">
+        <div class="success-icon">✓</div>
+        <h3>You're all set!</h3>
         <p>
-          Your parent account and student details have been
-          successfully registered.
+          Your parent account and student details have been successfully registered.
         </p>
-
-
         <div class="complete-details">
-
-          <strong>
-            {{ studentForm.get('studentName')?.value }}
-          </strong>
-
-          <span>
-            {{ studentForm.get('schoolName')?.value }}
-          </span>
-
+          <strong>{{ studentForm.get('studentName')?.value }}</strong>
+          <span>{{ studentForm.get('schoolName')?.value }}</span>
           <span>
             Driver:
-            {{ driverDetails?.name }}
+            {{ driverDetails?.name || driverConnectionForm.get('driverName')?.value || 'New Driver' }}
           </span>
-
         </div>
-
-
         <ion-button expand="block" class="register-btn" (click)="goToLogin()">
-
           Continue to Login
-
         </ion-button>
-
       </div>
 
-
-      <!-- =================================================
-           PARENT NAVIGATION
-      ================================================== -->
-
-      <div class="parent-navigation" *ngIf="parentStep >= 1 && parentStep <= 7">
-
+      <!-- NAVIGATION -->
+      <div class="parent-navigation" *ngIf="parentStep >= 1 && parentStep <= 6">
         <ion-button fill="clear" (click)="previousParentStep()" *ngIf="parentStep > 1">
-
           ← Back
-
         </ion-button>
-
 
         <ion-button expand="block" class="continue-btn" (click)="nextParentStep()">
-
           Continue
-
         </ion-button>
-
       </div>
 
     </div>
-
   </div>
-
 </ion-content>

@@ -1585,3 +1585,1135 @@ small {
   }
 
 }
+/* =========================================================
+   STEP 3 - STUDENT DETAILS
+   ========================================================= */
+
+.student-details-card {
+  position: relative;
+  overflow: visible !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   FORM FIELD
+   ========================================================= */
+
+.form-field {
+  width: 100%;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+
+/* =========================================================
+   IONIC INPUT
+   ========================================================= */
+
+.custom-input-item {
+  --background: #ffffff;
+  --border-color: #d8e2ef;
+  --border-width: 1px;
+  --border-style: solid;
+
+  --highlight-color-focused: #2878e8;
+  --highlight-color-valid: #2878e8;
+
+  --padding-start: 18px;
+  --padding-end: 18px;
+
+  width: 100%;
+  min-height: 72px;
+
+  margin: 0;
+
+  border: 1px solid #d8e2ef;
+  border-radius: 17px;
+
+  box-shadow: none;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+}
+
+
+/*
+ * Ionic internally adds borders/backgrounds to ion-item.
+ * Remove them so our custom card remains consistent.
+ */
+
+.custom-input-item::part(native) {
+  background: transparent;
+  border: 0;
+}
+
+
+/* =========================================================
+   SCHOOL SECTION
+   ========================================================= */
+
+.school-section {
+  width: 100%;
+  margin: 4px 0 20px;
+  position: relative;
+
+  overflow: visible !important;
+
+  z-index: 20;
+}
+
+
+/* =========================================================
+   SCHOOL HEADER
+   ========================================================= */
+
+.school-section-header {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+
+.school-section-header h4 {
+  margin: 0;
+
+  font-size: 17px;
+  line-height: 22px;
+
+  font-weight: 800;
+
+  color: #17233c;
+}
+
+
+.school-location-text {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin: 3px 0 0;
+
+  font-size: 12px;
+  line-height: 18px;
+
+  font-weight: 600;
+
+  color: #ef4444;
+}
+
+
+.location-dot {
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   SCHOOL SEARCH BOX
+   ========================================================= */
+
+.school-search-box {
+  width: 100%;
+  margin-bottom: 10px;
+
+  position: relative;
+
+  z-index: 30;
+}
+
+
+.school-input-item {
+  min-height: 72px !important;
+
+  display: flex !important;
+
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  transform: none !important;
+}
+
+
+/* Force Ionic input itself to remain visible */
+
+.school-input-item ion-input {
+  display: block !important;
+
+  width: 100%;
+
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   SCHOOL STATUS
+   ========================================================= */
+
+.school-status {
+  width: 100%;
+
+  min-height: 44px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  margin: 8px 0;
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  background: #f5f9ff;
+
+  border: 1px solid #dceaff;
+
+  color: #49709f;
+
+  font-size: 13px;
+
+  box-sizing: border-box;
+}
+
+
+.school-status ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+
+/* =========================================================
+   SCHOOL RESULTS
+   ========================================================= */
+
+.school-results {
+  width: 100%;
+
+  max-height: 260px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  margin-top: 8px;
+
+  padding: 4px;
+
+  background: #ffffff;
+
+  border: 1px solid #dce5f0;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 10px 28px rgba(24, 55, 95, 0.12);
+
+  box-sizing: border-box;
+
+  position: relative;
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   SCHOOL RESULT
+   ========================================================= */
+
+.school-result {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 12px;
+
+  margin: 0;
+
+  border: 0;
+
+  border-bottom: 1px solid #edf1f6;
+
+  background: #ffffff;
+
+  color: #17233c;
+
+  text-align: left;
+
+  font-family: inherit;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  box-sizing: border-box;
+}
+
+
+.school-result:last-child {
+  border-bottom: 0;
+}
+
+
+.school-result:hover {
+  background: #f6faff;
+}
+
+
+.school-result:active {
+  background: #edf5ff;
+}
+
+
+/* =========================================================
+   SCHOOL ICON
+   ========================================================= */
+
+.school-result-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #eef5ff;
+
+  font-size: 21px;
+}
+
+
+/* =========================================================
+   SCHOOL RESULT CONTENT
+   ========================================================= */
+
+.school-result-content {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+
+.school-result-content strong {
+  display: block;
+
+  width: 100%;
+
+  color: #17233c;
+
+  font-size: 14px;
+  line-height: 19px;
+
+  font-weight: 800;
+
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+}
+
+
+.school-result-content span {
+  display: block;
+
+  color: #65748b;
+
+  font-size: 11px;
+  line-height: 16px;
+
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+}
+
+
+.school-result-content small {
+  display: block;
+
+  color: #2878e8;
+
+  font-size: 10px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   ARROW
+   ========================================================= */
+
+.school-result-arrow {
+  flex: 0 0 auto;
+
+  font-size: 25px;
+
+  line-height: 1;
+
+  color: #9aa8bb;
+}
+
+
+/* =========================================================
+   NO RESULTS
+   ========================================================= */
+
+.school-no-results {
+  width: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  padding: 22px 14px;
+
+  margin-top: 8px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e3eaf2;
+
+  border-radius: 15px;
+
+  box-sizing: border-box;
+}
+
+
+.no-school-icon {
+  font-size: 25px;
+
+  margin-bottom: 3px;
+}
+
+
+.school-no-results strong {
+  font-size: 14px;
+
+  color: #24334d;
+}
+
+
+.school-no-results span {
+  font-size: 11px;
+
+  color: #748197;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   SELECTED SCHOOL
+   ========================================================= */
+
+.selected-school-card {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  margin-top: 8px;
+
+  background: #f2f8ff;
+
+  border: 1px solid #bcd9ff;
+
+  border-radius: 16px;
+
+  box-sizing: border-box;
+}
+
+
+.selected-school-icon {
+  width: 38px;
+  height: 38px;
+
+  flex: 0 0 38px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #2878e8;
+
+  color: #ffffff;
+
+  font-size: 20px;
+
+  font-weight: 800;
+}
+
+
+.selected-school-info {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+
+.selected-label {
+  font-size: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+
+  font-weight: 800;
+
+  color: #2878e8;
+}
+
+
+.selected-school-info strong {
+  color: #17233c;
+
+  font-size: 14px;
+
+  line-height: 19px;
+
+  overflow-wrap: anywhere;
+}
+
+
+.selected-address {
+  color: #687890;
+
+  font-size: 11px;
+
+  line-height: 16px;
+
+  overflow-wrap: anywhere;
+}
+
+
+.change-school-btn {
+  flex: 0 0 auto;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #2878e8;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  padding: 8px 4px;
+}
+
+
+/* =========================================================
+   VALIDATION
+   ========================================================= */
+
+.field-error {
+  display: block;
+
+  margin: 5px 4px 0;
+
+  color: #ef4444;
+
+  font-size: 11px;
+
+  line-height: 16px;
+
+  font-weight: 600;
+}
+
+
+.school-error {
+  margin-top: 7px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .student-details-card {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+
+  .school-results {
+    max-height: 240px;
+  }
+
+
+  .school-result {
+    padding: 12px 9px;
+
+    gap: 9px;
+  }
+
+
+  .school-result-icon {
+    width: 38px;
+    height: 38px;
+
+    flex-basis: 38px;
+
+    font-size: 19px;
+  }
+
+
+  .school-result-content strong {
+    font-size: 13px;
+  }
+
+
+  .school-result-content span {
+    font-size: 10px;
+  }
+
+
+  .selected-school-card {
+    padding: 12px;
+  }
+
+}
+/* =========================================================
+   PICKUP POINT CONFIRMATION DIALOG
+   ========================================================= */
+
+.pickup-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.pickup-confirm-dialog {
+  width: min(420px, 100%);
+
+  padding: 24px 20px 20px;
+
+  border-radius: 24px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.25);
+
+  text-align: center;
+
+  animation:
+    pickupDialogIn 180ms ease-out;
+}
+
+.pickup-confirm-icon {
+  width: 58px;
+  height: 58px;
+
+  margin: 0 auto 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eaf2ff;
+
+  font-size: 28px;
+}
+
+.pickup-confirm-dialog h4 {
+  margin: 0 0 8px;
+
+  color: #17213b;
+
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.pickup-confirm-dialog > p {
+  margin: 0 auto 18px;
+
+  max-width: 340px;
+
+  color: #667085;
+
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.pickup-confirm-tips {
+  display: grid;
+  gap: 9px;
+
+  margin-bottom: 20px;
+
+  text-align: left;
+}
+
+.pickup-confirm-tips > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+
+  border-radius: 12px;
+
+  background: #f6f8fc;
+}
+
+.pickup-confirm-tips span {
+  width: 24px;
+  height: 24px;
+
+  flex: 0 0 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #e8f0ff;
+  color: #246bce;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pickup-confirm-tips strong {
+  color: #344054;
+  font-size: 13px;
+}
+
+.pickup-confirm-btn {
+  --background: linear-gradient(
+    135deg,
+    #ffad00,
+    #ff7118
+  );
+
+  --background-activated: #f57c00;
+
+  --border-radius: 14px;
+
+  min-height: 50px;
+
+  font-weight: 800;
+}
+
+@keyframes pickupDialogIn {
+
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+}
+.school-location-header {
+  margin: 8px 0 14px;
+}
+
+.school-location-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  color: #ff3b4a;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.location-pin {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.detected-location {
+  margin-top: 4px;
+
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.detected-location strong {
+  color: #1e293b;
+}
+
+.detected-location.loading {
+  color: #64748b;
+}
+
+.detected-location.error {
+  color: #dc2626;
+}
+
+/* ============================================================
+   PARENT REGISTRATION - NEW FLOW
+============================================================ */
+
+.autosave-note {
+  margin: 12px 0 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f0f8ff;
+  color: #28577d;
+  font-size: 13px;
+  text-align: center;
+}
+
+.driver-card.new-driver-card {
+  border-left: 4px solid #f59e0b;
+}
+
+.driver-status-message {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f5f9ff;
+  color: #315b7d;
+  font-size: 13px;
+}
+
+.review-item {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.review-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.review-content strong,
+.review-content small {
+  overflow-wrap: anywhere;
+}
+
+.review-item ion-button {
+  flex: 0 0 auto;
+  margin: 0;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+.pickup-confirm-dialog ion-button + ion-button {
+  margin-top: 8px;
+}
+
+@media (max-width: 576px) {
+  .review-item {
+    flex-wrap: wrap;
+  }
+
+  .review-item ion-button {
+    margin-left: 42px;
+  }
+}
+
+
+/* ============================================================
+   DETECTED AREA / CITY
+============================================================ */
+.detected-location-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 12px 0 16px;
+  padding: 13px 14px;
+  border: 1px solid #cfe3fb;
+  border-radius: 14px;
+  background: #f5f9ff;
+}
+
+.detected-location-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #e6f1ff;
+}
+
+.detected-location-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.detected-location-caption {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #718078;
+}
+
+.detected-location-content strong {
+  color: #13213a;
+  font-size: 15px;
+}
+
+.detected-location-content span:not(.detected-location-caption) {
+  color: #526174;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.detect-location-retry {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #1b7df0;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* ============================================================
+   LOCATION + PASSWORD FIXES
+============================================================ */
+
+.password-toggle {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  margin: 0;
+  min-width: 42px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.password-toggle:active {
+  transform: scale(0.94);
+}
+
+.source-note {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.detected-location small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+
+/* New driver parent-onboarding guidance */
+.new-driver-helper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(30, 136, 229, 0.06);
+  border: 1px solid rgba(30, 136, 229, 0.14);
+}
+
+.new-driver-helper strong {
+  font-size: 13px;
+}
+
+.new-driver-helper span {
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.78;
+}
+/* =========================================================
+   TERMS & CONDITIONS CONSENT
+========================================================= */
+
+.terms-consent-section {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.terms-consent-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.terms-consent-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #e8f1ff;
+  font-size: 18px;
+}
+
+.terms-consent-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: #172033;
+  }
+
+  span {
+    font-size: 12px;
+    line-height: 1.45;
+    color: #64748b;
+  }
+}
+
+.terms-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  ion-checkbox {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    --size: 20px;
+  }
+
+  &.accepted {
+    border-color: #93c5fd;
+    background: #f8fbff;
+  }
+}
+
+.terms-consent-text {
+  flex: 1;
+  min-width: 0;
+
+  span {
+    display: block;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #334155;
+  }
+
+  small {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #64748b;
+  }
+}
+
+.terms-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.terms-link:hover {
+  color: #1d4ed8;
+}
+
+.terms-validation-message {
+  margin-top: 8px;
+  padding-left: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc2626;
+}
+
+/* Disabled final registration button */
+.register-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

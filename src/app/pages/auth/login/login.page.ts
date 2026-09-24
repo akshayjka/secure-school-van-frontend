@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+
+import { Component, OnInit } from '@angular/core';
 
 import {
   FormBuilder,
@@ -8,13 +9,13 @@ import {
   FormsModule
 } from '@angular/forms';
 
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { ToastService } from '../../../core/services/toast';
-import { RouterLink } from '@angular/router';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -29,78 +30,66 @@ import { RouterLink } from '@angular/router';
     RouterLink
   ]
 })
+export class LoginPage implements OnInit {
 
-export class LoginPage {
+  // =========================================================
+  // FORMS
+  // =========================================================
 
   loginForm!: FormGroup;
+  forgotPasswordForm!: FormGroup;
+
+  // =========================================================
+  // UI STATE
+  // =========================================================
 
   isLoading = false;
+  isUpdatingPassword = false;
 
   showForgotPassword = false;
 
-  forgotPasswordForm!: FormGroup;
+  // =========================================================
+  // CONSTRUCTOR
+  // =========================================================
 
   constructor(
-
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
     private toastService: ToastService
+  ) {}
 
+  // =========================================================
+  // INIT
+  // =========================================================
 
-  ) { }
-
-  ngOnInit() {
-
+  ngOnInit(): void {
     this.initializeForm();
-
     this.initializeForgotPasswordForm();
 
+    /*
+     * IMPORTANT
+     *
+     * Do not restore or pre-populate the login password.
+     * Browser/password-manager autofill can sometimes put an old
+     * password into the form and make debugging authentication
+     * extremely confusing.
+     */
+    this.clearLoginPassword();
   }
 
-  initializeForgotPasswordForm() {
-    this.forgotPasswordForm = this.fb.group({
-      mobileNumber: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern('^[0-9]{10}$')
-        ]
-      ],
-      newPassword: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(6)
-        ]
-      ],
-      confirmPassword: [
-        '',
-        [
-          Validators.required
-        ]
-      ]
-    });
+  // =========================================================
+  // LOGIN FORM
+  // =========================================================
 
-  }
-
-  openForgotPassword() {
-    this.showForgotPassword = true;
-  }
-
-  closeForgotPassword() {
-    this.showForgotPassword = false;
-  }
-
-  initializeForm() {
+  private initializeForm(): void {
 
     this.loginForm = this.fb.group({
-
       mobileNumber: [
         '',
         [
           Validators.required,
-          Validators.pattern('^[0-9]{10}$')
+          Validators.pattern('^[6-9][0-9]{9}$')
         ]
       ],
 
@@ -111,327 +100,604 @@ export class LoginPage {
           Validators.minLength(6)
         ]
       ]
-
     });
-
   }
 
-  updatePassword() {
+  // =========================================================
+  // FORGOT PASSWORD FORM
+  // =========================================================
+
+  private initializeForgotPasswordForm(): void {
+
+    this.forgotPasswordForm = this.fb.group({
+
+      mobileNumber: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('^[6-9][0-9]{9}$')
+        ]
+      ],
+
+      newPassword: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6)
+        ]
+      ],
+
+      confirmPassword: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6)
+        ]
+      ]
+    });
+  }
+
+  // =========================================================
+  // PASSWORD CLEANUP
+  // =========================================================
+
+  private clearLoginPassword(): void {
+
+    if (!this.loginForm) {
+      return;
+    }
+
+    this.loginForm.patchValue(
+      {
+        password: ''
+      },
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  // =========================================================
+  // FORGOT PASSWORD
+  // =========================================================
+
+  openForgotPassword(): void {
+    this.showForgotPassword = true;
+
+    this.forgotPasswordForm.reset();
+
+    this.isUpdatingPassword = false;
+  }
+
+  closeForgotPassword(): void {
+    this.showForgotPassword = false;
+
+    this.forgotPasswordForm.reset();
+
+    this.isUpdatingPassword = false;
+  }
+
+  // =========================================================
+  // UPDATE PASSWORD
+  // =========================================================
+
+  updatePassword(): void {
+
+    if (this.isUpdatingPassword) {
+      return;
+    }
 
     if (this.forgotPasswordForm.invalid) {
 
       this.forgotPasswordForm.markAllAsTouched();
 
       return;
-
     }
 
-    const {
+    const mobileNumber = String(
+      this.forgotPasswordForm.get('mobileNumber')?.value || ''
+    ).trim();
 
-      mobileNumber,
+    const newPassword = String(
+      this.forgotPasswordForm.get('newPassword')?.value || ''
+    );
 
-      newPassword,
+    const confirmPassword = String(
+      this.forgotPasswordForm.get('confirmPassword')?.value || ''
+    );
 
-      confirmPassword
-
-    } = this.forgotPasswordForm.value;
+    // ---------------------------------------------------------
+    // Validate password match
+    // ---------------------------------------------------------
 
     if (newPassword !== confirmPassword) {
 
-      alert('Passwords do not match');
+      this.toastService.showToast(
+        'Passwords do not match.',
+        'warning'
+      );
 
       return;
-
     }
+
+    // ---------------------------------------------------------
+    // Validate mobile
+    // ---------------------------------------------------------
+
+    if (!/^[6-9][0-9]{9}$/.test(mobileNumber)) {
+
+      this.toastService.showToast(
+        'Enter a valid 10-digit mobile number.',
+        'warning'
+      );
+
+      return;
+    }
+
+    // ---------------------------------------------------------
+    // Payload
+    // ---------------------------------------------------------
 
     const payload = {
-
       mobileNumber,
-
       password: newPassword
-
     };
 
-    this.authService.setPassword(
-
-      payload
-
-    ).subscribe({
-
-      next: (response) => {
-
-        // alert(response.message);
-
-
-        this.closeForgotPassword();
-
-        this.forgotPasswordForm.reset();
-
-      },
-
-      error: (error) => {
-
-        this.toastService.showToast(error?.error?.message || 'Unable to update password', 'danger');
-
+    console.log(
+      'SET PASSWORD PAYLOAD:',
+      {
+        mobileNumber,
+        passwordProvided: !!newPassword
       }
+    );
 
-    });
+    this.isUpdatingPassword = true;
 
-  }
+    this.authService
+      .setPassword(payload)
+      .subscribe({
 
-login() {
+        next: (response: any) => {
 
-  if (this.loginForm.invalid || this.isLoading) {
-    this.loginForm.markAllAsTouched();
-    return;
-  }
-
-  this.isLoading = true;
-
-  const payload = this.loginForm.getRawValue();
-
-  console.log('LOGIN PAYLOAD:', payload);
-
-  this.authService.login(payload).subscribe({
-
-    next: (response: any) => {
-
-      console.log('LOGIN RESPONSE:', response);
-
-      // -----------------------------
-      // 1. Validate token
-      // -----------------------------
-
-      if (!response?.token) {
-        console.error('Token missing in login response');
-
-        this.toastService.showToast(
-          'Invalid login response. Token missing.',
-          'danger'
-        );
-
-        this.isLoading = false;
-        return;
-      }
-
-      // -----------------------------
-      // 2. Get role safely
-      // -----------------------------
-
-      const role = response?.role || response?.user?.role;
-
-      if (!role) {
-        console.error('Role missing:', response);
-
-        this.toastService.showToast(
-          'User role not found.',
-          'danger'
-        );
-
-        this.isLoading = false;
-        return;
-      }
-
-      // -----------------------------
-      // 3. Store common login data
-      // -----------------------------
-
-      localStorage.setItem(
-        'token',
-        response.token
-      );
-
-      localStorage.setItem(
-        'role',
-        role
-      );
-
-      const userName =
-        response?.user?.name ||
-        response?.name ||
-        '';
-
-      localStorage.setItem(
-        'userName',
-        userName
-      );
-
-      // -----------------------------
-      // 4. DRIVER LOGIN
-      // -----------------------------
-
-      if (role === 'driver') {
-
-        const driverId =
-          response?.user?.driverId ||
-          response?.driverId;
-
-        if (!driverId) {
-
-          console.error(
-            'Driver ID missing:',
+          console.log(
+            'SET PASSWORD RESPONSE:',
             response
           );
 
+          this.isUpdatingPassword = false;
+
           this.toastService.showToast(
-            'Driver information not found.',
-            'danger'
+            response?.message ||
+            'Password updated successfully. Please login.',
+            'success'
           );
 
-          this.clearLoginStorage();
+          this.closeForgotPassword();
+        },
 
-          this.isLoading = false;
-
-          return;
-        }
-
-        localStorage.setItem(
-          'driverId',
-          driverId
-        );
-
-        console.log(
-          'Driver logged in:',
-          driverId
-        );
-
-        this.router.navigateByUrl(
-          '/driver/dashboard',
-          {
-            replaceUrl: true
-          }
-        );
-
-        return;
-      }
-
-      // -----------------------------
-      // 5. ADMIN LOGIN
-      // -----------------------------
-
-      if (role === 'admin') {
-
-        console.log(
-          'Admin logged in'
-        );
-
-        this.router.navigateByUrl(
-          '/admin/dashboard',
-          {
-            replaceUrl: true
-          }
-        );
-
-        return;
-      }
-
-      // -----------------------------
-      // 6. PARENT LOGIN
-      // -----------------------------
-
-      if (role === 'parent') {
-
-        const parentId =
-          response?.user?.parentId ||
-          response?.parentId;
-
-        if (!parentId) {
+        error: (error: any) => {
 
           console.error(
-            'Parent ID missing:',
-            response
+            'SET PASSWORD ERROR:',
+            error
           );
+
+          this.isUpdatingPassword = false;
 
           this.toastService.showToast(
-            'Parent information not found.',
+            error?.error?.message ||
+            'Unable to update password.',
             'danger'
           );
-
-          this.clearLoginStorage();
-
-          this.isLoading = false;
-
-          return;
         }
+      });
+  }
 
-        localStorage.setItem(
-          'parentId',
-          parentId
-        );
+  // =========================================================
+  // LOGIN
+  // =========================================================
 
-        console.log(
-          'Parent logged in:',
-          parentId
-        );
+  login(): void {
 
-        this.router.navigateByUrl(
-          '/parent/dashboard',
-          {
-            replaceUrl: true
-          }
-        );
-
-        return;
-      }
-
-      // -----------------------------
-      // 7. Unknown role
-      // -----------------------------
-
-      console.error(
-        'Unknown role:',
-        role
-      );
-
-      this.toastService.showToast(
-        'Invalid user role.',
-        'danger'
-      );
-
-      this.clearLoginStorage();
-
-      this.isLoading = false;
-
-    },
-
-    error: (error) => {
-
-      console.error(
-        'LOGIN ERROR:',
-        error
-      );
-
-      this.toastService.showToast(
-        error?.error?.message ||
-        'Login failed. Please try again.',
-        'danger'
-      );
-
-      this.isLoading = false;
-
-    },
-
-    complete: () => {
-
-      this.isLoading = false;
-
+    // Prevent duplicate requests.
+    if (this.isLoading) {
+      return;
     }
 
-  });
+    // ---------------------------------------------------------
+    // Validate form
+    // ---------------------------------------------------------
 
-}
+    if (this.loginForm.invalid) {
 
-private clearLoginStorage() {
+      this.loginForm.markAllAsTouched();
 
-  localStorage.removeItem('token');
+      return;
+    }
 
-  localStorage.removeItem('role');
+    // ---------------------------------------------------------
+    // Read values explicitly
+    // ---------------------------------------------------------
 
-  localStorage.removeItem('userName');
+    const mobileNumber = String(
+      this.loginForm.get('mobileNumber')?.value || ''
+    )
+      .replace(/\D/g, '')
+      .trim();
 
-  localStorage.removeItem('driverId');
+    const password = String(
+      this.loginForm.get('password')?.value || ''
+    );
 
-  localStorage.removeItem('parentId');
+    // ---------------------------------------------------------
+    // Validate mobile
+    // ---------------------------------------------------------
 
-}
+    if (!/^[6-9][0-9]{9}$/.test(mobileNumber)) {
+
+      this.toastService.showToast(
+        'Enter a valid 10-digit mobile number.',
+        'warning'
+      );
+
+      return;
+    }
+
+    // ---------------------------------------------------------
+    // Validate password
+    // ---------------------------------------------------------
+
+    if (!password || password.length < 6) {
+
+      this.toastService.showToast(
+        'Please enter your password.',
+        'warning'
+      );
+
+      return;
+    }
+
+    // ---------------------------------------------------------
+    // IMPORTANT
+    //
+    // Do NOT trim the password.
+    //
+    // Passwords are allowed to contain spaces and the exact
+    // password entered during registration must be sent.
+    // ---------------------------------------------------------
+
+    const payload = {
+      mobileNumber,
+      password
+    };
+
+    console.log(
+      'LOGIN PAYLOAD:',
+      {
+        mobileNumber,
+        passwordProvided: password.length > 0,
+        passwordLength: password.length
+      }
+    );
+
+    this.isLoading = true;
+
+    // ---------------------------------------------------------
+    // LOGIN API
+    // ---------------------------------------------------------
+
+    this.authService
+      .login(payload)
+      .subscribe({
+
+        // =====================================================
+        // SUCCESS
+        // =====================================================
+
+        next: (response: any) => {
+
+          console.log(
+            'LOGIN RESPONSE:',
+            response
+          );
+
+          // ---------------------------------------------------
+          // Token
+          // ---------------------------------------------------
+
+          const token =
+            response?.token ||
+            response?.data?.token ||
+            response?.accessToken;
+
+          if (!token) {
+
+            console.error(
+              'LOGIN SUCCESS BUT TOKEN IS MISSING:',
+              response
+            );
+
+            this.clearLoginStorage();
+
+            this.toastService.showToast(
+              'Login response is invalid. Token is missing.',
+              'danger'
+            );
+
+            this.isLoading = false;
+
+            return;
+          }
+
+          // ---------------------------------------------------
+          // Role
+          // ---------------------------------------------------
+
+          const role = String(
+            response?.role ||
+            response?.user?.role ||
+            response?.data?.role ||
+            ''
+          )
+            .trim()
+            .toLowerCase();
+
+          if (!role) {
+
+            console.error(
+              'LOGIN SUCCESS BUT ROLE IS MISSING:',
+              response
+            );
+
+            this.clearLoginStorage();
+
+            this.toastService.showToast(
+              'User role was not returned by the server.',
+              'danger'
+            );
+
+            this.isLoading = false;
+
+            return;
+          }
+
+          // ---------------------------------------------------
+          // User
+          // ---------------------------------------------------
+
+          const user =
+            response?.user ||
+            response?.data?.user ||
+            response?.data ||
+            {};
+
+          // ---------------------------------------------------
+          // Common storage
+          // ---------------------------------------------------
+
+          localStorage.setItem(
+            'token',
+            token
+          );
+
+          localStorage.setItem(
+            'role',
+            role
+          );
+
+          const userName = String(
+            user?.name ||
+            response?.name ||
+            response?.data?.name ||
+            ''
+          );
+
+          localStorage.setItem(
+            'userName',
+            userName
+          );
+
+          // ===================================================
+          // DRIVER
+          // ===================================================
+
+          if (role === 'driver') {
+
+            const driverId = String(
+              user?.driverId ||
+              response?.driverId ||
+              response?.data?.driverId ||
+              ''
+            ).trim();
+
+            if (!driverId) {
+
+              console.error(
+                'Driver ID missing:',
+                response
+              );
+
+              this.clearLoginStorage();
+
+              this.toastService.showToast(
+                'Driver information was not returned by the server.',
+                'danger'
+              );
+
+              this.isLoading = false;
+
+              return;
+            }
+
+            localStorage.setItem(
+              'driverId',
+              driverId
+            );
+
+            console.log(
+              'Driver logged in:',
+              driverId
+            );
+
+            this.router.navigateByUrl(
+              '/driver/dashboard',
+              {
+                replaceUrl: true
+              }
+            );
+
+            return;
+          }
+
+          // ===================================================
+          // PARENT
+          // ===================================================
+
+          if (role === 'parent') {
+
+            const parentId = String(
+              user?.parentId ||
+              response?.parentId ||
+              response?.data?.parentId ||
+              ''
+            ).trim();
+
+            if (!parentId) {
+
+              console.error(
+                'Parent ID missing:',
+                response
+              );
+
+              this.clearLoginStorage();
+
+              this.toastService.showToast(
+                'Parent information was not returned by the server.',
+                'danger'
+              );
+
+              this.isLoading = false;
+
+              return;
+            }
+
+            localStorage.setItem(
+              'parentId',
+              parentId
+            );
+
+            console.log(
+              'Parent logged in:',
+              parentId
+            );
+
+            this.router.navigateByUrl(
+              '/parent/dashboard',
+              {
+                replaceUrl: true
+              }
+            );
+
+            return;
+          }
+
+          // ===================================================
+          // ADMIN
+          // ===================================================
+
+          if (role === 'admin') {
+
+            console.log(
+              'Admin logged in'
+            );
+
+            this.router.navigateByUrl(
+              '/admin/dashboard',
+              {
+                replaceUrl: true
+              }
+            );
+
+            return;
+          }
+
+          // ===================================================
+          // UNKNOWN ROLE
+          // ===================================================
+
+          console.error(
+            'Unknown role returned from backend:',
+            role,
+            response
+          );
+
+          this.clearLoginStorage();
+
+          this.toastService.showToast(
+            'Invalid user role returned by the server.',
+            'danger'
+          );
+
+          this.isLoading = false;
+        },
+
+        // =====================================================
+        // ERROR
+        // =====================================================
+
+        error: (error: any) => {
+
+          console.error(
+            'LOGIN ERROR:',
+            error
+          );
+
+          const serverMessage = String(
+            error?.error?.message ||
+            error?.error?.error ||
+            ''
+          ).trim();
+
+          /*
+           * Keep the backend's exact authentication error.
+           *
+           * For example:
+           * "Invalid password"
+           * "User not found"
+           * "Password not set"
+           */
+
+          this.toastService.showToast(
+            serverMessage ||
+            'Login failed. Please check your mobile number and password.',
+            'danger'
+          );
+
+          this.isLoading = false;
+        },
+
+        // =====================================================
+        // COMPLETE
+        // =====================================================
+
+        complete: () => {
+
+          this.isLoading = false;
+        }
+      });
+  }
+
+  // =========================================================
+  // CLEAR LOGIN STORAGE
+  // =========================================================
+
+  private clearLoginStorage(): void {
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userName');
+
+    localStorage.removeItem('driverId');
+    localStorage.removeItem('parentId');
+  }
 }
