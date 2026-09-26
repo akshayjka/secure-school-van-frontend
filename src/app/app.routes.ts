@@ -138,4 +138,8 @@ export const routes: Routes = [
     path: 'journey-report',
     loadComponent: () => import('./pages/parent/journey-report/journey-report.page').then( m => m.JourneyReportPage)
   },
+  {
+    path: 'after-ride-page',
+    loadComponent: () => import('./pages/parent/after-ride-page/after-ride-page.page').then( m => m.AfterRidePage)
+  },
 ];

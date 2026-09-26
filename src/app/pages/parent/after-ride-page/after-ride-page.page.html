@@ -1,0 +1,506 @@
+<ion-header>
+
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+
+      <ion-button
+        type="button"
+        (click)="goBack()"
+        aria-label="Back">
+
+        <ion-icon
+          slot="icon-only"
+          name="arrow-back-outline">
+        </ion-icon>
+
+      </ion-button>
+
+    </ion-buttons>
+
+    <ion-title>
+      After Ride
+    </ion-title>
+
+  </ion-toolbar>
+
+</ion-header>
+
+
+<ion-content>
+
+  <main class="after-ride-page">
+
+    <!-- =====================================================
+         PAGE INTRO
+    ====================================================== -->
+
+    <section class="page-intro">
+
+      <div class="intro-icon">
+
+        <ion-icon
+          name="checkmark-circle-outline">
+        </ion-icon>
+
+      </div>
+
+      <div class="intro-content">
+
+        <span class="intro-label">
+          TODAY'S JOURNEY
+        </span>
+
+        <h1>
+          Ride Completed
+        </h1>
+
+        <p>
+          Today's school van journey has been completed.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MORNING JOURNEY
+    ====================================================== -->
+
+    <section class="journey-card">
+
+      <div class="section-heading">
+
+        <div class="heading-icon morning">
+
+          <ion-icon
+            name="home-outline">
+          </ion-icon>
+
+        </div>
+
+        <div class="heading-content">
+
+          <span>
+            MORNING JOURNEY
+          </span>
+
+          <h2>
+            Home → School
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="journey-timeline">
+
+        <!-- PICKUP -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon pickup">
+
+              <ion-icon
+                name="bus-outline">
+              </ion-icon>
+
+            </div>
+
+            <div class="timeline-line"></div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Picked up from home
+            </span>
+
+            <strong>
+              {{ formatTime(morningPickedUpAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- SCHOOL -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon school">
+
+              <ion-icon
+                name="school-outline">
+              </ion-icon>
+
+            </div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Arrived at school
+            </span>
+
+            <strong>
+              {{ formatTime(morningDroppedAtSchoolAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- DURATION -->
+
+      <div class="duration-box">
+
+        <div class="duration-icon">
+
+          <ion-icon
+            name="time-outline">
+          </ion-icon>
+
+        </div>
+
+        <div class="duration-content">
+
+          <span>
+            Journey time
+          </span>
+
+          <strong>
+            {{ formatDuration(morningDurationMinutes) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         EVENING JOURNEY
+    ====================================================== -->
+
+    <section class="journey-card">
+
+      <div class="section-heading">
+
+        <div class="heading-icon evening">
+
+          <ion-icon
+            name="school-outline">
+          </ion-icon>
+
+        </div>
+
+        <div class="heading-content">
+
+          <span>
+            EVENING JOURNEY
+          </span>
+
+          <h2>
+            School → Home
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="journey-timeline">
+
+        <!-- SCHOOL PICKUP -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon school">
+
+              <ion-icon
+                name="school-outline">
+              </ion-icon>
+
+            </div>
+
+            <div class="timeline-line"></div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Picked up from school
+            </span>
+
+            <strong>
+              {{ formatTime(eveningPickedFromSchoolAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- HOME -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon home">
+
+              <ion-icon
+                name="home-outline">
+              </ion-icon>
+
+            </div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Arrived home
+            </span>
+
+            <strong>
+              {{ formatTime(eveningDroppedAtHomeAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- DURATION -->
+
+      <div class="duration-box">
+
+        <div class="duration-icon">
+
+          <ion-icon
+            name="time-outline">
+          </ion-icon>
+
+        </div>
+
+        <div class="duration-content">
+
+          <span>
+            Journey time
+          </span>
+
+          <strong>
+            {{ formatDuration(eveningDurationMinutes) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TOMORROW ATTENDANCE
+    ====================================================== -->
+
+    <section class="tomorrow-card">
+
+      <div class="tomorrow-header">
+
+        <div class="tomorrow-icon">
+
+          <ion-icon
+            name="calendar-outline">
+          </ion-icon>
+
+        </div>
+
+        <div class="tomorrow-header-content">
+
+          <span>
+            TOMORROW
+          </span>
+
+          <h2>
+            School Attendance
+          </h2>
+
+          <p>
+            {{ tomorrowDateLabel }}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="tomorrow-divider"></div>
+
+
+      <div class="tomorrow-attendance-row">
+
+        <div class="tomorrow-attendance-text">
+
+          <strong>
+            Will your child attend?
+          </strong>
+
+          <span>
+            Select one option to inform the driver.
+          </span>
+
+        </div>
+
+
+        <div class="attendance-buttons">
+
+          <!-- PRESENT -->
+
+          <button
+            type="button"
+            class="attendance-button present"
+
+            [class.selected]="
+              tomorrowAttendanceStatus === 'present'
+            "
+
+            [disabled]="
+              tomorrowAttendanceLoading
+            "
+
+            (click)="
+              selectTomorrowAttendance('present')
+            ">
+
+            <ion-icon
+              name="checkmark-outline">
+            </ion-icon>
+
+            <span>
+              Present
+            </span>
+
+          </button>
+
+
+          <!-- ABSENT -->
+
+          <button
+            type="button"
+            class="attendance-button absent"
+
+            [class.selected]="
+              tomorrowAttendanceStatus === 'absent'
+            "
+
+            [disabled]="
+              tomorrowAttendanceLoading
+            "
+
+            (click)="
+              selectTomorrowAttendance('absent')
+            ">
+
+            <ion-icon
+              name="close-outline">
+            </ion-icon>
+
+            <span>
+              Absent
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- SAVED STATE -->
+
+      <div
+        class="attendance-status"
+        *ngIf="
+          tomorrowAttendanceStatus !== 'not_marked'
+        ">
+
+        <ion-icon
+          name="checkmark-circle-outline">
+        </ion-icon>
+
+        <span>
+
+          Tomorrow:
+          
+          <strong>
+            {{ tomorrowAttendanceLabel }}
+          </strong>
+
+        </span>
+
+      </div>
+
+
+      <!-- LOADING -->
+
+      <div
+        class="attendance-saving"
+        *ngIf="tomorrowAttendanceLoading">
+
+        <ion-spinner
+          name="crescent">
+        </ion-spinner>
+
+        <span>
+          Saving attendance...
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <section class="footer-message">
+
+      <ion-icon
+        name="checkmark-circle-outline">
+      </ion-icon>
+
+      <p>
+        Thank you for keeping your child's attendance updated.
+      </p>
+
+    </section>
+
+  </main>
+
+</ion-content>

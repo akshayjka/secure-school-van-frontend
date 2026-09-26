@@ -1,1200 +1,408 @@
-<!-- =====================================================
-     PARENT MENU
-====================================================== -->
-
-<ion-menu
-  side="start"
-  menuId="parent-menu"
-  contentId="parent-dashboard-content">
-
+<ion-menu #parentMenu side="start" menuId="parent-menu" contentId="parent-dashboard-content">
   <ion-header>
-    <ion-toolbar>
-      <ion-title>
-        Parent Menu
-      </ion-title>
+    <ion-toolbar class="menu-toolbar">
+      <ion-title>Parent Menu</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <ion-content>
-
     <ion-list>
-
-      <!-- DASHBOARD -->
-
-      <ion-item
-        button
-        detail="false"
-        (click)="openDashboard()">
-
-        <ion-icon
-          slot="start"
-          name="home-outline">
-        </ion-icon>
-
-        <ion-label>
-          Dashboard
-        </ion-label>
-
+      <ion-item button detail="false" (click)="openDashboard()">
+        <ion-icon slot="start" name="home-outline"></ion-icon>
+        <ion-label>Dashboard</ion-label>
       </ion-item>
 
-
-      <!-- ATTENDANCE -->
-
-      <ion-item
-        button
-        detail="false"
-        (click)="openAttendanceFromMenu()">
-
-        <ion-icon
-          slot="start"
-          name="calendar-outline">
-        </ion-icon>
-
-        <ion-label>
-          Attendance
-        </ion-label>
-
+      <ion-item button detail="false" (click)="openAfterRideFromMenu()">
+        <ion-icon slot="start" name="time-outline"></ion-icon>
+        <ion-label>After Ride</ion-label>
       </ion-item>
 
-
-      <!-- JOURNEY REPORT -->
-
-      <ion-item
-        button
-        detail="false"
-        (click)="openJourneyReport()">
-
-        <ion-icon
-          slot="start"
-          name="time-outline">
-        </ion-icon>
-
-        <ion-label>
-          Journey Report
-        </ion-label>
-
+      <ion-item button detail="false" (click)="openJourneyReport()">
+        <ion-icon slot="start" name="calendar-outline"></ion-icon>
+        <ion-label>Journey Report</ion-label>
       </ion-item>
-
-
-      <!-- LIVE TRACKING -->
 
       <ion-item
         button
         detail="false"
         [disabled]="!trackingAvailable"
         (click)="openTrackingFromMenu()">
-
-        <ion-icon
-          slot="start"
-          name="location-outline">
-        </ion-icon>
-
-        <ion-label>
-          Live Tracking
-        </ion-label>
-
+        <ion-icon slot="start" name="location-outline"></ion-icon>
+        <ion-label>Live Tracking</ion-label>
       </ion-item>
 
-
-      <!-- LOGOUT -->
-
-      <ion-item
-        button
-        detail="false"
-        (click)="logout()">
-
-        <ion-icon
-          slot="start"
-          name="log-out-outline">
-        </ion-icon>
-
-        <ion-label>
-          Logout
-        </ion-label>
-
+      <ion-item button detail="false" (click)="openAttendanceFromMenu()">
+        <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+        <ion-label>Attendance</ion-label>
       </ion-item>
 
+      <ion-item button detail="false" (click)="logout()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+        <ion-label>Logout</ion-label>
+      </ion-item>
     </ion-list>
-
   </ion-content>
-
 </ion-menu>
 
-
-
-<!-- =====================================================
-     DASHBOARD HEADER
-====================================================== -->
-
-<ion-header>
-
+<ion-header class="parent-header">
   <ion-toolbar>
-
-    <!-- MENU -->
-
     <ion-buttons slot="start">
-
-      <ion-menu-button
-        menu="parent-menu">
-      </ion-menu-button>
-
+      <ion-button
+        class="menu-button"
+        fill="clear"
+        type="button"
+        (click)="openParentMenu()"
+        aria-label="Open parent menu">
+        <ion-icon
+          slot="icon-only"
+          name="menu-outline">
+        </ion-icon>
+      </ion-button>
     </ion-buttons>
 
-
-    <ion-title>
-      Parent Dashboard
-    </ion-title>
-
+    <ion-title>Dashboard</ion-title>
 
     <ion-buttons slot="end">
-
-      <!-- REFRESH -->
-
       <ion-button
         class="toolbar-action"
         (click)="refreshDashboard()"
-        [disabled]="isLoading">
-
-        <ion-icon
-          slot="icon-only"
-          name="refresh-outline">
-        </ion-icon>
-
+        [disabled]="isLoading"
+        aria-label="Refresh dashboard">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
       </ion-button>
-
-
-      <!-- LOGOUT -->
 
       <ion-button
         class="toolbar-action"
-        (click)="logout()">
-
-        <ion-icon
-          slot="icon-only"
-          name="log-out-outline">
-        </ion-icon>
-
+        (click)="logout()"
+        aria-label="Logout">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
-
     </ion-buttons>
-
   </ion-toolbar>
-
 </ion-header>
 
+<ion-content id="parent-dashboard-content" [scrollEvents]="true">
+  <main class="dashboard-page">
 
+    <div class="dashboard-loading" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Updating your child's journey...</span>
+    </div>
 
-<!-- =====================================================
-     DASHBOARD CONTENT
-====================================================== -->
-
-<ion-content
-  id="parent-dashboard-content">
-
-  <main class="parent-dashboard">
-
-
-    <!-- =====================================================
-         ATTENDANCE
-    ====================================================== -->
-
-    <section class="attendance-card">
+    <!-- DESIGN 1: WARM WELCOME HEADER -->
+    <section class="welcome-section">
+      <div class="welcome-copy">
+        <span class="welcome-eyebrow">GOOD MORNING</span>
+        <h1>Hello, Parent</h1>
+        <p>Here’s your child’s school van update.</p>
+      </div>
 
       <button
         type="button"
-        class="attendance-icon-button"
-        (click)="openAttendance()"
-        aria-label="Open attendance">
-
-        <ion-icon
-          name="calendar-outline">
-        </ion-icon>
-
+        class="student-avatar"
+        (click)="openStudentProfile()"
+        aria-label="View student profile">
+        <span>{{ parent.studentName ? parent.studentName.charAt(0).toUpperCase() : 'S' }}</span>
       </button>
-
-
-      <div class="attendance-content">
-
-        <span class="card-label">
-          ATTENDANCE
-        </span>
-
-
-        <h2>
-          Today's Attendance
-        </h2>
-
-
-        <div
-          class="attendance-status"
-          [class.present]="todayAttendanceStatus === 'present'"
-          [class.absent]="todayAttendanceStatus === 'absent'"
-          [class.not-marked]="todayAttendanceStatus === 'not_marked'">
-
-          <span class="status-dot"></span>
-
-
-          <ng-container
-            [ngSwitch]="todayAttendanceStatus">
-
-            <span *ngSwitchCase="'present'">
-              Present
-            </span>
-
-            <span *ngSwitchCase="'absent'">
-              Absent
-            </span>
-
-            <span *ngSwitchDefault>
-              Not Marked
-            </span>
-
-          </ng-container>
-
-        </div>
-
-
-        <div class="attendance-hint">
-
-          <ion-icon
-            name="calendar-outline">
-          </ion-icon>
-
-          <span>
-            Tap calendar to manage attendance
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <div class="attendance-arrow">
-
-        <ion-icon
-          name="chevron-forward-outline">
-        </ion-icon>
-
-      </div>
-
     </section>
 
-
-    <!-- =====================================================
-         NEXT DAY PREPARATION
-         Shown only after the evening ride is completed.
-         Existing dashboard UI remains unchanged for all
-         active / waiting / morning states.
-    ====================================================== -->
-
-    <ng-container *ngIf="showNextDayPreparation">
-
-      <!-- TODAY'S COMPLETED JOURNEY -->
-
-      <section class="completed-journey-card">
-
-        <div class="completed-journey-header">
-
-          <div class="completed-check-icon">
-            <ion-icon name="checkmark-outline"></ion-icon>
-          </div>
-
-          <div class="completed-journey-heading">
-
-            <h2>
-              Today's Ride Completed!
-            </h2>
-
-            <p>
-              Your child has been safely dropped at home.
-            </p>
-
-          </div>
-
+    <!-- PRIMARY RIDE CARD -->
+    <section class="ride-card">
+      <div class="ride-card-header">
+        <div class="ride-icon-wrap">
+          <ion-icon [name]="rideNotificationIcon"></ion-icon>
         </div>
 
-
-        <div class="journey-timeline">
-
-          <div class="journey-timeline-item">
-
-            <div class="journey-timeline-icon pickup">
-              <ion-icon name="bus-outline"></ion-icon>
-            </div>
-
-            <div class="journey-timeline-content">
-
-              <strong>
-                Picked Up
-              </strong>
-
-              <span>
-                From Home
-              </span>
-
-            </div>
-
-            <time>
-              {{ formatJourneyTimeOrDash(pickupTime) }}
-            </time>
-
-          </div>
-
-
-          <div class="journey-timeline-item">
-
-            <div class="journey-timeline-icon school">
-              <ion-icon name="school-outline"></ion-icon>
-            </div>
-
-            <div class="journey-timeline-content">
-
-              <strong>
-                Dropped at School
-              </strong>
-
-            </div>
-
-            <time>
-              {{ formatJourneyTimeOrDash(schoolDropTime) }}
-            </time>
-
-          </div>
-
-
-          <div class="journey-timeline-item">
-
-            <div class="journey-timeline-icon pickup">
-              <ion-icon name="bus-outline"></ion-icon>
-            </div>
-
-            <div class="journey-timeline-content">
-
-              <strong>
-                Picked Up from School
-              </strong>
-
-            </div>
-
-            <time>
-              {{ formatJourneyTimeOrDash(schoolPickupTime) }}
-            </time>
-
-          </div>
-
-
-          <div class="journey-timeline-item">
-
-            <div class="journey-timeline-icon home">
-              <ion-icon name="home-outline"></ion-icon>
-            </div>
-
-            <div class="journey-timeline-content">
-
-              <strong>
-                Dropped at Home
-              </strong>
-
-            </div>
-
-            <time>
-              {{ formatJourneyTimeOrDash(homeDropTime) }}
-            </time>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- TOMORROW ATTENDANCE -->
-
-      <section class="tomorrow-attendance-card">
-
-        <div class="tomorrow-attendance-heading">
-
-          <div class="tomorrow-calendar-icon">
-            <ion-icon name="calendar-outline"></ion-icon>
-          </div>
-
-          <div>
-
-            <span>
-              TOMORROW'S ATTENDANCE
-            </span>
-
-            <strong>
-              {{ tomorrowAttendanceDateLabel }}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <button
-          type="button"
-          class="tomorrow-attendance-row"
-          (click)="openAttendance()"
-          aria-label="Manage tomorrow's attendance">
-
-          <div
-            class="tomorrow-status-icon"
-            [class.present]="tomorrowAttendanceStatus === 'present'"
-            [class.absent]="tomorrowAttendanceStatus === 'absent'"
-            [class.not-marked]="
-              tomorrowAttendanceStatus === 'not_marked'
-            ">
-
-            <ion-icon
-              [name]="tomorrowAttendanceStatus === 'absent'
-                ? 'close-outline'
-                : tomorrowAttendanceStatus === 'present'
-                  ? 'checkmark-outline'
-                  : 'help-outline'">
-            </ion-icon>
-
-          </div>
-
-
-          <div class="tomorrow-attendance-content">
-
-            <strong>
-              {{ tomorrowAttendanceLabel }}
-            </strong>
-
-            <span>
-              {{ tomorrowAttendanceMessage }}
-            </span>
-
-          </div>
-
-
-          <ion-icon
-            class="tomorrow-attendance-arrow"
-            name="chevron-forward-outline">
-          </ion-icon>
-
-        </button>
-
-
-        <div class="tomorrow-attendance-hint">
-
-          <ion-icon name="create-outline"></ion-icon>
-
-          <span>
-            Tap to change if needed
-          </span>
-
-        </div>
-
-      </section>
-
-
-      <!-- PREPARE FOR NEXT DAY -->
-
-      <button
-        type="button"
-        class="prepare-next-day-button"
-        (click)="openAttendance()">
-
-        <ion-icon name="calendar-outline"></ion-icon>
-
-        <span>
-          Prepare for Next Day
-        </span>
-
-        <ion-icon
-          name="arrow-forward-outline"
-          class="prepare-next-day-arrow">
-        </ion-icon>
-
-      </button>
-
-    </ng-container>
-
-
-
-    <!-- =====================================================
-         EXISTING RIDE NOTIFICATION
-    ====================================================== -->
-
-    <ng-container *ngIf="!showNextDayPreparation">
-
-    <section
-      class="ride-notification"
-      [class.notification-success]="rideNotificationType === 'active'"
-      [class.notification-ended]="rideNotificationType === 'completed'"
-      [class.notification-waiting]="rideNotificationType === 'waiting'">
-
-
-      <div class="notification-icon">
-
-        <ion-icon
-          [name]="rideNotificationIcon">
-        </ion-icon>
-
-      </div>
-
-
-      <div class="notification-content">
-
-        <h3>
-          {{ notificationTitle }}
-        </h3>
-
-        <p>
-          {{ notificationMessage }}
-        </p>
-
-
-        <small *ngIf="rideDirection">
-          {{ rideDirection }}
-        </small>
-
-      </div>
-
-
-      <span
-        class="live-badge"
-        *ngIf="rideNotificationType === 'active'">
-
-        LIVE
-
-      </span>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         STUDENT PROFILE
-    ====================================================== -->
-
-    <section class="student-profile-card">
-
-      <div class="student-profile-header">
-
-        <div class="student-profile-info">
-
-          <span class="card-eyebrow">
-            STUDENT
-          </span>
-
-
-          <h2>
-            {{ parent.studentName || 'Student' }}
-          </h2>
-
-
-          <p>
-            {{ parent.schoolName || 'School not available' }}
-          </p>
-
-
-          <div class="student-profile-hint">
-
-            <ion-icon
-              name="person-outline">
-            </ion-icon>
-
-            <span>
-              Tap profile to view student details
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <button
-          type="button"
-          class="student-avatar"
-          (click)="openStudentProfile()"
-          aria-label="View student details">
-
-          <ion-icon
-            name="person-outline">
-          </ion-icon>
-
-        </button>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         DRIVER + RIDE STATUS
-    ====================================================== -->
-
-    <div class="dashboard-info-grid">
-
-
-      <!-- DRIVER -->
-
-      <section class="mini-info-card">
-
-        <div class="mini-card-header">
-
-          <div class="mini-icon driver-icon">
-
-            <ion-icon
-              name="person-outline">
-            </ion-icon>
-
-          </div>
-
-          <span>
-            Driver
-          </span>
-
-        </div>
-
-
-        <div class="mini-card-body">
-
-          <h3>
-            {{ driver.name || 'Not Assigned' }}
-          </h3>
-
-
-          <p *ngIf="driver.mobileNumber">
-            {{ driver.mobileNumber }}
-          </p>
-
-
-          <p *ngIf="!driver.mobileNumber">
-            Contact not available
-          </p>
-
-        </div>
-
-      </section>
-
-
-
-      <!-- RIDE STATUS -->
-
-      <section class="mini-info-card">
-
-        <div class="mini-card-header">
-
-          <div class="mini-icon ride-icon">
-
-            <ion-icon
-              name="bus-outline">
-            </ion-icon>
-
-          </div>
-
-          <span>
-            Ride Status
-          </span>
-
-        </div>
-
-
-        <div class="mini-card-body">
-
-          <div
-            class="ride-status"
-            [class.ride-active]="rideStatusClass === 'active'"
-            [class.ride-inactive]="rideStatusClass === 'inactive'"
-            [class.ride-waiting]="rideStatusClass === 'waiting'"
-            [class.ride-completed]="rideStatusClass === 'completed'">
-
+        <div class="ride-card-copy">
+          <span class="status-pill" [class.active]="trackingAvailable" [class.waiting]="!trackingAvailable">
             <span class="status-dot"></span>
+            {{ trackingAvailable ? 'ON ROUTE' : (rideStatusClass === 'completed' ? 'COMPLETED' : 'WAITING') }}
+          </span>
+          <h2>{{ notificationTitle || rideStatusTitle }}</h2>
+          <p>{{ notificationMessage || rideStatusMessage }}</p>
+        </div>
 
-            {{ rideStatusTitle }}
+        <span class="live-badge" *ngIf="rideNotificationType === 'active'">LIVE</span>
+      </div>
 
+      <div class="ride-meta" *ngIf="pickupTime || schoolDropTime || schoolPickupTime || homeDropTime">
+        <span *ngIf="rideType === 'morning' && pickupTime">
+          Picked up at {{ formatJourneyTime(pickupTime) }}
+        </span>
+        <span *ngIf="rideType === 'evening' && schoolPickupTime">
+          Picked up at {{ formatJourneyTime(schoolPickupTime) }}
+        </span>
+      </div>
+
+      <!--
+        LIVE JOURNEY MILESTONES
+
+        These are real status indicators, not decorative icons.
+
+        completed = green + check
+        active    = blue + pulse
+        waiting   = grey + pending
+
+        They are driven by the backend student/ride state.
+      -->
+      <div class="route-progress" [attr.aria-label]="routeProgressAriaLabel">
+
+        <!-- HOME / SCHOOL PICKUP -->
+        <div
+          class="progress-step"
+          [ngClass]="routeFirstStateClass"
+          [attr.title]="routeFirstNotification">
+
+          <div class="progress-marker">
+            <ion-icon [name]="routeFirstIcon"></ion-icon>
+
+            <span
+              class="marker-badge"
+              *ngIf="routeFirstStateClass === 'completed'"
+              aria-hidden="true">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </span>
           </div>
 
-
-          <p>
-            {{ rideStatusMessage }}
-          </p>
-
+          <strong>{{ routeFirstLabel }}</strong>
+          <span>{{ routeFirstTimeLabel }}</span>
         </div>
 
-      </section>
+        <div
+          class="progress-line"
+          [class.completed]="routeFirstCompleted || routeMiddleCompleted">
+        </div>
 
-    </div>
+        <!-- ON ROUTE -->
+        <div
+          class="progress-step"
+          [ngClass]="routeMiddleStateClass"
+          [attr.title]="routeMiddleNotification">
 
+          <div class="progress-marker">
+            <ion-icon [name]="routeMiddleIcon"></ion-icon>
 
+            <span
+              class="marker-badge"
+              *ngIf="routeMiddleStateClass === 'completed'"
+              aria-hidden="true">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </span>
+          </div>
 
-    <!-- =====================================================
-         STUDENT STATUS
-    ====================================================== -->
+          <strong>On Route</strong>
+          <span>{{ routeMiddleTimeLabel }}</span>
+        </div>
 
-    <section
-      class="student-status-card"
-      [class.status-waiting]="studentStatus === 'waiting'"
-      [class.status-picked]="
-        studentStatus === 'picked_up' ||
-        studentStatus === 'picked_from_school'
-      "
-      [class.status-dropped]="
-        studentStatus === 'dropped_at_school' ||
-        studentStatus === 'dropped_at_home' ||
-        studentStatus === 'dropped'
-      ">
+        <div
+          class="progress-line"
+          [class.completed]="routeMiddleCompleted || routeLastCompleted">
+        </div>
 
+        <!-- SCHOOL / HOME ARRIVAL -->
+        <div
+          class="progress-step"
+          [ngClass]="routeLastStateClass"
+          [attr.title]="routeLastNotification">
 
-      <!-- WAITING -->
+          <div class="progress-marker">
+            <ion-icon [name]="routeLastIcon"></ion-icon>
 
-      <div
-        class="student-status-icon"
-        *ngIf="studentStatus === 'waiting'">
+            <span
+              class="marker-badge"
+              *ngIf="routeLastStateClass === 'completed'"
+              aria-hidden="true">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </span>
+          </div>
 
-        <ion-icon
-          name="time-outline">
-        </ion-icon>
-
+          <strong>{{ routeLastLabel }}</strong>
+          <span>{{ routeLastTimeLabel }}</span>
+        </div>
       </div>
 
-
-      <!-- PICKED -->
-
-      <div
-        class="student-status-icon"
-        *ngIf="
-          studentStatus === 'picked_up' ||
-          studentStatus === 'picked_from_school'
-        ">
-
-        <ion-icon
-          name="bus-outline">
-        </ion-icon>
-
-      </div>
-
-
-      <!-- COMPLETED -->
-
-      <div
-        class="student-status-icon"
-        *ngIf="
-          studentStatus === 'dropped_at_school' ||
-          studentStatus === 'dropped_at_home' ||
-          studentStatus === 'dropped'
-        ">
-
-        <ion-icon
-          name="checkmark-circle-outline">
-        </ion-icon>
-
-      </div>
-
-
-      <div class="student-status-content">
-
-        <span>
-          Student Status
+      <!-- Human-readable notification below the milestone tracker -->
+      <div class="route-notification" [ngClass]="routeNotificationClass">
+        <span class="route-notification-icon">
+          <ion-icon [name]="routeNotificationIcon"></ion-icon>
         </span>
 
-
-        <strong>
-          {{ studentStatusTitle }}
-        </strong>
-
-
-        <small>
-          {{ studentStatusMessage }}
-        </small>
-
-
-        <!-- MORNING PICKUP -->
-
-        <div
-          class="journey-time"
-          *ngIf="
-            studentStatus === 'picked_up' &&
-            pickupTime
-          ">
-
-          <ion-icon
-            name="time-outline">
-          </ion-icon>
-
-          <span>
-            Pickup:
-            {{ formatJourneyTime(pickupTime) }}
-          </span>
-
+        <div class="route-notification-copy">
+          <strong>{{ routeNotificationTitle }}</strong>
+          <span>{{ routeNotificationMessage }}</span>
         </div>
-
-
-        <!-- SCHOOL DROP -->
-
-        <div
-          class="journey-time"
-          *ngIf="
-            studentStatus === 'dropped_at_school' &&
-            schoolDropTime
-          ">
-
-          <ion-icon
-            name="checkmark-circle-outline">
-          </ion-icon>
-
-          <span>
-            Dropped at school:
-            {{ formatJourneyTime(schoolDropTime) }}
-          </span>
-
-        </div>
-
-
-        <!-- EVENING SCHOOL PICKUP -->
-
-        <div
-          class="journey-time"
-          *ngIf="
-            studentStatus === 'picked_from_school' &&
-            schoolPickupTime
-          ">
-
-          <ion-icon
-            name="time-outline">
-          </ion-icon>
-
-          <span>
-            School pickup:
-            {{ formatJourneyTime(schoolPickupTime) }}
-          </span>
-
-        </div>
-
-
-        <!-- EVENING HOME DROP -->
-
-        <div
-          class="journey-time"
-          *ngIf="
-            studentStatus === 'dropped_at_home' &&
-            homeDropTime
-          ">
-
-          <ion-icon
-            name="checkmark-circle-outline">
-          </ion-icon>
-
-          <span>
-            Dropped at home:
-            {{ formatJourneyTime(homeDropTime) }}
-          </span>
-
-        </div>
-
       </div>
 
+      <div class="ride-actions">
+        <button type="button" class="primary-action" (click)="openTracking()" [disabled]="!trackingAvailable">
+          <ion-icon name="location-outline"></ion-icon>
+          {{ trackingAvailable ? 'Track Van' : 'Tracking Unavailable' }}
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
     </section>
 
+    <!-- QUICK ACTIONS -->
+    <section class="quick-section">
+      <div class="section-title-row">
+        <div>
+          <span class="section-eyebrow">QUICK ACCESS</span>
+          <h2>Quick Actions</h2>
+        </div>
+      </div>
 
+      <div class="quick-grid">
+        <button type="button" class="quick-card attendance" (click)="openAttendance()">
+          <span class="quick-icon"><ion-icon name="calendar-outline"></ion-icon></span>
+          <span class="quick-copy">
+            <strong>Attendance</strong>
+            <small>Mark or view</small>
+          </span>
+        </button>
 
-    <!-- =====================================================
-         TRACKING
-    ====================================================== -->
+        <button type="button" class="quick-card tracking" (click)="openTracking()" [disabled]="!trackingAvailable">
+          <span class="quick-icon"><ion-icon name="location-outline"></ion-icon></span>
+          <span class="quick-copy">
+            <strong>Live Tracking</strong>
+            <small>Track van location</small>
+          </span>
+        </button>
 
-    <div
-      class="tracking-footer"
-      *ngIf="trackingAvailable">
+        <button type="button" class="quick-card report" (click)="openJourneyReport()">
+          <span class="quick-icon"><ion-icon name="calendar-outline"></ion-icon></span>
+          <span class="quick-copy">
+            <strong>Journey Report</strong>
+            <small>View daily report</small>
+          </span>
+        </button>
 
-      <ion-button
-        expand="block"
-        class="track-button"
-        (click)="openTracking()">
+        <a
+          *ngIf="driver.mobileNumber"
+          class="quick-card driver"
+          [href]="'tel:' + driver.mobileNumber">
+          <span class="quick-icon"><ion-icon name="call-outline"></ion-icon></span>
+          <span class="quick-copy">
+            <strong>Contact Driver</strong>
+            <small>Call {{ driver.name || 'driver' }}</small>
+          </span>
+        </a>
 
+        <button type="button" class="quick-card profile" (click)="openStudentProfile()">
+          <span class="quick-icon"><ion-icon name="person-outline"></ion-icon></span>
+          <span class="quick-copy">
+            <strong>Student Profile</strong>
+            <small>View details</small>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <!-- TOMORROW ATTENDANCE -->
+    <section class="tomorrow-attendance-card" *ngIf="showNextDayPreparation">
+      <div class="tomorrow-attendance-header">
+        <div class="tomorrow-attendance-icon">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <div class="tomorrow-attendance-heading">
+          <span class="section-eyebrow">TOMORROW'S ATTENDANCE</span>
+          <h2>{{ tomorrowAttendanceDateLabel }}</h2>
+          <p>{{ tomorrowAttendanceMessage }}</p>
+        </div>
+      </div>
+
+      <div class="tomorrow-current-status"
+        [class.present-state]="tomorrowAttendanceStatus === 'present'"
+        [class.absent-state]="tomorrowAttendanceStatus === 'absent'">
         <ion-icon
-          slot="start"
-          name="location-outline">
+          [name]="tomorrowAttendanceStatus === 'present' ? 'checkmark-circle-outline' : tomorrowAttendanceStatus === 'absent' ? 'close-outline' : 'help-outline'">
         </ion-icon>
+        <span>{{ tomorrowAttendanceLabel }}</span>
+      </div>
 
-        Track School Van
+      <div class="tomorrow-attendance-actions">
+        <button
+          type="button"
+          class="tomorrow-choice present-choice"
+          [class.selected]="tomorrowAttendanceStatus === 'present'"
+          [disabled]="tomorrowAttendanceLoading"
+          (click)="selectTomorrowAttendance('present')">
+          <ion-icon name="checkmark-outline"></ion-icon>
+          <span>Present</span>
+        </button>
 
-        <ion-icon
-          slot="end"
-          name="chevron-forward-outline">
-        </ion-icon>
+        <button
+          type="button"
+          class="tomorrow-choice absent-choice"
+          [class.selected]="tomorrowAttendanceStatus === 'absent'"
+          [disabled]="tomorrowAttendanceLoading"
+          (click)="selectTomorrowAttendance('absent')">
+          <ion-icon name="close-outline"></ion-icon>
+          <span>Absent</span>
+        </button>
+      </div>
 
-      </ion-button>
+      <div class="tomorrow-saving" *ngIf="tomorrowAttendanceLoading">
+        Saving attendance...
+      </div>
+    </section>
 
-    </div>
-
-
-    <div
-      class="bottom-space"
-      *ngIf="trackingAvailable">
-    </div>
-
-
-    </ng-container>
-
+    <div class="bottom-space"></div>
   </main>
-
 </ion-content>
 
-
-
-<!-- =====================================================
-     STUDENT PROFILE POPUP
-====================================================== -->
-
-<div
-  class="student-popup-overlay"
-  *ngIf="showStudentProfile"
-  (click)="closeStudentProfile()">
-
-
-  <div
-    class="student-popup-card"
-    (click)="$event.stopPropagation()">
-
-
-    <!-- HEADER -->
-
+<!-- STUDENT PROFILE -->
+<div class="student-popup-overlay" *ngIf="showStudentProfile" (click)="closeStudentProfile()">
+  <div class="student-popup-card" (click)="$event.stopPropagation()">
     <div class="student-popup-header">
-
-      <button
-        type="button"
-        class="popup-close"
-        (click)="closeStudentProfile()">
-
-        <ion-icon
-          name="close-outline">
-        </ion-icon>
-
+      <button type="button" class="popup-close" (click)="closeStudentProfile()" aria-label="Close student profile">
+        <ion-icon name="close-outline"></ion-icon>
       </button>
 
-
       <div class="popup-avatar">
-
-        {{
-          parent.studentName
-            ? parent.studentName.charAt(0).toUpperCase()
-            : 'S'
-        }}
-
+        {{ parent.studentName ? parent.studentName.charAt(0).toUpperCase() : 'S' }}
       </div>
-
-
-      <h2>
-        {{ parent.studentName || 'Student' }}
-      </h2>
-
-
-      <p>
-        {{ parent.schoolName || 'School not available' }}
-      </p>
-
+      <h2>{{ parent.studentName || 'Student' }}</h2>
+      <p>{{ parent.schoolName || 'School not available' }}</p>
     </div>
-
-
-
-    <!-- BODY -->
 
     <div class="student-popup-body">
-
-
-      <!-- SCHOOL -->
+      <div class="popup-detail-card">
+        <div class="popup-detail-icon school"><ion-icon name="school-outline"></ion-icon></div>
+        <div><span>School</span><strong>{{ parent.schoolName || 'School not available' }}</strong></div>
+      </div>
 
       <div class="popup-detail-card">
-
-        <div class="popup-detail-icon popup-school">
-
-          <ion-icon
-            name="school-outline">
-          </ion-icon>
-
-        </div>
-
-
-        <div class="popup-detail-content">
-
-          <span>
-            School
-          </span>
-
-          <strong>
-            {{ parent.schoolName || 'School not available' }}
-          </strong>
-
-        </div>
-
+        <div class="popup-detail-icon pickup"><ion-icon name="location-outline"></ion-icon></div>
+        <div><span>Pickup</span><strong>{{ parent.pickupArea || 'Pickup location not available' }}</strong></div>
       </div>
-
-
-
-      <!-- PICKUP -->
 
       <div class="popup-detail-card">
-
-        <div class="popup-detail-icon popup-pickup">
-
-          <ion-icon
-            name="location-outline">
-          </ion-icon>
-
-        </div>
-
-
-        <div class="popup-detail-content">
-
-          <span>
-            Pickup
-          </span>
-
-          <strong>
-            {{ parent.pickupArea || 'Pickup location not available' }}
-          </strong>
-
-        </div>
-
+        <div class="popup-detail-icon drop"><ion-icon name="navigate-outline"></ion-icon></div>
+        <div><span>Drop</span><strong>{{ parent.dropArea || 'Drop location not available' }}</strong></div>
       </div>
-
-
-
-      <!-- DROP -->
-
-      <div class="popup-detail-card">
-
-        <div class="popup-detail-icon popup-drop">
-
-          <ion-icon
-            name="navigate-outline">
-          </ion-icon>
-
-        </div>
-
-
-        <div class="popup-detail-content">
-
-          <span>
-            Drop
-          </span>
-
-          <strong>
-            {{ parent.dropArea || 'Drop location not available' }}
-          </strong>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- DRIVER -->
 
       <div class="popup-detail-card popup-full-width">
-
-        <div class="popup-detail-icon popup-driver">
-
-          <ion-icon
-            name="person-outline">
-          </ion-icon>
-
-        </div>
-
-
-        <div class="popup-detail-content">
-
-          <span>
-            Driver
-          </span>
-
-          <strong>
-            {{ driver.name || 'Driver not assigned' }}
-          </strong>
-
-        </div>
-
+        <div class="popup-detail-icon driver"><ion-icon name="person-outline"></ion-icon></div>
+        <div><span>Driver</span><strong>{{ driver.name || 'Driver not assigned' }}</strong></div>
       </div>
-
-
-
-      <!-- DRIVER PHONE -->
 
       <div class="popup-detail-card popup-full-width">
-
-        <div class="popup-detail-icon popup-phone">
-
-          <ion-icon
-            name="call-outline">
-          </ion-icon>
-
-        </div>
-
-
-        <div class="popup-detail-content">
-
-          <span>
-            Driver Contact
-          </span>
-
-          <strong>
-            {{ driver.mobileNumber || 'Contact not available' }}
-          </strong>
-
-        </div>
-
+        <div class="popup-detail-icon phone"><ion-icon name="call-outline"></ion-icon></div>
+        <div><span>Driver Contact</span><strong>{{ driver.mobileNumber || 'Contact not available' }}</strong></div>
       </div>
-
-
-
-      <!-- RIDE STATUS -->
 
       <div class="popup-detail-card popup-full-width">
-
-        <div
-          class="popup-detail-icon"
-          [class.popup-ride-active]="rideStatusClass === 'active'"
-          [class.popup-ride-ended]="rideStatusClass !== 'active'">
-
-          <ion-icon
-            [name]="rideNotificationIcon">
-          </ion-icon>
-
+        <div class="popup-detail-icon" [class.ride-active]="rideStatusClass === 'active'" [class.ride-ended]="rideStatusClass !== 'active'">
+          <ion-icon [name]="rideNotificationIcon"></ion-icon>
         </div>
-
-
-        <div class="popup-detail-content">
-
-          <span>
-            Ride Status
-          </span>
-
-
-          <strong>
-            {{ rideStatusTitle }}
-          </strong>
-
-
-          <small>
-            {{ rideStatusMessage }}
-          </small>
-
+        <div>
+          <span>Ride Status</span>
+          <strong>{{ rideStatusTitle }}</strong>
+          <small>{{ rideStatusMessage }}</small>
         </div>
-
       </div>
 
-
-
-      <!-- CLOSE -->
-
-      <ion-button
-        expand="block"
-        class="popup-close-button"
-        (click)="closeStudentProfile()">
-
-        Close
-
-      </ion-button>
-
+      <ion-button expand="block" class="popup-close-button" (click)="closeStudentProfile()">Close</ion-button>
     </div>
-
   </div>
-
 </div>

@@ -1,7 +1,8 @@
 import {
   Component,
   OnInit,
-  OnDestroy
+  OnDestroy,
+  ViewChild
 } from '@angular/core';
 
 import {
@@ -32,6 +33,10 @@ import {
 import {
   Router
 } from '@angular/router';
+
+import {
+  MenuController
+} from '@ionic/angular';
 
 import {
   Subscription
@@ -71,7 +76,8 @@ import {
   closeOutline,
   helpOutline,
   createOutline,
-  arrowForwardOutline
+  arrowForwardOutline,
+  menuOutline
 } from 'ionicons/icons';
 
 
@@ -134,6 +140,20 @@ export class DashboardPage
 
   rideStarted = false;
 
+  /**
+   * Authoritative backend ride identity/state.
+   *
+   * rideStarted is never inferred from student status.
+   */
+  activeRideId: string | null = null;
+
+  activeRideStatus:
+    | 'started'
+    | 'ended'
+    | null = null;
+
+  activeRideStartTime: string | null = null;
+
   rideType:
     | 'morning'
     | 'evening'
@@ -183,10 +203,31 @@ export class DashboardPage
     | 'absent'
     | 'not_marked' = 'not_marked';
 
+  tomorrowAttendanceLoading = false;
+
 
   // Keeps the completed evening ride context even after
   // the backend marks the active ride as ended.
   completedRideType:
+    | 'morning'
+    | 'evening'
+    | null = null;
+
+  /**
+   * Last ride completed today. This comes from the backend's
+   * completed-ride context and must never be inferred only
+   * from Parent.morningStatus/eveningStatus.
+   */
+  lastCompletedRideType:
+    | 'morning'
+    | 'evening'
+    | null = null;
+
+  /**
+   * Next scheduled journey when there is no active ride.
+   * Example: after morning drop, this becomes "evening".
+   */
+  nextRideType:
     | 'morning'
     | 'evening'
     | null = null;
@@ -282,6 +323,22 @@ export class DashboardPage
 
 
   // =====================================================
+  // MENU VIEW
+  // =====================================================
+
+  /**
+   * Direct reference to the page's ion-menu.
+   *
+   * We intentionally open this instance directly instead of
+   * relying only on MenuController's global registry. This is
+   * more reliable when the menu lives inside a standalone
+   * Ionic page/component.
+   */
+  @ViewChild('parentMenu', { static: false })
+  private parentMenu?: IonMenu;
+
+
+  // =====================================================
   // CONSTRUCTOR
   // =====================================================
 
@@ -293,7 +350,9 @@ export class DashboardPage
 
     private dialogService: DialogService,
 
-    private socketService: SocketService
+    private socketService: SocketService,
+
+    private menuController: MenuController
 
   ) {
 
@@ -334,7 +393,9 @@ export class DashboardPage
 
       createOutline,
 
-      arrowForwardOutline
+      arrowForwardOutline,
+
+      menuOutline
 
     });
 
@@ -508,228 +569,142 @@ export class DashboardPage
     // ===================================================
     // RIDE STARTED
     // ===================================================
+    //
+    // Socket.IO is only a synchronization trigger.
+    // MongoDB remains the source of truth.
+    //
+    // NEVER do:
+    //   this.rideStarted = true
+    //
+    // from a socket event alone.
+    // ===================================================
 
     this.rideStartedSubscription =
-
       this.socketService
-
         .listenRideStarted()
-
         .subscribe((data: any) => {
-
 
           console.log(
             '🟢 Parent received ride_started:',
             data
           );
 
-
           if (
-
-            this.driverId &&
-
-            data?.driverId &&
-
-            data.driverId !== this.driverId
-
+            this.parentId &&
+            data?.parentId &&
+            data.parentId !== this.parentId
           ) {
-
             return;
-
           }
 
-
-          this.rideStarted = true;
-
+          if (
+            this.driverId &&
+            data?.driverId &&
+            data.driverId !== this.driverId
+          ) {
+            return;
+          }
 
           const incomingRideType =
-
             this.normalizeRideType(
               data?.rideType
             );
 
+          /*
+           * A valid ride-start event must carry the
+           * persisted ride ID and started status.
+           *
+           * If an older/stale event arrives, reload
+           * the dashboard instead of trusting it.
+           */
+          if (
+            !incomingRideType ||
+            !data?.rideId ||
+            data?.status !== 'started'
+          ) {
+            console.warn(
+              'Ignoring unverified ride_started event.',
+              data
+            );
 
-          if (incomingRideType) {
-
-            this.rideType =
-              incomingRideType;
-
+            this.loadDashboard();
+            return;
           }
 
-
-          this.updateRideState();
-
+          this.loadDashboard();
         });
-
-
 
     // ===================================================
     // RIDE ENDED
     // ===================================================
 
     this.rideEndedSubscription =
-
       this.socketService
-
         .listenRideEnded()
-
         .subscribe((data: any) => {
-
 
           console.log(
             '🔴 Parent received ride_ended:',
             data
           );
 
-
           if (
-
             this.driverId &&
-
             data?.driverId &&
-
             data.driverId !== this.driverId
-
           ) {
-
             return;
-
           }
-
-
-          this.rideStarted = false;
-
-          this.trackingAvailable = false;
-
 
           const endedRideType =
-
             this.normalizeRideType(
               data?.rideType
-            ) ||
-
-            this.rideType ||
-
-            (
-              this.studentStatus === 'dropped_at_home'
-                ? 'evening'
-                : this.studentStatus === 'dropped_at_school'
-                  ? 'morning'
-                  : null
             );
 
-
           if (endedRideType) {
-
             this.completedRideType =
               endedRideType;
-
           }
 
-
           /*
-           * Do not clear rideType immediately.
-           * The completed dashboard needs the evening context
-           * to show the full-day journey summary.
+           * Do not locally manufacture the final state.
+           * Reload after the DB transaction has completed.
            */
-          this.updateRideState();
-
+          this.loadDashboard();
         });
-
-
 
     // ===================================================
     // STUDENT STATUS
     // ===================================================
 
     this.studentStatusSubscription =
-
       this.socketService
-
         .listenStudentStatusUpdated()
-
         .subscribe((data: any) => {
-
 
           console.log(
             '📡 Parent student status:',
             data
           );
 
-
           if (
-
             this.parentId &&
-
             data?.parentId &&
-
             data.parentId !== this.parentId
-
           ) {
-
             return;
-
           }
 
-
-          const incomingRideType =
-
-            this.normalizeRideType(
-              data?.rideType
-            );
-
-
-          if (incomingRideType) {
-
-            this.rideType =
-              incomingRideType;
-
-          }
-
-
-          this.studentStatus =
-
-            this.normalizeStudentStatus(
-              data?.status
-            );
-
-
-          if (this.isStudentTripCompleted()) {
-
-            this.completedRideType =
-
-              incomingRideType ||
-
-              this.completedRideType ||
-
-              (
-                this.studentStatus === 'dropped_at_home'
-                  ? 'evening'
-                  : this.studentStatus === 'dropped_at_school'
-                    ? 'morning'
-                    : null
-              );
-
-          }
-
-
-          this.extractJourneyTimes(data);
-
-
-          if (
-            this.isStudentOnVan()
-          ) {
-
-            this.rideStarted = true;
-
-          }
-
-
-          this.updateRideState();
-
+          /*
+           * Student status and ride status are separate
+           * concepts.
+           *
+           * The event tells us that something changed;
+           * the dashboard API tells us the authoritative
+           * current ride state.
+           */
+          this.loadDashboard();
         });
-
-
 
     // ===================================================
     // DASHBOARD UPDATED
@@ -749,19 +724,31 @@ export class DashboardPage
             data
           );
 
-
           if (
-
-            data?.type === 'ride_started' ||
-
-            data?.type === 'ride_ended'
-
+            data?.parentId &&
+            data.parentId !== this.parentId
           ) {
+            return;
+          }
+
+          // IMPORTANT:
+          // Tomorrow attendance is already the authoritative value
+          // contained in the socket event. Do NOT immediately call
+          // loadDashboard() here because that creates a race where
+          // an older GET response can overwrite the new selection.
+          if (
+            data?.type ===
+            'tomorrow_attendance_updated'
+          ) {
+
+            this.tomorrowAttendanceStatus =
+              this.normalizeAttendanceStatus(
+                data?.tomorrowAttendanceStatus
+              );
 
             return;
 
           }
-
 
           this.loadDashboard();
 
@@ -904,13 +891,47 @@ export class DashboardPage
           // =================================================
 
           this.rideStarted =
-            Boolean(res.rideStarted);
+            this.resolveRideStartedFromDashboard(res);
+
+          this.activeRideId =
+            res?.rideId ??
+            res?.ride?.rideId ??
+            null;
+
+          this.activeRideStatus =
+            res?.rideStatus ??
+            res?.ride?.status ??
+            null;
+
+          this.activeRideStartTime =
+            res?.rideStartTime ??
+            res?.ride?.startTime ??
+            null;
 
 
           this.rideType =
 
             this.normalizeRideType(
               res.rideType
+            );
+
+          /*
+           * IMPORTANT:
+           *
+           * rideType is the ACTIVE ride type only.
+           * When the driver has not started the return ride,
+           * rideType must be null. Do not derive an evening
+           * completion from the old Parent.eveningStatus.
+           */
+          this.lastCompletedRideType =
+            this.normalizeRideType(
+              res.lastCompletedRideType ??
+              res.completedRideType
+            );
+
+          this.nextRideType =
+            this.normalizeRideType(
+              res.nextRideType
             );
 
 
@@ -929,17 +950,27 @@ export class DashboardPage
           this.extractJourneyTimes(res);
 
 
+          /*
+           * Completion is authoritative only when the backend
+           * explicitly identifies a completed ride.
+           */
           this.completedRideType =
-
-            this.resolveCompletedRideType(
-              this.normalizeRideType(res.rideType),
-              this.studentStatus
+            this.normalizeRideType(
+              res.completedRideType ??
+              res.lastCompletedRideType
             );
 
 
 
+          /*
+           * Do NOT let a historical student status manufacture
+           * an active ride. Only the persisted Ride record can
+           * make rideStarted=true.
+           */
           if (
-            this.isStudentOnVan()
+            this.isStudentOnVan() &&
+            this.activeRideId &&
+            this.activeRideStatus === 'started'
           ) {
 
             this.rideStarted = true;
@@ -1134,32 +1165,21 @@ export class DashboardPage
     | 'evening'
     | null {
 
-    if (!this.isStudentTripCompleted()) {
-
-      return null;
-
+    /*
+     * Kept for compatibility with older socket payloads.
+     *
+     * IMPORTANT: this method is intentionally conservative.
+     * A status such as "dropped_at_home" is NOT enough to prove
+     * that the current ride is completed because that status can
+     * belong to an earlier ride/day.
+     */
+    if (this.rideStarted && this.isStudentTripCompleted()) {
+      return incomingRideType || this.rideType;
     }
 
-    if (incomingRideType) {
-
-      return incomingRideType;
-
-    }
-
-    if (status === 'dropped_at_home') {
-
-      return 'evening';
-
-    }
-
-    if (status === 'dropped_at_school') {
-
-      return 'morning';
-
-    }
-
-    return this.completedRideType;
-
+    return this.completedRideType ||
+      this.lastCompletedRideType ||
+      null;
   }
 
 
@@ -1175,6 +1195,286 @@ export class DashboardPage
 
   }
 
+
+    // =====================================================
+  // AFTER RIDE PAGE
+  // =====================================================
+
+  /**
+   * Controls whether the dashboard displays the
+   * completed-journey / next-day section.
+   *
+   * This intentionally reuses the existing authoritative
+   * completed ride state.
+   */
+  get showAfterRide(): boolean {
+
+    return (
+      this.completedRideType === 'evening' &&
+      this.isStudentTripCompleted()
+    );
+
+  }
+
+
+  /**
+   * Morning journey duration shown on dashboard.
+   */
+  get morningJourneyDurationLabel(): string {
+
+    const minutes =
+      this.calculateJourneyDurationMinutes(
+        this.pickupTime,
+        this.schoolDropTime
+      );
+
+    return this.formatJourneyDuration(
+      minutes
+    );
+
+  }
+
+
+  /**
+   * Evening journey duration shown on dashboard.
+   */
+  get eveningJourneyDurationLabel(): string {
+
+    const minutes =
+      this.calculateJourneyDurationMinutes(
+        this.schoolPickupTime,
+        this.homeDropTime
+      );
+
+    return this.formatJourneyDuration(
+      minutes
+    );
+
+  }
+
+
+  /**
+   * Calculate duration between two journey events.
+   */
+  private calculateJourneyDurationMinutes(
+
+    start:
+      string | Date | null,
+
+    end:
+      string | Date | null
+
+  ): number | null {
+
+    if (
+      !start ||
+      !end
+    ) {
+
+      return null;
+
+    }
+
+
+    const startDate =
+      new Date(start);
+
+    const endDate =
+      new Date(end);
+
+
+    if (
+      Number.isNaN(
+        startDate.getTime()
+      ) ||
+      Number.isNaN(
+        endDate.getTime()
+      )
+    ) {
+
+      return null;
+
+    }
+
+
+    const difference =
+      endDate.getTime() -
+      startDate.getTime();
+
+
+    if (
+      difference < 0
+    ) {
+
+      return null;
+
+    }
+
+
+    return Math.round(
+      difference / 60000
+    );
+
+  }
+
+
+  /**
+   * Convert minutes into a user-friendly label.
+   */
+  private formatJourneyDuration(
+
+    minutes:
+      number | null
+
+  ): string {
+
+    if (
+      minutes === null ||
+      minutes === undefined ||
+      !Number.isFinite(minutes)
+    ) {
+
+      return 'Not available';
+
+    }
+
+
+    const total =
+      Math.max(
+        0,
+        Math.round(minutes)
+      );
+
+
+    const hours =
+      Math.floor(
+        total / 60
+      );
+
+
+    const mins =
+      total % 60;
+
+
+    if (
+      hours > 0
+    ) {
+
+      return `${hours} hr ${mins} min`;
+
+    }
+
+
+    return `${mins} min`;
+
+  }
+
+
+  /**
+   * Open the dedicated After Ride page.
+   */
+  openAfterRide(): void {
+
+    if (!this.parentId) {
+
+      this.parentId =
+        localStorage.getItem(
+          'parentId'
+        );
+
+    }
+
+
+    if (!this.parentId) {
+
+      this.router.navigateByUrl(
+        '/auth/login',
+        {
+          replaceUrl: true
+        }
+      );
+
+      return;
+
+    }
+
+
+    this.router.navigateByUrl(
+      '/parent/after-ride'
+    );
+
+  }
+
+
+  /**
+   * Menu action for After Ride.
+   */
+  async openAfterRideFromMenu(): Promise<void> {
+
+    await this.closeParentMenu();
+
+    this.openAfterRide();
+
+  }
+
+  // =====================================================
+  // TOMORROW ATTENDANCE
+  // =====================================================
+
+  async selectTomorrowAttendance(
+    status: 'present' | 'absent'
+  ): Promise<void> {
+
+    if (this.tomorrowAttendanceLoading || !this.parentId) {
+      return;
+    }
+
+    const statusText = status === 'present' ? 'Present' : 'Absent';
+
+    const confirmed = await this.confirmTomorrowAttendance(statusText);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.tomorrowAttendanceLoading = true;
+
+    this.parentService
+      .updateTomorrowAttendance(this.parentId, status)
+      .subscribe({
+        next: (response: any) => {
+
+          const savedStatus =
+            response?.data?.status ||
+            status;
+
+          this.tomorrowAttendanceStatus =
+            this.normalizeAttendanceStatus(
+              savedStatus
+            );
+
+          this.tomorrowAttendanceLoading = false;
+
+        },
+        error: (error) => {
+          console.error('Tomorrow attendance error:', error);
+          this.tomorrowAttendanceLoading = false;
+          window.alert('Unable to save tomorrow attendance. Please try again.');
+        }
+      });
+  }
+
+  private async confirmTomorrowAttendance(status: string): Promise<boolean> {
+    const service: any = this.dialogService;
+
+    if (typeof service.confirm === 'function') {
+      return Boolean(
+        await service.confirm(`Mark tomorrow's attendance as ${status}?`)
+      );
+    }
+
+    return window.confirm(`Mark tomorrow's attendance as ${status}?`);
+  }
 
 
   // =====================================================
@@ -1228,6 +1528,57 @@ export class DashboardPage
 
   }
 
+
+
+  // =====================================================
+  // RESOLVE ACTIVE RIDE FROM DASHBOARD RESPONSE
+  // =====================================================
+
+  /**
+   * Uses the backend's explicit active-ride state.
+   *
+   * If the backend also exposes a ride status, an ended/completed
+   * status always wins over a stale rideStarted flag.
+   */
+  private resolveRideStartedFromDashboard(
+    data: any
+  ): boolean {
+
+    if (!data) {
+      return false;
+    }
+
+    const status = String(
+      data?.rideStatus ??
+      data?.status ??
+      data?.ride?.status ??
+      ''
+    )
+      .trim()
+      .toLowerCase();
+
+    const rideId =
+      data?.rideId ??
+      data?.ride?.rideId ??
+      null;
+
+    /*
+     * A ride is active ONLY when all three are true:
+     *
+     *   1. MongoDB says started
+     *   2. rideStarted is true
+     *   3. a persisted rideId exists
+     */
+    if (
+      status !== 'started' ||
+      data?.rideStarted !== true ||
+      !rideId
+    ) {
+      return false;
+    }
+
+    return true;
+  }
 
 
   // =====================================================
@@ -1392,6 +1743,47 @@ export class DashboardPage
   }
 
 
+  /**
+   * A completion may be displayed while there is no active ride
+   * only when the backend explicitly supplied completedRideType.
+   *
+   * This prevents a stale eveningStatus=dropped_at_home from
+   * making the dashboard show "Arrived Home" before today's
+   * return ride has even started.
+   */
+  private isAuthoritativeCompletedRide(): boolean {
+
+    return Boolean(
+      this.completedRideType &&
+      this.isStudentTripCompleted()
+    );
+
+  }
+
+
+  /**
+   * Journey type used by the visual milestone tracker.
+   *
+   * Priority:
+   *   1. active ride
+   *   2. next ride waiting to start
+   *   3. explicitly completed ride
+   */
+  private get effectiveJourneyType():
+    | 'morning'
+    | 'evening'
+    | null {
+
+    return (
+      this.rideType ||
+      this.nextRideType ||
+      this.completedRideType ||
+      null
+    );
+
+  }
+
+
 
   // =====================================================
   // UPDATE RIDE STATE
@@ -1400,64 +1792,84 @@ export class DashboardPage
   private updateRideState(): void {
 
 
-    if (
+    /*
+     * IMPORTANT:
+     *
+     * Ride state is authoritative.
+     * A student being "picked_up" must NEVER
+     * turn an ended/non-existent ride into an
+     * active ride.
+     */
+    if (!this.rideStarted) {
 
-      !this.rideStarted &&
-
-      !this.isStudentOnVan()
-
-    ) {
-
-
+      /*
+       * NEVER treat a historical student status as a current
+       * completed ride.
+       *
+       * Example:
+       * eveningStatus = dropped_at_home
+       * but today's evening Ride has not started.
+       *
+       * In that case the parent must see:
+       *   Return ride pending
+       * NOT:
+       *   Arrived Home
+       */
       if (
-        this.isStudentTripCompleted()
+        this.isAuthoritativeCompletedRide()
       ) {
 
         this.updateCompletedStudentState();
-
         return;
 
       }
 
-
       this.trackingAvailable = false;
 
+      const waitingRideType =
+        this.nextRideType ||
+        this.rideType;
 
       this.rideStatusClass =
-        'inactive';
-
+        waitingRideType
+          ? 'waiting'
+          : 'inactive';
 
       this.rideStatusTitle =
-        'No Active Ride';
-
+        waitingRideType === 'evening'
+          ? 'Return Ride Pending'
+          : waitingRideType === 'morning'
+            ? 'Morning Ride Pending'
+            : 'No Active Ride';
 
       this.rideStatusMessage =
-        'The school van is not currently on a trip.';
-
+        waitingRideType === 'evening'
+          ? 'The driver has not started the return ride from school yet.'
+          : waitingRideType === 'morning'
+            ? 'The driver has not started the morning ride yet.'
+            : 'The school van is not currently on a trip.';
 
       this.notificationTitle =
-        'No Active Ride';
-
+        this.rideStatusTitle;
 
       this.notificationMessage =
-        'The school van is not currently on a trip.';
+        this.rideStatusMessage;
 
-
-      this.rideDirection = '';
-
+      this.rideDirection =
+        waitingRideType === 'evening'
+          ? 'School → Home'
+          : waitingRideType === 'morning'
+            ? 'Home → School'
+            : '';
 
       this.rideNotificationIcon =
-        'checkmark-circle-outline';
-
+        'time-outline';
 
       this.rideNotificationType =
         'waiting';
 
-
       this.updateStudentDisplay();
-
       return;
-
     }
 
 
@@ -1774,6 +2186,58 @@ export class DashboardPage
 
 
 
+    // ===================================================
+    // EVENING RIDE HAS NOT STARTED
+    // ===================================================
+
+    /*
+     * Do not infer "ride started" merely from rideType === evening.
+     * The driver must actually start the evening ride.
+     *
+     * A student who has already been picked up is also treated as
+     * actively travelling, because the student status itself proves
+     * that the return journey is in progress.
+     */
+    if (
+      !this.rideStarted &&
+      !this.isStudentOnVan()
+    ) {
+
+      this.trackingAvailable = false;
+
+      this.rideStatusClass =
+        'waiting';
+
+      this.rideStatusTitle =
+        'Waiting for Ride';
+
+      this.rideStatusMessage =
+        'The return ride has not started yet.';
+
+      this.notificationTitle =
+        'Waiting for Ride';
+
+      this.notificationMessage =
+        'The driver has not started the return ride yet.';
+
+      this.rideNotificationIcon =
+        'time-outline';
+
+      this.rideNotificationType =
+        'waiting';
+
+      this.updateStudentDisplay();
+
+      return;
+
+    }
+
+
+
+    // ===================================================
+    // STUDENT DROPPED AT HOME
+    // ===================================================
+
     if (
 
       this.studentStatus === 'dropped_at_home' ||
@@ -1782,17 +2246,13 @@ export class DashboardPage
 
     ) {
 
-
       this.trackingAvailable = false;
-
 
       this.rideStatusClass =
         'completed';
 
-
       this.rideStatusTitle =
         'Arrived Home';
-
 
       this.rideStatusMessage =
 
@@ -1802,10 +2262,8 @@ export class DashboardPage
 
           : 'Student has reached home safely.';
 
-
       this.notificationTitle =
         'Arrived Home';
-
 
       this.notificationMessage =
 
@@ -1815,14 +2273,11 @@ export class DashboardPage
 
           : 'Your student has reached home safely.';
 
-
       this.rideNotificationIcon =
         'checkmark-circle-outline';
 
-
       this.rideNotificationType =
         'completed';
-
 
       this.updateStudentDisplay();
 
@@ -1831,6 +2286,10 @@ export class DashboardPage
     }
 
 
+
+    // ===================================================
+    // STUDENT PICKED UP FROM SCHOOL
+    // ===================================================
 
     if (
 
@@ -1840,17 +2299,14 @@ export class DashboardPage
 
     ) {
 
-
-      this.trackingAvailable = true;
-
+      this.trackingAvailable =
+        this.rideStarted || this.isStudentOnVan();
 
       this.rideStatusClass =
         'active';
 
-
       this.rideStatusTitle =
         'Returning Home';
-
 
       this.rideStatusMessage =
 
@@ -1860,10 +2316,8 @@ export class DashboardPage
 
           : 'Student has been picked up from school and is travelling home.';
 
-
       this.notificationTitle =
         'Picked Up From School';
-
 
       this.notificationMessage =
 
@@ -1873,14 +2327,11 @@ export class DashboardPage
 
           : 'Your student has been picked up from school and is travelling home.';
 
-
       this.rideNotificationIcon =
         'bus-outline';
 
-
       this.rideNotificationType =
         'active';
-
 
       this.updateStudentDisplay();
 
@@ -1890,36 +2341,32 @@ export class DashboardPage
 
 
 
-    this.trackingAvailable = false;
+    // ===================================================
+    // EVENING RIDE STARTED - WAITING FOR STUDENT PICKUP
+    // ===================================================
 
+    this.trackingAvailable = false;
 
     this.rideStatusClass =
       'waiting';
 
-
     this.rideStatusTitle =
-      'Waiting for Pickup';
-
+      'Return Trip Started';
 
     this.rideStatusMessage =
-      'The return trip has started and the van will pick up your student from school.';
-
+      'The van is heading to school to pick up your student.';
 
     this.notificationTitle =
       'Return Trip Started';
 
-
     this.notificationMessage =
       'The van is heading to school to pick up your student.';
-
 
     this.rideNotificationIcon =
       'bus-outline';
 
-
     this.rideNotificationType =
       'waiting';
-
 
     this.updateStudentDisplay();
 
@@ -1940,6 +2387,8 @@ export class DashboardPage
     const completedType =
 
       this.completedRideType ||
+
+      this.lastCompletedRideType ||
 
       this.rideType;
 
@@ -2348,7 +2797,7 @@ export class DashboardPage
 
         this.studentStatusMessage =
 
-          this.rideType === 'evening'
+          this.effectiveJourneyType === 'evening'
 
             ? 'Student is waiting for pickup from school.'
 
@@ -2408,6 +2857,317 @@ export class DashboardPage
   }
 
 
+
+
+  // =====================================================
+  // LIVE ROUTE MILESTONE STATE
+  // =====================================================
+  //
+  // These getters convert the authoritative ride/student state
+  // into meaningful visual notifications for the parent.
+  //
+  // Morning: Home -> On Route -> School
+  // Evening: School -> On Route -> Home
+
+  get routeFirstLabel(): string {
+    return this.effectiveJourneyType === 'evening' ? 'School' : 'Home';
+  }
+
+  get routeLastLabel(): string {
+    return this.effectiveJourneyType === 'evening' ? 'Home' : 'School';
+  }
+
+  get routeFirstIcon(): string {
+    if (this.routeFirstCompleted) {
+      return 'checkmark-circle-outline';
+    }
+
+    if (this.routeFirstStateClass === 'active') {
+      return 'bus-outline';
+    }
+
+    return this.effectiveJourneyType === 'evening'
+      ? 'school-outline'
+      : 'home-outline';
+  }
+
+  get routeLastIcon(): string {
+    if (this.routeLastCompleted) {
+      return 'checkmark-circle-outline';
+    }
+
+    return this.effectiveJourneyType === 'evening'
+      ? 'home-outline'
+      : 'school-outline';
+  }
+
+  get routeMiddleIcon(): string {
+    if (this.routeMiddleCompleted) {
+      return 'checkmark-circle-outline';
+    }
+
+    if (this.routeMiddleStateClass === 'active') {
+      return 'bus-outline';
+    }
+
+    return 'time-outline';
+  }
+
+  get routeFirstCompleted(): boolean {
+    if (this.effectiveJourneyType === 'evening') {
+      return (
+        this.studentStatus === 'picked_from_school' ||
+        this.studentStatus === 'dropped_at_home' ||
+        this.studentStatus === 'dropped'
+      );
+    }
+
+    return (
+      this.studentStatus === 'picked_up' ||
+      this.studentStatus === 'dropped_at_school' ||
+      this.studentStatus === 'dropped'
+    );
+  }
+
+  get routeMiddleCompleted(): boolean {
+    if (this.effectiveJourneyType === 'morning') {
+      return (
+        this.studentStatus === 'dropped_at_school' ||
+        this.studentStatus === 'dropped'
+      );
+    }
+
+    if (this.effectiveJourneyType === 'evening') {
+      return (
+        this.studentStatus === 'dropped_at_home' ||
+        this.studentStatus === 'dropped'
+      );
+    }
+
+    return false;
+  }
+
+  get routeLastCompleted(): boolean {
+    return this.routeMiddleCompleted;
+  }
+
+  get routeFirstStateClass(): 'completed' | 'active' | 'waiting' {
+    if (this.routeFirstCompleted) {
+      return 'completed';
+    }
+
+    // Ride started + student not yet picked up:
+    // the pickup milestone is the current action.
+    return this.rideStarted ? 'active' : 'waiting';
+  }
+
+  get routeMiddleStateClass(): 'completed' | 'active' | 'waiting' {
+    if (this.routeMiddleCompleted) {
+      return 'completed';
+    }
+
+    if (this.effectiveJourneyType === 'morning') {
+      return this.studentStatus === 'picked_up'
+        ? 'active'
+        : 'waiting';
+    }
+
+    if (this.effectiveJourneyType === 'evening') {
+      return this.studentStatus === 'picked_from_school'
+        ? 'active'
+        : 'waiting';
+    }
+
+    return 'waiting';
+  }
+
+  get routeLastStateClass(): 'completed' | 'active' | 'waiting' {
+    return this.routeLastCompleted ? 'completed' : 'waiting';
+  }
+
+  get routeFirstTimeLabel(): string {
+    if (this.effectiveJourneyType === 'evening') {
+      if (this.schoolPickupTime) {
+        return `Picked up ${this.formatJourneyTime(this.schoolPickupTime)}`;
+      }
+
+      return this.rideStarted ? 'Pickup in progress' : 'Pickup pending';
+    }
+
+    if (this.pickupTime) {
+      return `Picked up ${this.formatJourneyTime(this.pickupTime)}`;
+    }
+
+    return this.rideStarted ? 'Pickup in progress' : 'Pickup pending';
+  }
+
+  get routeMiddleTimeLabel(): string {
+    if (this.routeMiddleCompleted) {
+      return 'Journey complete';
+    }
+
+    if (this.routeMiddleStateClass === 'active') {
+      return this.trackingAvailable ? 'Live now' : 'On route';
+    }
+
+    if (this.rideStarted) {
+      return 'Van on the way';
+    }
+
+    return 'Waiting';
+  }
+
+  get routeLastTimeLabel(): string {
+    if (this.effectiveJourneyType === 'evening') {
+      if (this.homeDropTime) {
+        return `Arrived ${this.formatJourneyTime(this.homeDropTime)}`;
+      }
+
+      return 'Arrival pending';
+    }
+
+    if (this.schoolDropTime) {
+      return `Arrived ${this.formatJourneyTime(this.schoolDropTime)}`;
+    }
+
+    return 'Arrival pending';
+  }
+
+  get routeFirstNotification(): string {
+    if (this.routeFirstCompleted) {
+      return this.effectiveJourneyType === 'evening'
+        ? `Student picked up from school${this.schoolPickupTime ? ` at ${this.formatJourneyTime(this.schoolPickupTime)}` : ''}.`
+        : `Student picked up from home${this.pickupTime ? ` at ${this.formatJourneyTime(this.pickupTime)}` : ''}.`;
+    }
+
+    if (this.rideStarted) {
+      return this.effectiveJourneyType === 'evening'
+        ? 'Return ride started. The van is heading to school for pickup.'
+        : 'Morning ride started. The van is heading to the pickup point.';
+    }
+
+    return this.effectiveJourneyType === 'evening'
+      ? 'Waiting for the return ride to start.'
+      : 'Waiting for the morning ride to start.';
+  }
+
+  get routeMiddleNotification(): string {
+    if (this.routeMiddleCompleted) {
+      return this.effectiveJourneyType === 'evening'
+        ? 'Student completed the school-to-home journey.'
+        : 'Student completed the home-to-school journey.';
+    }
+
+    if (this.routeMiddleStateClass === 'active') {
+      return this.effectiveJourneyType === 'evening'
+        ? 'Your student is travelling from school to home.'
+        : 'Your student is travelling from home to school.';
+    }
+
+    if (this.rideStarted) {
+      return 'The van is moving, but the student has not reached the on-route stage yet.';
+    }
+
+    return 'The journey has not reached the on-route stage yet.';
+  }
+
+  get routeLastNotification(): string {
+    if (this.routeLastCompleted) {
+      return this.effectiveJourneyType === 'evening'
+        ? `Student arrived home${this.homeDropTime ? ` at ${this.formatJourneyTime(this.homeDropTime)}` : ''}.`
+        : `Student arrived at school${this.schoolDropTime ? ` at ${this.formatJourneyTime(this.schoolDropTime)}` : ''}.`;
+    }
+
+    return this.effectiveJourneyType === 'evening'
+      ? 'Waiting for the student to arrive home.'
+      : 'Waiting for the student to arrive at school.';
+  }
+
+  get routeNotificationIcon(): string {
+    if (this.routeLastCompleted) {
+      return 'checkmark-circle-outline';
+    }
+
+    if (
+      this.routeMiddleStateClass === 'active' ||
+      this.routeFirstStateClass === 'active'
+    ) {
+      return 'bus-outline';
+    }
+
+    return 'time-outline';
+  }
+
+  get routeNotificationClass(): 'completed' | 'active' | 'waiting' {
+    if (this.routeLastCompleted) {
+      return 'completed';
+    }
+
+    if (
+      this.routeMiddleStateClass === 'active' ||
+      this.routeFirstStateClass === 'active'
+    ) {
+      return 'active';
+    }
+
+    return 'waiting';
+  }
+
+  get routeNotificationTitle(): string {
+    if (this.routeLastCompleted) {
+      return this.effectiveJourneyType === 'evening'
+        ? 'Journey completed'
+        : 'Arrived at school';
+    }
+
+    if (this.routeMiddleStateClass === 'active') {
+      return this.effectiveJourneyType === 'evening'
+        ? 'Returning home'
+        : 'Going to school';
+    }
+
+    if (this.routeFirstStateClass === 'active') {
+      return 'Pickup in progress';
+    }
+
+    return 'Journey update';
+  }
+
+  get routeNotificationMessage(): string {
+    if (this.routeLastCompleted) {
+      return this.effectiveJourneyType === 'evening'
+        ? (
+            this.homeDropTime
+              ? `Your child reached home at ${this.formatJourneyTime(this.homeDropTime)}.`
+              : 'Your child reached home safely.'
+          )
+        : (
+            this.schoolDropTime
+              ? `Your child reached school at ${this.formatJourneyTime(this.schoolDropTime)}.`
+              : 'Your child reached school safely.'
+          );
+    }
+
+    if (this.routeMiddleStateClass === 'active') {
+      return this.trackingAvailable
+        ? 'Live tracking is available for the current journey.'
+        : 'Your child is travelling in the van.';
+    }
+
+    if (this.routeFirstStateClass === 'active') {
+      return this.effectiveJourneyType === 'evening'
+        ? 'The van is heading to school to pick up your child.'
+        : 'The van is heading to the pickup point for your child.';
+    }
+
+    return this.effectiveJourneyType === 'evening'
+      ? 'The return ride has not started yet.'
+      : 'The morning ride has not started yet.';
+  }
+
+  get routeProgressAriaLabel(): string {
+    return `${this.routeFirstLabel}: ${this.routeFirstTimeLabel}. On Route: ${this.routeMiddleTimeLabel}. ${this.routeLastLabel}: ${this.routeLastTimeLabel}.`;
+  }
 
   // =====================================================
   // LIVE TRACKING
@@ -2531,18 +3291,97 @@ export class DashboardPage
   // MENU
   // =====================================================
 
-  openDashboard(): void {
+  async openParentMenu(): Promise<void> {
 
-    this.router.navigateByUrl(
+    try {
+
+      // Preferred path: open the actual ion-menu instance
+      // rendered by this dashboard page.
+      if (this.parentMenu) {
+
+        const isOpen =
+          await this.parentMenu.isOpen();
+
+        if (!isOpen) {
+
+          const opened =
+            await this.parentMenu.open();
+
+          console.log(
+            'Parent menu opened:',
+            opened
+          );
+
+        }
+
+        return;
+      }
+
+      // Fallback in case ViewChild is temporarily unavailable.
+      await this.menuController.enable(
+        true,
+        'parent-menu'
+      );
+
+      await this.menuController.open(
+        'parent-menu'
+      );
+
+    } catch (error) {
+
+      console.error(
+        'Failed to open parent menu:',
+        error
+      );
+
+    }
+
+  }
+
+
+  async closeParentMenu(): Promise<void> {
+
+    try {
+
+      if (this.parentMenu) {
+
+        await this.parentMenu.close();
+
+        return;
+      }
+
+      await this.menuController.close(
+        'parent-menu'
+      );
+
+    } catch (error) {
+
+      console.warn(
+        'Failed to close parent menu:',
+        error
+      );
+
+    }
+
+  }
+
+
+  async openDashboard(): Promise<void> {
+
+    await this.closeParentMenu();
+
+    await this.router.navigateByUrl(
       '/parent/dashboard'
     );
 
   }
 
 
-  openAttendanceFromMenu(): void {
+  async openAttendanceFromMenu(): Promise<void> {
 
-    this.router.navigate([
+    await this.closeParentMenu();
+
+    await this.router.navigate([
 
       '/parent/attendance',
 
@@ -2553,22 +3392,26 @@ export class DashboardPage
   }
 
 
-  openJourneyReport(): void {
+  async openJourneyReport(): Promise<void> {
 
-    this.router.navigateByUrl(
+    await this.closeParentMenu();
+
+    await this.router.navigateByUrl(
       '/parent/journey-report'
     );
 
   }
 
 
-  openTrackingFromMenu(): void {
+  async openTrackingFromMenu(): Promise<void> {
 
     if (!this.trackingAvailable) {
 
       return;
 
     }
+
+    await this.closeParentMenu();
 
     this.openTracking();
 
@@ -2639,11 +3482,18 @@ export class DashboardPage
 
     this.rideStarted = false;
 
+    this.activeRideId = null;
+    this.activeRideStatus = null;
+    this.activeRideStartTime = null;
+
     this.rideType = null;
 
     this.completedRideType = null;
+    this.lastCompletedRideType = null;
+    this.nextRideType = null;
 
     this.tomorrowAttendanceStatus = 'not_marked';
+    this.tomorrowAttendanceLoading = false;
 
     this.pickupTime = null;
 

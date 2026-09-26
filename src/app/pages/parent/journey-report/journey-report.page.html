@@ -5,6 +5,7 @@
     <ion-buttons slot="start">
 
       <ion-button
+        type="button"
         (click)="goBack()">
 
         <ion-icon
@@ -26,19 +27,18 @@
 </ion-header>
 
 
-
 <ion-content>
 
   <main class="journey-report-page">
 
 
     <!-- =====================================================
-         HEADER
+         PAGE HEADER
     ====================================================== -->
 
     <section class="journey-page-header">
 
-      <div>
+      <div class="journey-header-content">
 
         <span class="journey-eyebrow">
           JOURNEY REPORT
@@ -66,27 +66,36 @@
     </section>
 
 
-
     <!-- =====================================================
          DATE
     ====================================================== -->
 
     <section class="journey-date-card">
 
-      <label>
-        Select Date
-      </label>
+      <div class="date-label">
+
+        <span>
+          REPORT DATE
+        </span>
+
+        <strong>
+          Select a date
+        </strong>
+
+      </div>
 
 
       <input
         type="date"
+
         [value]="selectedReportDate"
+
         [max]="todayDate"
+
         (change)="onReportDateChange($event)"
       />
 
     </section>
-
 
 
     <!-- =====================================================
@@ -95,7 +104,10 @@
 
     <div
       class="journey-loading"
-      *ngIf="journeyReportLoading">
+
+      *ngIf="
+        journeyReportLoading
+      ">
 
       <ion-spinner></ion-spinner>
 
@@ -104,7 +116,6 @@
       </span>
 
     </div>
-
 
 
     <!-- =====================================================
@@ -151,9 +162,6 @@
         </div>
 
 
-
-        <!-- TIMELINE -->
-
         <div class="journey-timeline">
 
 
@@ -191,6 +199,7 @@
 
               <span
                 class="not-recorded"
+
                 *ngIf="
                   !journeyReport.morning?.pickedUpAt
                 ">
@@ -202,7 +211,6 @@
             </div>
 
           </div>
-
 
 
           <!-- SCHOOL DROP -->
@@ -239,6 +247,7 @@
 
               <span
                 class="not-recorded"
+
                 *ngIf="
                   !journeyReport.morning?.droppedAtSchoolAt
                 ">
@@ -254,7 +263,6 @@
         </div>
 
       </section>
-
 
 
       <!-- =================================================
@@ -289,9 +297,6 @@
 
         </div>
 
-
-
-        <!-- TIMELINE -->
 
         <div class="journey-timeline">
 
@@ -330,6 +335,7 @@
 
               <span
                 class="not-recorded"
+
                 *ngIf="
                   !journeyReport.evening?.pickedFromSchoolAt
                 ">
@@ -341,7 +347,6 @@
             </div>
 
           </div>
-
 
 
           <!-- HOME DROP -->
@@ -378,6 +383,7 @@
 
               <span
                 class="not-recorded"
+
                 *ngIf="
                   !journeyReport.evening?.droppedAtHomeAt
                 ">
@@ -397,13 +403,13 @@
     </ng-container>
 
 
-
     <!-- =====================================================
          NO JOURNEY
     ====================================================== -->
 
     <div
       class="journey-empty"
+
       *ngIf="
         !journeyReportLoading &&
         journeyReport &&
@@ -425,13 +431,13 @@
     </div>
 
 
-
     <!-- =====================================================
-         NO REPORT RESPONSE
+         NO REPORT
     ====================================================== -->
 
     <div
       class="journey-empty"
+
       *ngIf="
         !journeyReportLoading &&
         !journeyReport

@@ -1,0 +1,723 @@
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+ion-toolbar {
+  --background: #ffffff;
+  --color: #172033;
+
+  border-bottom: 1px solid #edf0f5;
+}
+
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+.after-ride-page {
+  min-height: 100%;
+  padding: 18px 16px 35px;
+
+  background: #f7f9fc;
+}
+
+
+/* =====================================================
+   INTRO
+===================================================== */
+
+.page-intro {
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 17px;
+
+  margin-bottom: 15px;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 6px 22px rgba(20, 35, 60, 0.06);
+}
+
+
+.intro-icon {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background: #eaf8ef;
+  color: #16833f;
+}
+
+
+.intro-icon ion-icon {
+  font-size: 26px;
+}
+
+
+.intro-content {
+  min-width: 0;
+}
+
+
+.intro-label {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.9px;
+
+  color: #8791a5;
+}
+
+
+.page-intro h1 {
+  margin: 3px 0;
+
+  font-size: 20px;
+  font-weight: 800;
+
+  color: #172033;
+}
+
+
+.page-intro p {
+  margin: 0;
+
+  font-size: 12px;
+  line-height: 1.45;
+
+  color: #6d7688;
+}
+
+
+/* =====================================================
+   JOURNEY CARD
+===================================================== */
+
+.journey-card {
+  padding: 17px;
+
+  margin-bottom: 15px;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 6px 22px rgba(20, 35, 60, 0.05);
+}
+
+
+/* =====================================================
+   SECTION HEADING
+===================================================== */
+
+.section-heading {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  margin-bottom: 19px;
+}
+
+
+.heading-icon {
+  width: 41px;
+  height: 41px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+}
+
+
+.heading-icon.morning {
+  background: #eef3ff;
+  color: #4161d1;
+}
+
+
+.heading-icon.evening {
+  background: #fff4e8;
+  color: #d67b17;
+}
+
+
+.heading-icon ion-icon {
+  font-size: 20px;
+}
+
+
+.heading-content span {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.8px;
+
+  color: #8791a5;
+}
+
+
+.heading-content h2 {
+  margin: 4px 0 0;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  color: #172033;
+}
+
+
+/* =====================================================
+   JOURNEY TIMELINE
+===================================================== */
+
+.journey-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.journey-event {
+  display: flex;
+
+  min-height: 62px;
+}
+
+
+.timeline-column {
+  width: 40px;
+
+  flex-shrink: 0;
+
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+}
+
+
+.event-icon {
+  width: 34px;
+  height: 34px;
+
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+}
+
+
+.event-icon ion-icon {
+  font-size: 17px;
+}
+
+
+.event-icon.pickup {
+  background: #eef3ff;
+  color: #4161d1;
+}
+
+
+.event-icon.school {
+  background: #fff4e8;
+  color: #d67b17;
+}
+
+
+.event-icon.home {
+  background: #eaf8ef;
+  color: #16833f;
+}
+
+
+.timeline-line {
+  position: absolute;
+
+  top: 34px;
+  bottom: 0;
+
+  width: 2px;
+
+  background: #dfe4ed;
+}
+
+
+.event-content {
+  flex: 1;
+
+  padding: 1px 0 18px 10px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+
+.event-label {
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #737d90;
+}
+
+
+.event-content strong {
+  font-size: 15px;
+  font-weight: 800;
+
+  color: #20283a;
+}
+
+
+/* =====================================================
+   DURATION
+===================================================== */
+
+.duration-box {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 2px;
+
+  padding: 12px;
+
+  border-radius: 13px;
+
+  background: #f5f7fb;
+}
+
+
+.duration-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #e9edf4;
+
+  color: #53647d;
+}
+
+
+.duration-icon ion-icon {
+  font-size: 18px;
+}
+
+
+.duration-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+
+.duration-content span {
+  font-size: 10px;
+
+  color: #8992a4;
+}
+
+
+.duration-content strong {
+  font-size: 14px;
+
+  color: #20283a;
+}
+
+
+/* =====================================================
+   TOMORROW ATTENDANCE
+===================================================== */
+
+.tomorrow-card {
+  padding: 17px;
+
+  margin-top: 3px;
+
+  background: #ffffff;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 7px 25px rgba(20, 35, 60, 0.07);
+}
+
+
+.tomorrow-header {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+}
+
+
+.tomorrow-icon {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #eef3ff;
+  color: #4161d1;
+}
+
+
+.tomorrow-icon ion-icon {
+  font-size: 20px;
+}
+
+
+.tomorrow-header-content {
+  min-width: 0;
+}
+
+
+.tomorrow-header-content > span {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.8px;
+
+  color: #8791a5;
+}
+
+
+.tomorrow-header h2 {
+  margin: 4px 0 1px;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  color: #172033;
+}
+
+
+.tomorrow-header p {
+  margin: 0;
+
+  font-size: 12px;
+
+  color: #747e90;
+}
+
+
+.tomorrow-divider {
+  height: 1px;
+
+  margin: 16px 0;
+
+  background: #edf0f5;
+}
+
+
+/* =====================================================
+   ATTENDANCE ROW
+===================================================== */
+
+.tomorrow-attendance-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+}
+
+
+.tomorrow-attendance-text {
+  flex: 1;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+
+.tomorrow-attendance-text strong {
+  font-size: 14px;
+
+  color: #20283a;
+}
+
+
+.tomorrow-attendance-text span {
+  font-size: 11px;
+  line-height: 1.4;
+
+  color: #8791a3;
+}
+
+
+/* =====================================================
+   SIMPLE PRESENT / ABSENT BUTTONS
+===================================================== */
+
+.attendance-buttons {
+  display: flex;
+
+  flex-shrink: 0;
+
+  gap: 7px;
+}
+
+
+.attendance-button {
+  min-width: 76px;
+
+  height: 38px;
+
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  border-radius: 10px;
+
+  border: 1.5px solid #e1e5ec;
+
+  background: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+
+.attendance-button:active {
+  transform: scale(0.97);
+}
+
+
+.attendance-button:disabled {
+  opacity: 0.55;
+}
+
+
+.attendance-button ion-icon {
+  font-size: 16px;
+}
+
+
+/* PRESENT */
+
+.attendance-button.present {
+  color: #16833f;
+}
+
+
+.attendance-button.present.selected {
+  background: #eaf8ef;
+
+  border-color: #2fa65b;
+}
+
+
+/* ABSENT */
+
+.attendance-button.absent {
+  color: #c83a3a;
+}
+
+
+.attendance-button.absent.selected {
+  background: #fff0f0;
+
+  border-color: #df6464;
+}
+
+
+/* =====================================================
+   SAVED STATE
+===================================================== */
+
+.attendance-status {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-top: 13px;
+
+  padding: 9px 11px;
+
+  border-radius: 10px;
+
+  background: #f5f8f6;
+
+  font-size: 11px;
+
+  color: #667184;
+}
+
+
+.attendance-status ion-icon {
+  color: #16833f;
+
+  font-size: 16px;
+}
+
+
+.attendance-status strong {
+  color: #20283a;
+}
+
+
+/* =====================================================
+   SAVING
+===================================================== */
+
+.attendance-saving {
+  display: flex;
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top: 12px;
+
+  font-size: 11px;
+
+  color: #737d90;
+}
+
+
+.attendance-saving ion-spinner {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 18px 10px 8px;
+}
+
+
+.footer-message ion-icon {
+  font-size: 16px;
+
+  color: #16833f;
+}
+
+
+.footer-message p {
+  margin: 0;
+
+  font-size: 11px;
+
+  color: #8992a4;
+
+  text-align: center;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .after-ride-page {
+    padding: 15px 13px 30px;
+  }
+
+
+  .page-intro {
+    padding: 15px;
+  }
+
+
+  .journey-card {
+    padding: 15px;
+  }
+
+
+  .tomorrow-card {
+    padding: 15px;
+  }
+
+
+  .tomorrow-attendance-row {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+
+  .attendance-buttons {
+    width: 100%;
+  }
+
+
+  .attendance-button {
+    flex: 1;
+
+    height: 40px;
+  }
+
+}

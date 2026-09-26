@@ -35,14 +35,14 @@ import {
   calendarOutline,
   homeOutline,
   schoolOutline,
-  timeOutline,
   informationCircleOutline
 } from 'ionicons/icons';
 
 
 @Component({
 
-  selector: 'app-journey-report',
+  selector:
+    'app-journey-report',
 
   templateUrl:
     './journey-report.page.html',
@@ -85,8 +85,8 @@ export class JourneyReportPage
   // IDENTIFIER
   // =====================================================
 
-  parentId: string | null = null;
-
+  parentId:
+    string | null = null;
 
 
   // =====================================================
@@ -98,15 +98,15 @@ export class JourneyReportPage
   todayDate = '';
 
 
-
   // =====================================================
   // REPORT
   // =====================================================
 
-  journeyReport: any = null;
+  journeyReport:
+    any = null;
 
-  journeyReportLoading = false;
-
+  journeyReportLoading =
+    false;
 
 
   // =====================================================
@@ -115,12 +115,13 @@ export class JourneyReportPage
 
   constructor(
 
-    private parentService: ParentService,
+    private parentService:
+      ParentService,
 
-    private router: Router
+    private router:
+      Router
 
   ) {
-
 
     addIcons({
 
@@ -132,14 +133,11 @@ export class JourneyReportPage
 
       schoolOutline,
 
-      timeOutline,
-
       informationCircleOutline
 
     });
 
   }
-
 
 
   // =====================================================
@@ -148,9 +146,10 @@ export class JourneyReportPage
 
   ngOnInit(): void {
 
-
     this.parentId =
-      localStorage.getItem('parentId');
+      localStorage.getItem(
+        'parentId'
+      );
 
 
     if (!this.parentId) {
@@ -183,13 +182,11 @@ export class JourneyReportPage
   }
 
 
-
   // =====================================================
   // TODAY
   // =====================================================
 
   private getTodayDate(): string {
-
 
     const now =
       new Date();
@@ -200,7 +197,6 @@ export class JourneyReportPage
 
 
     const month =
-
       String(
         now.getMonth() + 1
       )
@@ -211,7 +207,6 @@ export class JourneyReportPage
 
 
     const day =
-
       String(
         now.getDate()
       )
@@ -226,13 +221,11 @@ export class JourneyReportPage
   }
 
 
-
   // =====================================================
-  // LOAD JOURNEY REPORT
+  // LOAD REPORT
   // =====================================================
 
   loadJourneyReport(): void {
-
 
     if (!this.parentId) {
 
@@ -252,7 +245,8 @@ export class JourneyReportPage
       true;
 
 
-    this.journeyReport = null;
+    this.journeyReport =
+      null;
 
 
     this.parentService
@@ -269,7 +263,6 @@ export class JourneyReportPage
 
         next: (response: any) => {
 
-
           console.log(
 
             'JOURNEY REPORT:',
@@ -280,8 +273,8 @@ export class JourneyReportPage
 
 
           this.journeyReport =
-
-            response?.data || null;
+            response?.data ||
+            null;
 
 
           this.journeyReportLoading =
@@ -291,7 +284,6 @@ export class JourneyReportPage
 
 
         error: (error) => {
-
 
           console.error(
 
@@ -316,7 +308,6 @@ export class JourneyReportPage
   }
 
 
-
   // =====================================================
   // DATE CHANGE
   // =====================================================
@@ -325,9 +316,7 @@ export class JourneyReportPage
     event: any
   ): void {
 
-
     const selectedDate =
-
       event?.detail?.value ||
 
       event?.target?.value ||
@@ -351,7 +340,6 @@ export class JourneyReportPage
   }
 
 
-
   // =====================================================
   // FORMAT TIME
   // =====================================================
@@ -364,7 +352,6 @@ export class JourneyReportPage
       null
 
   ): string {
-
 
     if (!value) {
 
@@ -405,7 +392,6 @@ export class JourneyReportPage
     );
 
   }
-
 
 
   // =====================================================

@@ -1,2706 +1,805 @@
-/* =====================================================
-   PARENT DASHBOARD
-   PROFESSIONAL SCHOOL VAN UI
-   -----------------------------------------------------
-   Shared visual language with Driver Dashboard
-   Theme:
-   Navy + Amber + Green + Cool Slate
-===================================================== */
-
-
-/* =====================================================
-   TOOLBAR
-===================================================== */
-
-ion-toolbar {
-  --min-height: 62px;
-  --background: linear-gradient(
-    135deg,
-    #0f172a 0%,
-    #172554 100%
-  );
-  --color: #ffffff;
-
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-
-  box-shadow:
-    0 4px 16px rgba(15, 23, 42, 0.16);
-}
-
-ion-title {
-  text-align: center;
-
-  font-size: 18px;
-  font-weight: 800;
-
-  letter-spacing: -0.2px;
-}
-
-.toolbar-action {
-  width: 46px;
-  height: 46px;
-
-  --border-radius: 50%;
-  --background: rgba(255, 255, 255, 0.10);
-  --color: #ffffff;
-
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
-}
-
-.toolbar-action ion-icon {
-  font-size: 23px;
-}
-
-.toolbar-action:active {
-  transform: scale(0.94);
-}
-
-
-/* =====================================================
-   PAGE
-===================================================== */
-
-.parent-dashboard {
-  position: relative;
-
-  min-height: 100%;
-
-  padding: 18px 16px 30px;
-
-  background:
-    radial-gradient(
-      circle at 100% 0%,
-      rgba(245, 158, 11, 0.10),
-      transparent 32%
-    ),
-    radial-gradient(
-      circle at 0% 20%,
-      rgba(37, 99, 235, 0.06),
-      transparent 28%
-    ),
-    linear-gradient(
-      180deg,
-      #f8fafc 0%,
-      #f8fafc 55%,
-      #f1f5f9 100%
-    );
-}
-
-
-/* Decorative background */
-
-.parent-dashboard::before {
-  content: "";
-
-  position: absolute;
-
-  width: 280px;
-  height: 280px;
-
-  top: -120px;
-  right: -130px;
-
-  border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(245, 158, 11, 0.09),
-      transparent 68%
-    );
-
-  pointer-events: none;
-}
-
-.parent-dashboard > * {
-  position: relative;
-
-  z-index: 1;
-}
-
-
-/* =====================================================
-   SHARED CARD
-===================================================== */
-
-.attendance-card,
-.student-profile-card,
-.mini-info-card,
-.student-status-card {
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff 0%,
-      #f8fafc 100%
-    );
-
-  border:
-    1px solid #e2e8f0;
-
-  box-shadow:
-    0 10px 24px rgba(15, 23, 42, 0.06),
-    0 2px 5px rgba(15, 23, 42, 0.03);
-}
-
-
-/* =====================================================
-   ATTENDANCE CARD
-===================================================== */
-
-.attendance-card {
-  width: 100%;
-  min-width: 0;
-
-  min-height: 112px;
-
-  box-sizing: border-box;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 14px;
-
-  padding: 16px;
-
-  border-radius: 20px;
-
-  position: relative;
-
-  overflow: hidden;
-}
-
-.attendance-card::before {
-  content: "";
-
-  position: absolute;
-
-  top: 0;
-  left: 0;
-
-  width: 4px;
-  height: 100%;
-
-  background:
-    linear-gradient(
-      180deg,
-      #f59e0b,
-      #f97316
-    );
-}
-
-
-/* =====================================================
-   ATTENDANCE ICON
-===================================================== */
-
-.attendance-icon {
-  width: 50px;
-  height: 50px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 15px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fff7ed,
-      #ffedd5
-    );
-
-  color: #c2410c;
-
-  border: 1px solid #fed7aa;
-
-  font-size: 24px;
-
-  box-shadow:
-    0 5px 14px rgba(245, 158, 11, 0.08);
-}
-
-
-/* =====================================================
-   ATTENDANCE ICON BUTTON
-===================================================== */
-
-.attendance-icon-button {
-  width: 54px;
-  height: 54px;
-
-  min-width: 54px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  border: none;
-
-  border-radius: 16px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fff7ed,
-      #ffedd5
-    );
-
-  color: #c2410c;
-
-  box-shadow:
-    0 5px 14px rgba(245, 158, 11, 0.08);
-
-  cursor: pointer;
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.attendance-icon-button ion-icon {
-  font-size: 26px;
-}
-
-.attendance-icon-button:active {
-  transform: scale(0.93);
-
-  box-shadow:
-    0 2px 8px rgba(245, 158, 11, 0.10);
-}
-
-
-/* =====================================================
-   ATTENDANCE CONTENT
-===================================================== */
-
-.attendance-content {
-  flex: 1;
-
-  min-width: 0;
-
-  overflow: hidden;
-}
-
-.card-label {
+:host {
+  --navy: #172033;
+  --navy-soft: #253653;
+  --orange: #ffad18;
+  --orange-dark: #e58a00;
+  --yellow-soft: #fff4c9;
+  --blue: #4161d1;
+  --green: #16833f;
+  --purple: #7358d8;
+  --red: #c83a3a;
+  --text: #172033;
+  --muted: #718096;
+  --border: #e9edf3;
+  --surface: #ffffff;
+  --page: #f7f9fc;
+  --shadow: 0 8px 26px rgba(23, 32, 51, .06);
   display: block;
-
-  margin-bottom: 4px;
-
-  color: #64748b;
-
-  font-size: 10px;
-
-  font-weight: 800;
-
-  text-transform: uppercase;
-
-  letter-spacing: 0.9px;
-}
-
-.attendance-content .card-label {
-  color: #64748b;
-}
-
-.attendance-content h2 {
-  margin: 0 0 7px;
-
-  color: #0f172a;
-
-  font-size: 16px;
-
-  font-weight: 800;
-
-  line-height: 1.25;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-}
-
-
-/* =====================================================
-   ATTENDANCE STATUS
-===================================================== */
-
-.attendance-status {
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  font-size: 12px;
-
-  font-weight: 750;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-
-  flex-shrink: 0;
-
-  border-radius: 50%;
-}
-
-.attendance-status.present {
-  color: #15803d;
-}
-
-.attendance-status.present .status-dot {
-  background: #22c55e;
-
-  box-shadow:
-    0 0 0 4px rgba(34, 197, 94, 0.10);
-}
-
-.attendance-status.absent {
-  color: #dc2626;
-}
-
-.attendance-status.absent .status-dot {
-  background: #ef4444;
-
-  box-shadow:
-    0 0 0 4px rgba(239, 68, 68, 0.08);
-}
-
-
-/* =====================================================
-   ATTENDANCE HINT
-===================================================== */
-
-.attendance-hint {
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-
-  margin-top: 6px;
-
-  color: #94a3b8;
-
-  font-size: 9px;
-
-  font-weight: 600;
-
-  line-height: 1.3;
-}
-
-.attendance-hint ion-icon {
-  flex-shrink: 0;
-
-  font-size: 12px;
-
-  color: #d97706;
-}
-
-
-/* =====================================================
-   ATTENDANCE ARROW
-===================================================== */
-
-.attendance-arrow {
-  width: 30px;
-  height: 30px;
-
-  min-width: 30px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  color: #94a3b8;
-
-  font-size: 20px;
-}
-
-
-/* =====================================================
-   ATTENDANCE GRID COMPATIBILITY
-===================================================== */
-
-.dashboard-info-grid .attendance-card,
-.student-details-grid .attendance-card {
-  grid-column: 1 / -1;
-}
-
-
-/* =====================================================
-   STUDENT PROFILE CARD
-===================================================== */
-
-.student-profile-card {
-  margin-top: 14px;
-
-  padding: 18px;
-
-  border-radius: 20px;
-
-  position: relative;
-
-  overflow: hidden;
-}
-
-.student-profile-card::before {
-  content: "";
-
-  position: absolute;
-
-  top: 0;
-  left: 0;
-
-  width: 4px;
-  height: 100%;
-
-  background:
-    linear-gradient(
-      180deg,
-      #f59e0b,
-      #f97316
-    );
-}
-
-
-/* =====================================================
-   PROFILE HEADER
-===================================================== */
-
-.student-profile-header {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 14px;
-}
-
-.student-profile-info {
-  min-width: 0;
-
-  flex: 1;
-}
-
-.card-eyebrow {
-  display: block;
-
-  margin-bottom: 5px;
-
-  color: #c2410c;
-
-  font-size: 9px;
-
-  font-weight: 800;
-
-  letter-spacing: 1px;
-
-  text-transform: uppercase;
-}
-
-.student-profile-info h2 {
-  margin: 0;
-
-  overflow: hidden;
-
-  color: #0f172a;
-
-  font-size: 18px;
-
-  font-weight: 850;
-
-  letter-spacing: -0.25px;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-.student-profile-info p {
-  margin: 4px 0 0;
-
-  overflow: hidden;
-
-  color: #64748b;
-
-  font-size: 11px;
-
-  font-weight: 500;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-
-/* =====================================================
-   PROFILE AVATAR
-===================================================== */
-
-.student-avatar {
-  width: 54px;
-  height: 54px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  border: 1px solid #fed7aa;
-
-  border-radius: 16px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fff7ed,
-      #ffedd5
-    );
-
-  color: #c2410c;
-
-  font-size: 25px;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 5px 14px rgba(245, 158, 11, 0.08);
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.student-avatar ion-icon {
-  font-size: 25px;
-}
-
-.student-avatar:active {
-  transform: scale(0.93);
-
-  box-shadow:
-    0 2px 8px rgba(245, 158, 11, 0.12);
-}
-
-.student-avatar:hover {
-  box-shadow:
-    0 7px 18px rgba(245, 158, 11, 0.16);
-}
-
-
-/* =====================================================
-   PROFILE HINT
-===================================================== */
-
-.student-profile-hint {
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-
-  margin-top: 7px;
-
-  color: #94a3b8;
-
-  font-size: 9px;
-
-  font-weight: 600;
-}
-
-.student-profile-hint ion-icon {
-  font-size: 12px;
-
-  color: #d97706;
-}
-
-
-/* =====================================================
-   LEGACY STUDENT MAIN
-===================================================== */
-
-.student-main {
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-  margin-top: 18px;
-
-  padding-bottom: 16px;
-
-  border-bottom:
-    1px solid #e2e8f0;
-}
-
-.student-initial {
-  width: 48px;
-  height: 48px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background:
-    linear-gradient(
-      135deg,
-      #f59e0b,
-      #f97316
-    );
-
-  color: #ffffff;
-
-  font-size: 19px;
-
-  font-weight: 800;
-
-  box-shadow:
-    0 6px 16px rgba(245, 158, 11, 0.20);
-}
-
-.student-name h3 {
-  margin: 0;
-
-  color: #0f172a;
-
-  font-size: 16px;
-
-  font-weight: 800;
-}
-
-.student-name p {
-  margin: 4px 0 0;
-
-  color: #64748b;
-
-  font-size: 11px;
-}
-
-
-/* =====================================================
-   STUDENT DETAILS
-===================================================== */
-
-.student-details-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap: 8px;
-
-  margin-top: 16px;
-}
-
-.detail-item {
-  min-width: 0;
-
-  padding: 11px 7px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  text-align: center;
-
-  border-radius: 13px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #f8fafc,
-      #ffffff
-    );
-
-  border: 1px solid #e2e8f0;
-}
-
-.detail-icon {
-  width: 32px;
-  height: 32px;
-
-  margin-bottom: 7px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 10px;
-
-  font-size: 16px;
-}
-
-.school-icon {
-  background: #f3e8ff;
-  color: #9333ea;
-}
-
-.pickup-icon {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.drop-icon {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.detail-item span {
-  display: block;
-
-  margin-bottom: 3px;
-
-  color: #94a3b8;
-
-  font-size: 8px;
-}
-
-.detail-item strong {
-  display: block;
-
-  width: 100%;
-
-  overflow: hidden;
-
-  color: #0f172a;
-
-  font-size: 10px;
-
-  font-weight: 750;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-
-/* =====================================================
-   DRIVER / RIDE INFORMATION
-===================================================== */
-
-.dashboard-info-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  gap: 12px;
-
-  margin-top: 14px;
-}
-
-.mini-info-card {
-  min-width: 0;
-
-  min-height: 145px;
-
-  padding: 15px;
-
-  border-radius: 18px;
-}
-
-.mini-card-header {
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-}
-
-.mini-card-header > span {
-  color: #475569;
-
-  font-size: 11px;
-
-  font-weight: 750;
-}
-
-.mini-icon {
-  width: 34px;
-  height: 34px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 11px;
-
-  font-size: 17px;
-}
-
-.driver-icon {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
-.ride-icon {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.mini-card-body {
-  margin-top: 14px;
-}
-
-.mini-card-body h3 {
-  margin: 0;
-
-  overflow: hidden;
-
-  color: #0f172a;
-
-  font-size: 14px;
-
-  font-weight: 800;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-.mini-card-body p {
-  margin: 5px 0 0;
-
-  color: #64748b;
-
-  font-size: 10px;
-
-  line-height: 1.4;
-}
-
-
-/* =====================================================
-   RIDE STATUS
-===================================================== */
-
-.ride-status {
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 6px;
-
-  font-size: 12px;
-
-  font-weight: 800;
-}
-
-.ride-active {
-  color: #15803d;
-}
-
-.ride-active .status-dot {
-  background: #22c55e;
-
-  box-shadow:
-    0 0 0 4px rgba(34, 197, 94, 0.10);
 }
 
-.ride-inactive {
-  color: #64748b;
+/* ========================= TOP BAR ========================= */
+.parent-header ion-toolbar {
+  --background: var(--orange);
+  --color: #fff;
+  --border-width: 0;
+  --border-color: transparent;
+  --min-height: 58px;
+  --padding-start: 6px;
+  --padding-end: 8px;
+  box-shadow: 0 3px 12px rgba(23, 32, 51, .14);
 }
-
-.ride-inactive .status-dot {
-  background: #94a3b8;
-}
-
-
-/* =====================================================
-   STUDENT STATUS
-===================================================== */
-
-.student-status-card {
-  display: flex;
-
-  align-items: center;
-
-  gap: 13px;
-
-  margin-top: 14px;
-
-  padding: 15px;
-
-  min-height: 82px;
-
-  border-radius: 18px;
-}
-
-.student-status-icon {
-  width: 43px;
-  height: 43px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 14px;
-
-  font-size: 21px;
-}
-
-.student-status-content span {
-  display: block;
-
-  margin-bottom: 5px;
-
-  color: #64748b;
-
-  font-size: 10px;
-
-  font-weight: 600;
-}
-
-.student-status-content strong {
-  font-size: 13px;
-
-  font-weight: 800;
-}
-
-
-/* Waiting */
-
-.status-waiting {
-  background:
-    linear-gradient(
-      100deg,
-      #fffbeb,
-      #ffffff
-    );
-
-  border-color: #fde68a;
-}
-
-.status-waiting .student-status-icon {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.status-waiting
-.student-status-content strong {
-  color: #b45309;
-}
-
-
-/* Picked */
-
-.status-picked {
-  background:
-    linear-gradient(
-      100deg,
-      #f0fdf4,
-      #ffffff
-    );
-
-  border-color: #bbf7d0;
-}
-
-.status-picked .student-status-icon {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.status-picked
-.student-status-content strong {
-  color: #15803d;
-}
-
-
-/* Dropped */
-
-.status-dropped {
-  background:
-    linear-gradient(
-      100deg,
-      #eff6ff,
-      #ffffff
-    );
-
-  border-color: #bfdbfe;
-}
-
-.status-dropped .student-status-icon {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.status-dropped
-.student-status-content strong {
-  color: #1d4ed8;
-}
-
-
-/* =====================================================
-   RIDE NOTIFICATION
-===================================================== */
-
-.ride-notification {
-  display: flex;
-
-  align-items: center;
-
-  gap: 14px;
-
-  margin-top: 16px;
-
-  padding: 16px;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff,
-      #f8fafc
-    );
-
-  border:
-    1px solid #e2e8f0;
-
-  border-left: 4px solid #16a34a;
-
-  box-shadow:
-    0 8px 20px rgba(15, 23, 42, 0.06);
-
-  animation:
-    slideDown
-    0.35s
-    ease;
-}
-
-.notification-ended {
-  border-left-color: #ef4444;
-}
-
-.notification-icon {
-  width: 46px;
-  height: 46px;
-
-  display: flex;
-
-  justify-content: center;
-  align-items: center;
-
-  flex-shrink: 0;
-
-  border-radius: 14px;
-
-  background:
-    #dcfce7;
-
-  color: #16a34a;
-
-  font-size: 24px;
-}
-
-.notification-ended
-.notification-icon {
-  background: #fee2e2;
-
-  color: #dc2626;
-}
-
-.notification-content {
-  flex: 1;
-
-  min-width: 0;
-}
-
-.notification-content h3 {
-  margin: 0;
-
-  color: #0f172a;
-
-  font-size: 15px;
-
-  font-weight: 850;
-}
-
-.notification-content p {
-  margin-top: 4px;
-
-  color: #64748b;
-
-  font-size: 12px;
-}
-
-.live-badge {
-  background: #16a34a;
 
+.parent-header ion-title {
   color: #fff;
-
-  padding: 4px 8px;
-
-  border-radius: 20px;
-
-  font-size: 10px;
-
-  font-weight: 750;
-
-  animation:
-    pulse
-    1.5s
-    infinite;
-}
-
-
-/* =====================================================
-   TRACKING FOOTER
-===================================================== */
-
-.tracking-footer {
-  position: fixed;
-
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  z-index: 100;
-
-  padding:
-    10px 16px
-    calc(10px + env(safe-area-inset-bottom));
-
-  background:
-    rgba(248, 250, 252, 0.96);
-
-  border-top:
-    1px solid #e2e8f0;
-
-  backdrop-filter:
-    blur(12px);
-
-  -webkit-backdrop-filter:
-    blur(12px);
-
-  box-shadow:
-    0 -6px 24px rgba(15, 23, 42, 0.06);
-}
-
-.track-button {
-  width: 100%;
-
-  max-width: 720px;
-
-  min-height: 54px;
-
-  margin: 0 auto;
-
-  display: block;
-
-  --background:
-    linear-gradient(
-      110deg,
-      #16a34a,
-      #15803d
-    );
-
-  --background-hover:
-    #15803d;
-
-  --background-activated:
-    #166534;
-
-  --color:
-    #ffffff;
-
-  --border-radius:
-    15px;
-
-  --box-shadow:
-    0 8px 20px
-    rgba(22, 163, 74, 0.20);
-
-  font-weight: 750;
-}
-
-.bottom-space {
-  height: 80px;
-}
-
-
-/* =====================================================
-   STUDENT POPUP
-   SAME DESIGN LANGUAGE AS DRIVER
-===================================================== */
-
-.student-popup-overlay {
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 9999;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 14px;
-
-  background:
-    rgba(15, 23, 42, 0.68);
-
-  backdrop-filter:
-    blur(8px);
-
-  -webkit-backdrop-filter:
-    blur(8px);
-
-  animation:
-    popupOverlayIn
-    0.2s
-    ease;
-}
-
-
-/* =====================================================
-   POPUP CARD
-===================================================== */
-
-.student-popup-card {
-  width: 100%;
-
-  max-width: 390px;
-
-  max-height: 92vh;
-
-  overflow: hidden;
-
-  border-radius: 27px;
-
-  background: #ffffff;
-
-  border:
-    1px solid #e2e8f0;
-
-  box-shadow:
-    0 25px 70px
-    rgba(15, 23, 42, 0.30);
-
-  animation:
-    popupCardIn
-    0.28s
-    cubic-bezier(.22, 1, .36, 1);
-}
-
-
-/* =====================================================
-   POPUP HEADER
-   NAVY + AMBER — SAME AS DRIVER
-===================================================== */
-
-.student-popup-header {
-  position: relative;
-
-  padding: 28px 20px 26px;
-
-  text-align: center;
-
-  overflow: hidden;
-
-  color: #ffffff;
-
-  background:
-    linear-gradient(
-      135deg,
-      #0f172a 0%,
-      #172554 72%,
-      #1e3a8a 100%
-    );
-}
-
-.student-popup-header::before {
-  content: "";
-
-  position: absolute;
-
-  width: 190px;
-  height: 190px;
-
-  top: -110px;
-  right: -55px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(245, 158, 11, 0.16);
-
-  pointer-events: none;
-}
-
-.student-popup-header::after {
-  content: "";
-
-  position: absolute;
-
-  width: 150px;
-  height: 150px;
-
-  bottom: -105px;
-  left: -50px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(255, 255, 255, 0.06);
-
-  pointer-events: none;
-}
-
-
-/* =====================================================
-   POPUP CLOSE
-===================================================== */
-
-.popup-close {
-  position: absolute;
-
-  top: 13px;
-  right: 13px;
-
-  z-index: 10;
-
-  width: 36px;
-  height: 36px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  border: 1px solid
-    rgba(255, 255, 255, 0.15);
-
-  border-radius: 50%;
-
-  background:
-    rgba(255, 255, 255, 0.10);
-
-  color: #ffffff;
-
-  font-size: 21px;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease;
-}
-
-.popup-close:active {
-  transform: scale(0.90);
-
-  background:
-    rgba(255, 255, 255, 0.20);
-}
-
-
-/* =====================================================
-   POPUP AVATAR
-===================================================== */
-
-.popup-avatar {
-  position: relative;
-
-  z-index: 3;
-
-  width: 62px;
-  height: 62px;
-
-  margin:
-    0 auto 11px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fff7ed,
-      #ffedd5
-    );
-
-  color: #c2410c;
-
-  border:
-    3px solid
-    rgba(245, 158, 11, 0.55);
-
-  font-size: 24px;
-
-  font-weight: 800;
-
-  box-shadow:
-    0 8px 22px
-    rgba(0, 0, 0, 0.18);
-}
-
-
-/* =====================================================
-   POPUP HEADER TEXT
-===================================================== */
-
-.student-popup-header h2 {
-  position: relative;
-
-  z-index: 3;
-
-  margin: 0;
-
-  color: #ffffff;
-
-  font-size: 20px;
-
-  font-weight: 850;
-
-  line-height: 1.2;
-}
-
-.student-popup-header p {
-  position: relative;
-
-  z-index: 3;
-
-  margin: 5px 0 0;
-
-  color:
-    rgba(255, 255, 255, 0.72);
-
-  font-size: 12px;
-}
-
-
-/* =====================================================
-   POPUP BODY
-===================================================== */
-
-.student-popup-body {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  align-items: start;
-
-  gap: 10px;
-
-  padding: 15px;
-
-  max-height:
-    calc(92vh - 160px);
-
-  overflow-y: auto;
-
-  scrollbar-width: none;
-}
-
-.student-popup-body::-webkit-scrollbar {
-  display: none;
-}
-
-
-/* =====================================================
-   POPUP DETAIL CARD
-===================================================== */
-
-.popup-detail-card {
-  width: 100%;
-
-  min-width: 0;
-
-  min-height: 64px;
-
-  align-self: start;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 9px;
-
-  padding: 10px;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius: 15px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff,
-      #f8fafc
-    );
-
-  box-shadow:
-    0 3px 12px
-    rgba(15, 23, 42, 0.035);
-
-  box-sizing: border-box;
-}
-
-
-/* =====================================================
-   FULL WIDTH
-===================================================== */
-
-.popup-full-width {
-  grid-column:
-    1 / -1;
-}
-
-
-/* =====================================================
-   POPUP ICON
-===================================================== */
-
-.popup-detail-icon {
-  width: 38px;
-  height: 38px;
-
-  min-width: 38px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 11px;
-
   font-size: 18px;
-}
-
-
-/* =====================================================
-   POPUP ICON THEMES
-===================================================== */
-
-.popup-school {
-  background: #f3e8ff;
-  color: #9333ea;
-}
-
-.popup-pickup {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.popup-drop {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.popup-attendance {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.popup-driver {
-  background:
-    linear-gradient(
-      145deg,
-      #fff7ed,
-      #ffedd5
-    );
-
-  color: #c2410c;
-}
-
-.popup-phone {
-  background: #e0f2fe;
-  color: #0284c7;
-}
-
-.popup-ride-active {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.popup-ride-ended {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-
-/* =====================================================
-   POPUP CONTENT
-===================================================== */
-
-.popup-detail-content {
-  flex: 1;
-
-  min-width: 0;
-
-  overflow: hidden;
-}
-
-.popup-detail-content span {
-  display: block;
-
-  margin-bottom: 3px;
-
-  color: #94a3b8;
-
-  font-size: 9px;
-
-  font-weight: 650;
-
-  line-height: 1.2;
-}
-
-.popup-detail-content strong {
-  display: block;
-
-  max-width: 100%;
-
-  overflow: hidden;
-
-  color: #1e293b;
-
-  font-size: 11px;
-
-  font-weight: 800;
-
-  line-height: 1.25;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-.popup-detail-content small {
-  display: block;
-
-  margin-top: 3px;
-
-  color: #64748b;
-
-  font-size: 9px;
-
-  line-height: 1.3;
-}
-
-
-/* =====================================================
-   POPUP ATTENDANCE
-===================================================== */
-
-.popup-detail-card:has(.popup-attendance) {
-  min-width: 0;
-}
-
-.popup-detail-card:has(.popup-attendance)
-.popup-detail-content strong {
-  font-size: 10px;
-
-  white-space: nowrap;
-}
-
-
-/* =====================================================
-   POPUP STATUS
-===================================================== */
-
-.popup-present {
-  color: #16a34a !important;
-}
-
-.popup-absent {
-  color: #dc2626 !important;
-}
-
-.popup-ended {
-  color: #dc2626 !important;
-}
-
-
-/* =====================================================
-   POPUP CLOSE BUTTON
-===================================================== */
-
-.popup-close-button {
-  grid-column:
-    1 / -1;
-
-  width: 100%;
-
-  margin:
-    3px 0 0;
-
-  --background:
-    linear-gradient(
-      135deg,
-      #f59e0b,
-      #f97316
-    );
-
-  --background-hover:
-    #ea580c;
-
-  --background-activated:
-    #c2410c;
-
-  --color: #ffffff;
-
-  --border-radius: 15px;
-
-  --box-shadow:
-    0 8px 20px
-    rgba(245, 158, 11, 0.20);
-
-  min-height: 48px;
-
-  font-size: 13px;
-
-  font-weight: 750;
-}
-
-
-/* =====================================================
-   ANIMATIONS
-===================================================== */
-
-@keyframes pulse {
-  50% {
-    opacity: 0.55;
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-
-    transform:
-      translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateY(0);
-  }
-}
-
-@keyframes popupOverlayIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes popupCardIn {
-  from {
-    opacity: 0;
-
-    transform:
-      translateY(25px)
-      scale(0.94);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateY(0)
-      scale(1);
-  }
-}
-
-.journey-time {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 7px;
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.journey-time ion-icon {
-  font-size: 15px;
-}
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 370px) {
-
-  .parent-dashboard {
-    padding:
-      14px 12px 28px;
-  }
-
-
-  .attendance-card {
-    min-height: 105px;
-
-    padding: 14px;
-
-    gap: 11px;
-  }
-
-
-  .attendance-icon {
-    width: 43px;
-    height: 43px;
-
-    font-size: 20px;
-  }
-
-
-  .attendance-icon-button {
-    width: 48px;
-    height: 48px;
-
-    min-width: 48px;
-
-    border-radius: 14px;
-  }
-
-
-  .attendance-icon-button ion-icon {
-    font-size: 23px;
-  }
-
-
-  .attendance-content h2 {
-    font-size: 15px;
-  }
-
-
-  .attendance-status {
-    font-size: 11px;
-  }
-
-
-  .attendance-hint {
-    font-size: 8px;
-  }
-
-
-  .attendance-arrow {
-    width: 26px;
-    height: 26px;
-
-    min-width: 26px;
-
-    font-size: 18px;
-  }
-
-
-  .student-profile-card {
-    padding: 16px;
-  }
-
-
-  .student-avatar {
-    width: 50px;
-    height: 50px;
-
-    border-radius: 15px;
-  }
-
-
-  .student-profile-info h2 {
-    font-size: 16px;
-  }
-
-
-  .dashboard-info-grid {
-    gap: 8px;
-  }
-
-
-  .mini-info-card {
-    padding: 12px;
-
-    min-height: 135px;
-  }
-
-
-  .detail-item {
-    padding:
-      9px 4px;
-  }
-
-
-  .student-popup-overlay {
-    padding: 10px;
-  }
-
-
-  .student-popup-card {
-    max-width: 100%;
-
-    border-radius: 23px;
-  }
-
-
-  .student-popup-header {
-    padding:
-      25px
-      15px
-      23px;
-  }
-
-
-  .popup-avatar {
-    width: 56px;
-    height: 56px;
-
-    font-size: 22px;
-  }
-
-
-  .student-popup-header h2 {
-    font-size: 18px;
-  }
-
-
-  .student-popup-body {
-    gap: 8px;
-
-    padding: 12px;
-  }
-
-
-  .popup-detail-card {
-    min-height: 60px;
-
-    padding: 8px;
-
-    gap: 7px;
-  }
-
-
-  .popup-detail-icon {
-    width: 34px;
-    height: 34px;
-
-    min-width: 34px;
-
-    font-size: 16px;
-  }
-
-
-  .popup-detail-content span {
-    font-size: 8px;
-  }
-
-
-  .popup-detail-content strong {
-    font-size: 10px;
-  }
-
-
-  .popup-detail-content small {
-    font-size: 8px;
-  }
-
-}
-
-
-/* =====================================================
-   VERY SMALL DEVICES
-===================================================== */
-
-@media (max-width: 330px) {
-
-  .student-popup-body {
-    grid-template-columns: 1fr;
-  }
-
-  .popup-full-width {
-    grid-column: auto;
-  }
-
-  .popup-close-button {
-    grid-column: auto;
-  }
-
-}
-
-
-/* =====================================================
-   TABLET / DESKTOP
-===================================================== */
-
-@media (min-width: 768px) {
-
-  .parent-dashboard {
-    max-width: 760px;
-
-    margin: 0 auto;
-
-    padding-top: 28px;
-  }
-
-}
-
-
-/* =====================================================
-   ACCESSIBILITY
-===================================================== */
-
-@media (prefers-reduced-motion: reduce) {
-
-  .toolbar-action,
-  .attendance-icon-button,
-  .student-avatar {
-    transition: none;
-  }
-
-  .ride-notification,
-  .live-badge,
-  .student-popup-overlay,
-  .student-popup-card {
-    animation: none;
-  }
-
-}
-
-
-
-/* =====================================================
-   NEXT DAY PREPARATION
-   -----------------------------------------------------
-   Added only for the completed evening ride state.
-   Existing dashboard styles above remain unchanged.
-===================================================== */
-
-
-/* =====================================================
-   COMPLETED JOURNEY CARD
-===================================================== */
-
-.completed-journey-card {
-  width: 100%;
-  min-width: 0;
-
-  margin-top: 14px;
-  padding: 20px 16px 15px;
-
-  box-sizing: border-box;
-
-  border: 1px solid #e2e8f0;
-  border-radius: 22px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff 0%,
-      #f8fafc 100%
-    );
-
-  box-shadow:
-    0 10px 24px rgba(15, 23, 42, 0.06),
-    0 2px 5px rgba(15, 23, 42, 0.03);
-
-  overflow: hidden;
-}
-
-
-/* =====================================================
-   COMPLETED HEADER
-===================================================== */
-
-.completed-journey-header {
-  display: flex;
-  align-items: center;
-
-  gap: 13px;
-
-  padding-bottom: 17px;
-
-  border-bottom:
-    1px solid #e2e8f0;
-}
-
-.completed-check-icon {
-  width: 52px;
-  height: 52px;
-
-  min-width: 52px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background:
-    linear-gradient(
-      145deg,
-      #4ade80,
-      #22c55e
-    );
-
-  color: #ffffff;
-
-  font-size: 26px;
-
-  box-shadow:
-    0 7px 18px
-    rgba(34, 197, 94, 0.22);
-}
-
-.completed-journey-heading {
-  min-width: 0;
-  flex: 1;
-}
-
-.completed-journey-heading h2 {
-  margin: 0;
-
-  color: #0f172a;
-
-  font-size: 17px;
   font-weight: 850;
-
-  line-height: 1.25;
-
-  letter-spacing: -0.25px;
+  letter-spacing: .1px;
 }
 
-.completed-journey-heading p {
-  margin: 5px 0 0;
-
-  color: #64748b;
-
-  font-size: 11px;
-  font-weight: 500;
-
-  line-height: 1.45;
-}
-
-
-/* =====================================================
-   JOURNEY TIMELINE
-===================================================== */
-
-.journey-timeline {
-  position: relative;
-
-  padding-top: 15px;
-}
-
-.journey-timeline::before {
-  content: "";
-
-  position: absolute;
-
-  left: 18px;
-  top: 33px;
-  bottom: 33px;
-
-  width: 2px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #86efac 0%,
-      #bfdbfe 50%,
-      #c4b5fd 100%
-    );
-
-  border-radius: 4px;
-}
-
-.journey-timeline-item {
-  position: relative;
-
-  min-height: 51px;
-
+.parent-header ion-buttons {
   display: flex;
   align-items: center;
-
-  gap: 10px;
-
-  padding: 5px 0;
-}
-
-.journey-timeline-icon {
-  position: relative;
-
-  z-index: 2;
-
-  width: 37px;
-  height: 37px;
-
-  min-width: 37px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  border: 3px solid #ffffff;
-
-  font-size: 16px;
-
-  box-shadow:
-    0 3px 9px
-    rgba(15, 23, 42, 0.07);
-}
-
-.journey-timeline-icon.pickup {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.journey-timeline-icon.school {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.journey-timeline-icon.home {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
-.journey-timeline-content {
-  min-width: 0;
-  flex: 1;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-.journey-timeline-content strong {
-  overflow: hidden;
-
-  color: #1e293b;
-
-  font-size: 12px;
-  font-weight: 800;
-
-  line-height: 1.3;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.journey-timeline-content span {
-  color: #94a3b8;
-
-  font-size: 9px;
-  font-weight: 600;
-
-  line-height: 1.2;
-}
-
-.journey-timeline-item time {
-  flex-shrink: 0;
-
-  color: #475569;
-
-  font-size: 11px;
-  font-weight: 750;
-
-  white-space: nowrap;
-}
-
-
-/* =====================================================
-   TOMORROW ATTENDANCE
-===================================================== */
-
-.tomorrow-attendance-card {
-  position: relative;
-
-  margin-top: 14px;
-  padding: 15px;
-
-  border: 1px solid #bfdbfe;
-  border-radius: 20px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #eff6ff 0%,
-      #ffffff 78%
-    );
-
-  box-shadow:
-    0 8px 20px
-    rgba(37, 99, 235, 0.06);
-}
-
-.tomorrow-attendance-heading {
-  display: flex;
-  align-items: center;
-
-  gap: 10px;
-
-  margin-bottom: 12px;
-}
-
-.tomorrow-calendar-icon {
-  width: 38px;
-  height: 38px;
-
-  min-width: 38px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 11px;
-
-  background: #dbeafe;
-  color: #2563eb;
-
-  font-size: 19px;
-}
-
-.tomorrow-attendance-heading > div:last-child {
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-.tomorrow-attendance-heading span {
-  color: #2563eb;
-
-  font-size: 9px;
-  font-weight: 850;
-
-  letter-spacing: 0.8px;
-}
-
-.tomorrow-attendance-heading strong {
-  color: #475569;
-
-  font-size: 10px;
-  font-weight: 650;
-}
-
-.tomorrow-attendance-row {
-  width: 100%;
-
-  min-height: 58px;
-
-  display: flex;
-  align-items: center;
-
-  gap: 10px;
-
-  padding: 9px 10px;
-
-  border: 1px solid #dbeafe;
-  border-radius: 14px;
-
-  background: #ffffff;
-
-  color: #0f172a;
-
-  text-align: left;
-
-  cursor: pointer;
-
-  box-sizing: border-box;
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
-}
-
-.tomorrow-attendance-row:active {
-  transform: scale(0.985);
-
-  box-shadow:
-    0 3px 10px
-    rgba(37, 99, 235, 0.08);
-}
-
-.tomorrow-status-icon {
-  width: 38px;
-  height: 38px;
-
-  min-width: 38px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  font-size: 19px;
-}
-
-.tomorrow-status-icon.present {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.tomorrow-status-icon.absent {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.tomorrow-status-icon.not-marked {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.tomorrow-attendance-content {
-  min-width: 0;
-  flex: 1;
-
-  display: flex;
-  flex-direction: column;
-
   gap: 3px;
 }
 
-.tomorrow-attendance-content strong {
-  overflow: hidden;
-
-  font-size: 13px;
-  font-weight: 850;
-
-  line-height: 1.25;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.parent-header .menu-button {
+  width: 42px;
+  height: 42px;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --color: #fff;
+  --background: transparent;
+  --background-hover: rgba(255,255,255,.12);
+  --background-activated: rgba(255,255,255,.18);
+  --border-radius: 50%;
 }
 
-.tomorrow-attendance-content span {
-  overflow: hidden;
-
-  color: #64748b;
-
-  font-size: 9px;
-  font-weight: 550;
-
-  line-height: 1.35;
-
-  text-overflow: ellipsis;
+.parent-header .menu-button ion-icon {
+  color: #fff;
+  font-size: 25px;
 }
 
-.tomorrow-attendance-arrow {
-  flex-shrink: 0;
-
-  color: #94a3b8;
-
-  font-size: 18px;
+.parent-header .toolbar-action {
+  width: 42px;
+  height: 42px;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --color: var(--orange-dark);
+  --background: #fff;
+  --background-hover: #fff8e8;
+  --background-activated: #fff1d1;
+  --border-radius: 50%;
+  --box-shadow: 0 3px 9px rgba(113, 69, 0, .16);
 }
 
-.tomorrow-attendance-hint {
-  display: flex;
-  align-items: center;
-
-  gap: 5px;
-
-  margin-top: 8px;
-  padding-left: 2px;
-
-  color: #94a3b8;
-
-  font-size: 9px;
-  font-weight: 600;
+.parent-header .toolbar-action::part(native) {
+  border-radius: 50%;
 }
 
-.tomorrow-attendance-hint ion-icon {
-  color: #2563eb;
-
-  font-size: 12px;
+.parent-header .toolbar-action ion-icon {
+  color: var(--orange-dark);
+  font-size: 22px;
 }
 
+/* Keep the menu trigger visible even when Ionic auto-hide styles are applied. */
+.parent-header .menu-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
-/* =====================================================
-   PREPARE FOR NEXT DAY
-===================================================== */
+.menu-toolbar {
+  --background: var(--text);
+  --color: #fff;
+  --border-width: 0;
+}
+ion-menu { --width: 285px; }
+ion-menu ion-list { padding: 12px; }
+ion-menu ion-item {
+  --padding-start: 14px;
+  --inner-padding-end: 12px;
+  --min-height: 50px;
+  --border-radius: 14px;
+  margin: 4px 0;
+  font-weight: 650;
+}
+ion-menu ion-item ion-icon { font-size: 21px; color: var(--blue); }
 
-.prepare-next-day-button {
-  width: 100%;
-  min-height: 53px;
+#parent-dashboard-content { --background: var(--page); }
+.dashboard-page {
+  width: min(100%, 940px);
+  margin: 0 auto;
+  padding: 0 14px 32px;
+  box-sizing: border-box;
+}
 
-  margin-top: 14px;
-  padding: 0 16px;
-
+.dashboard-loading {
+  min-height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+.dashboard-loading ion-spinner { width: 18px; height: 18px; }
 
-  gap: 9px;
+/* ========================= WELCOME ========================= */
+.welcome-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 -14px;
+  padding: 25px 20px 76px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffe37e 0%, #fff0af 52%, #fff8df 100%);
+}
+.welcome-section::after {
+  content: '';
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  right: -80px;
+  bottom: -110px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.42);
+}
+.welcome-copy { position: relative; z-index: 1; min-width: 0; }
+.welcome-eyebrow {
+  display: block;
+  color: #765e16;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .8px;
+}
+.welcome-copy h1 {
+  margin: 5px 0 5px;
+  color: #171717;
+  font-size: 27px;
+  line-height: 1.05;
+  font-weight: 900;
+}
+.welcome-copy p { margin: 0; color: #51491f; font-size: 13px; }
+.student-avatar {
+  position: relative;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  display: grid;
+  place-items: center;
+  border: 4px solid rgba(255,255,255,.82);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 5px 16px rgba(85,69,0,.13);
+}
 
-  border: none;
-  border-radius: 15px;
+/* ========================= RIDE CARD ========================= */
+.ride-card {
+  position: relative;
+  z-index: 2;
+  margin-top: -52px;
+  overflow: hidden;
+  border: 1px solid #e7ebef;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(23,32,51,.10);
+}
+.ride-card-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 20px;
+}
+.ride-icon-wrap {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e3f7e9;
+  color: var(--green);
+  font-size: 26px;
+}
+.ride-card-copy { min-width: 0; padding-right: 36px; }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #fff4d6;
+  color: #9a6800;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .55px;
+}
+.status-pill.active { background: #dcf7e7; color: #087443; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: #c99718; }
+.status-pill.active .status-dot { background: var(--green); }
+.ride-card-copy h2 { margin: 8px 0 4px; color: var(--text); font-size: 18px; line-height: 1.18; font-weight: 900; }
+.ride-card-copy p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.live-badge {
+  position: absolute;
+  top: 19px;
+  right: 18px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #e74b4b;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 900;
+}
+.ride-meta { padding: 0 20px 12px; color: #56647a; font-size: 10px; font-weight: 750; }
+/* ========================= LIVE ROUTE MILESTONES ========================= */
+.route-progress {
+  display: grid;
+  grid-template-columns: 1fr 44px 1fr 44px 1fr;
+  align-items: start;
+  gap: 5px;
+  padding: 14px 20px 15px;
+  border-top: 1px solid var(--border);
+}
 
-  background:
-    linear-gradient(
-      135deg,
-      #0f172a,
-      #172554
-    );
+.progress-step {
+  position: relative;
+  min-width: 0;
+  text-align: center;
+  transition: transform .18s ease;
+}
 
-  color: #ffffff;
-
-  box-shadow:
-    0 8px 20px
-    rgba(15, 23, 42, 0.18);
-
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 750;
-
-  cursor: pointer;
-
+.progress-marker {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 6px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #dce2ea;
+  border-radius: 50%;
+  background: #f1f4f8;
+  color: #8995a6;
+  font-size: 15px;
   transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+    background .18s ease,
+    border-color .18s ease,
+    color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
 }
 
-.prepare-next-day-button > ion-icon:first-child {
-  font-size: 18px;
+/* Completed milestone: green + check. */
+.progress-step.completed .progress-marker {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(22,131,63,.10);
 }
 
-.prepare-next-day-arrow {
-  margin-left: auto;
+/* Current milestone: blue + pulse so the parent notices it. */
+.progress-step.active .progress-marker {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 0 5px rgba(65,97,209,.12);
+  animation: route-marker-pulse 1.8s ease-in-out infinite;
+}
 
+/* Waiting milestone: intentionally muted. */
+.progress-step.waiting .progress-marker {
+  background: #f3f5f8;
+  border-color: #dfe4eb;
+  color: #8d99aa;
+}
+
+/* Small confirmation badge on completed milestones. */
+.marker-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-size: 7px;
+  line-height: 1;
+}
+
+.marker-badge ion-icon {
+  font-size: 8px;
+}
+
+.progress-step strong,
+.progress-step span {
+  display: block;
+}
+
+.progress-step strong {
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.progress-step span {
+  min-height: 18px;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+.progress-step.active strong {
+  color: var(--blue);
+}
+
+.progress-step.completed strong {
+  color: var(--green);
+}
+
+.progress-line {
+  height: 3px;
+  margin-top: 16px;
+  border-radius: 99px;
+  background: #d8dee8;
+  transition: background .2s ease;
+}
+
+.progress-line.completed {
+  background: #6bc594;
+}
+
+/* Human-readable notification tied to the milestone state. */
+.route-notification {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 20px 14px;
+  padding: 9px 11px;
+  border: 1px solid #e7ebf1;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.route-notification-icon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #edf1f6;
+  color: #7b8798;
+  font-size: 15px;
+}
+
+.route-notification-copy {
+  min-width: 0;
+}
+
+.route-notification-copy strong,
+.route-notification-copy span {
+  display: block;
+}
+
+.route-notification-copy strong {
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.route-notification-copy span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.route-notification.active {
+  border-color: #cbd6ff;
+  background: #f5f7ff;
+}
+
+.route-notification.active .route-notification-icon {
+  background: #e5ebff;
+  color: var(--blue);
+}
+
+.route-notification.completed {
+  border-color: #bfe7cf;
+  background: #f3fbf6;
+}
+
+.route-notification.completed .route-notification-icon {
+  background: #def5e7;
+  color: var(--green);
+}
+
+.route-notification.waiting {
+  border-color: #eadfbd;
+  background: #fffaf0;
+}
+
+.route-notification.waiting .route-notification-icon {
+  background: #fff0cc;
+  color: #a16c00;
+}
+
+@keyframes route-marker-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(65,97,209,.10);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(65,97,209,.04);
+  }
+}
+.ride-actions { padding: 0 20px 17px; }
+.primary-action {
+  width: 100%;
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 850;
+}
+.primary-action:disabled { opacity: .5; }
+
+/* ========================= QUICK ACTIONS ========================= */
+.quick-section { margin-top: 18px; }
+.section-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 11px; }
+.section-eyebrow { display: block; color: #8a96a8; font-size: 9px; font-weight: 900; letter-spacing: .8px; }
+.section-title-row h2 { margin: 3px 0 0; color: var(--text); font-size: 20px; font-weight: 900; }
+.quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.quick-card {
+  min-width: 0;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: #fff;
+  color: var(--text);
+  text-decoration: none;
+  text-align: left;
+  box-shadow: 0 4px 15px rgba(23,32,51,.035);
+}
+.quick-card:disabled { opacity: .5; }
+.quick-icon { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; border-radius: 12px; font-size: 18px; }
+.quick-copy { min-width: 0; }
+.quick-copy strong, .quick-copy small { display: block; }
+.quick-copy strong { font-size: 12px; font-weight: 850; }
+.quick-copy small { margin-top: 3px; color: var(--muted); font-size: 9px; }
+.quick-card.attendance .quick-icon { color: #d77a00; background: #fff1d7; }
+.quick-card.tracking .quick-icon { color: var(--blue); background: #e9f1ff; }
+.quick-card.report .quick-icon { color: var(--purple); background: #eeeaff; }
+.quick-card.driver .quick-icon { color: #138957; background: #e2f8ed; }
+.quick-card.profile .quick-icon { color: #a35b00; background: #fff1d7; }
+
+/* ========================= TOMORROW ATTENDANCE ========================= */
+.tomorrow-attendance-card {
+  margin-top: 14px;
+  padding: 17px;
+  border: 1px solid #ded5fa;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fbfaff 0%, #ffffff 100%);
+  box-shadow: var(--shadow);
+}
+
+.tomorrow-attendance-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tomorrow-attendance-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #eeeaff;
+  color: var(--purple);
+  font-size: 21px;
+}
+
+.tomorrow-attendance-heading {
+  min-width: 0;
+  flex: 1;
+}
+
+.tomorrow-attendance-heading h2 {
+  margin: 3px 0 2px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.tomorrow-attendance-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.tomorrow-current-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin-top: 13px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #f0f2f6;
+  color: #66748a;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.tomorrow-current-status ion-icon {
+  font-size: 14px;
+}
+
+.tomorrow-current-status.present-state {
+  background: #e2f8ec;
+  color: var(--green);
+}
+
+.tomorrow-current-status.absent-state {
+  background: #ffe7e7;
+  color: var(--red);
+}
+
+.tomorrow-attendance-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.tomorrow-choice {
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 850;
+  transition: .18s ease;
+}
+
+.tomorrow-choice ion-icon {
   font-size: 17px;
-
-  opacity: 0.75;
 }
 
-.prepare-next-day-button:active {
-  transform: scale(0.985);
-
-  box-shadow:
-    0 4px 12px
-    rgba(15, 23, 42, 0.14);
+.present-choice {
+  border: 1px solid #b9e9ce;
+  color: var(--green);
 }
 
-
-/* =====================================================
-   SMALL SCREEN SUPPORT
-===================================================== */
-
-@media (max-width: 370px) {
-
-  .completed-journey-card {
-    padding: 17px 13px 13px;
-    border-radius: 20px;
-  }
-
-  .completed-check-icon {
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
-
-    font-size: 23px;
-  }
-
-  .completed-journey-heading h2 {
-    font-size: 15px;
-  }
-
-  .completed-journey-heading p {
-    font-size: 10px;
-  }
-
-  .journey-timeline-icon {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-
-    font-size: 14px;
-  }
-
-  .journey-timeline::before {
-    left: 16px;
-  }
-
-  .journey-timeline-item time {
-    font-size: 10px;
-  }
-
-  .journey-timeline-content strong {
-    font-size: 11px;
-  }
-
-  .tomorrow-attendance-card {
-    padding: 13px;
-  }
-
-  .tomorrow-attendance-content strong {
-    font-size: 12px;
-  }
-
-  .tomorrow-attendance-content span {
-    font-size: 8px;
-  }
-
+.present-choice.selected {
+  background: #e2f8ec;
+  border-color: #8dd6ad;
 }
 
+.absent-choice {
+  border: 1px solid #f0c2c2;
+  color: var(--red);
+}
 
-/* =====================================================
-   REDUCED MOTION
-===================================================== */
+.absent-choice.selected {
+  background: #ffe7e7;
+  border-color: #e49a9a;
+}
+
+.tomorrow-choice:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.tomorrow-saving {
+  margin-top: 9px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* ========================= PROFILE POPUP ========================= */
+.student-popup-overlay { position: fixed; z-index: 9999; inset: 0; display: flex; align-items: flex-end; justify-content: center; background: rgba(8,19,39,.58); backdrop-filter: blur(3px); }
+.student-popup-card { width: min(100%,520px); max-height: 90vh; overflow: auto; border-radius: 25px 25px 0 0; background: #fff; box-shadow: 0 -12px 45px rgba(0,0,0,.18); }
+.student-popup-header { position: relative; padding: 23px 20px 18px; text-align: center; background: linear-gradient(135deg,#ffcf4a,#ffad18); color: #2a210b; }
+.popup-close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(255,255,255,.35); color: #3d300d; font-size: 19px; }
+.popup-avatar { width: 60px; height: 60px; display: grid; place-items: center; margin: 3px auto 9px; border-radius: 50%; background: #fff; color: var(--blue); font-size: 24px; font-weight: 900; }
+.student-popup-header h2 { margin: 0; font-size: 21px; font-weight: 900; }
+.student-popup-header p { margin: 5px 0 0; color: #665820; font-size: 11px; }
+.student-popup-body { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; padding: 16px; }
+.popup-detail-card { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 15px; background: #fafcff; }
+.popup-full-width { grid-column: 1/-1; }
+.popup-detail-icon { width: 36px; height: 36px; flex: 0 0 36px; display: grid; place-items: center; border-radius: 11px; color: var(--blue); background: #eaf2ff; }
+.popup-detail-icon.school { color: var(--purple); background: #eeeaff; }
+.popup-detail-icon.pickup { color: var(--orange-dark); background: #fff0da; }
+.popup-detail-icon.drop { color: var(--green); background: #e2f8ed; }
+.popup-detail-icon.driver { color: var(--blue); background: #eaf2ff; }
+.popup-detail-icon.phone { color: #a95d00; background: #fff1d7; }
+.popup-detail-icon.ride-active { color: #07874c; background: #dcfae9; }
+.popup-detail-icon.ride-ended { color: #69778b; background: #edf1f6; }
+.popup-detail-card > div:last-child { min-width: 0; }
+.popup-detail-card span, .popup-detail-card strong, .popup-detail-card small { display: block; }
+.popup-detail-card span { color: var(--muted); font-size: 9px; font-weight: 750; text-transform: uppercase; letter-spacing: .5px; }
+.popup-detail-card strong { margin-top: 3px; overflow: hidden; color: var(--text); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.popup-detail-card small { margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.35; }
+.popup-close-button { grid-column: 1/-1; --background: var(--orange); --color: #fff; --border-radius: 13px; height: 44px; margin: 4px 0 0; font-weight: 800; text-transform: none; }
+
+button, a, ion-button, ion-item { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible { outline: 3px solid rgba(65,97,209,.28); outline-offset: 2px; }
+
+@media (max-width: 700px) {
+  .dashboard-page { padding-left: 10px; padding-right: 10px; }
+  .welcome-section { margin-left: -10px; margin-right: -10px; padding-left: 16px; padding-right: 16px; }
+  .ride-card { margin-top: -48px; }
+}
+
+@media (max-width: 520px) {
+  ion-title { font-size: 16px; }
+  .welcome-section { padding-top: 21px; padding-bottom: 70px; }
+  .welcome-copy h1 { font-size: 24px; }
+  .ride-card-header { padding: 17px; }
+  .ride-icon-wrap { width: 48px; height: 48px; flex-basis: 48px; font-size: 22px; }
+  .route-progress { grid-template-columns: 1fr 22px 1fr 22px 1fr; padding-left: 14px; padding-right: 14px; }
+  .progress-step strong { font-size: 9px; }
+  .progress-step span { font-size: 7px; }
+  .quick-grid { grid-template-columns: 1fr 1fr; }
+  .quick-card { min-height: 70px; padding: 10px; }
+  .quick-icon { width: 34px; height: 34px; flex-basis: 34px; font-size: 16px; }
+  .quick-copy strong { font-size: 10px; }
+  .quick-copy small { font-size: 8px; }
+  .student-popup-body { grid-template-columns: 1fr; }
+  .popup-full-width { grid-column: auto; }
+  .popup-close-button { grid-column: auto; }
+}
+
+@media (max-width: 390px) {
+  .dashboard-page { padding-left: 8px; padding-right: 8px; }
+  .welcome-section { margin-left: -8px; margin-right: -8px; }
+  .welcome-copy h1 { font-size: 22px; }
+  .student-avatar { width: 50px; height: 50px; flex-basis: 50px; }
+  .ride-card { margin-top: -44px; }
+  .route-progress { padding-left: 10px; padding-right: 10px; }
+  .progress-marker { width: 29px; height: 29px; font-size: 13px; }
+  .marker-badge { width: 12px; height: 12px; font-size: 6px; }
+  .progress-line { margin-top: 13px; }
+  .route-notification { margin-left: 14px; margin-right: 14px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
 
-  .tomorrow-attendance-row,
-  .prepare-next-day-button {
-    transition: none;
-  }
 
+/* =========================================================
+   PARENT MENU TRIGGER - EXPLICIT / RELIABLE
+   ========================================================= */
+
+.parent-header .menu-button {
+  position: relative;
+  z-index: 20;
+  display: inline-flex !important;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  --color: #ffffff;
+  --background: transparent;
+  --background-hover: rgba(255,255,255,.12);
+  --background-activated: rgba(255,255,255,.20);
+  --border-radius: 50%;
+}
+
+.parent-header .menu-button::part(native) {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.parent-header .menu-button ion-icon {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+  font-size: 27px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.parent-header ion-buttons[slot="start"] {
+  min-width: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   FINAL PARENT MENU FIX
+   ========================================================= */
+
+ion-menu {
+  --width: 285px;
+  z-index: 10000;
+}
+
+ion-menu::part(container) {
+  box-shadow: 8px 0 30px rgba(23, 32, 51, .18);
+}
+
+ion-menu::part(backdrop) {
+  background: rgba(10, 20, 35, .42);
+}
+
+.parent-header .menu-button {
+  position: relative;
+  z-index: 10001;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+}
+
+.parent-header .menu-button::part(native) {
+  min-width: 48px;
+  min-height: 48px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+}
+
+.parent-header .menu-button ion-icon {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  color: #fff !important;
+  font-size: 27px !important;
 }

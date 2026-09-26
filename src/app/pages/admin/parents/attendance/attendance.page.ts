@@ -521,74 +521,50 @@ export class AttendancePage implements OnInit {
 
   saveAttendance(): void {
 
-    const records =
-      this.attendanceDays
+    const records: {
+  date: string;
+  status: 'present' | 'absent';
+}[] = this.attendanceDays
 
-        .filter(
-          day =>
-            !day.isSunday &&
-            day.status !== 'not_marked'
-        )
+  .filter(day =>
+    !day.isSunday &&
+    (
+      day.status === 'present' ||
+      day.status === 'absent'
+    )
+  )
 
-        .map(
-          day => ({
-
-            date: day.date,
-
-            status: day.status
-
-          })
-        );
-
-
-    this.saving = true;
-
-
-    const payload = {
-
-      parentId: this.parentId,
-
-      year: this.selectedYear,
-
-      month: this.selectedMonth + 1,
-
-      records
-
-    };
+  .map(day => ({
+    date: day.date,
+    status:
+      day.status === 'absent'
+        ? 'absent'
+        : 'present'
+  }));
 
 
-    this.parentService
-      .saveMonthlyAttendance(payload)
-      .subscribe({
+this.parentService
+  .saveMonthlyAttendance({
 
-        next: async () => {
+    parentId: this.parentId,
 
-          this.saving = false;
+    records
 
-          await this.showToast(
-            'Attendance saved successfully',
-            'success'
-          );
+  })
+  .subscribe({
+    next: () => {
+      this.saving = false;
+    },
 
-        },
+    error: (error) => {
+      this.saving = false;
 
-        error: (err) => {
-
-          console.error(
-            'Save attendance failed:',
-            err
-          );
-
-          this.saving = false;
-
-          this.showToast(
-            'Failed to save attendance',
-            'danger'
-          );
-
-        }
-
-      });
+      console.error(
+        'SAVE ATTENDANCE ERROR:',
+        error
+      );
+    }
+  });
 
   }
 
