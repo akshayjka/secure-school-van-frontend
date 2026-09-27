@@ -1,481 +1,508 @@
-<ion-header>
+<ion-header> 
 
-  <ion-toolbar color="warning">
+  <ion-toolbar color="warning"> 
 
-    <ion-buttons slot="start">
+    <ion-buttons slot="start"> 
 
-      <ion-button
-        type="button"
-        (click)="goBack()">
+      <ion-button 
+        type="button" 
+        (click)="goBack()"> 
 
-        <ion-icon
-          slot="icon-only"
-          name="arrow-back-outline">
-        </ion-icon>
+        <ion-icon 
+          slot="icon-only" 
+          name="arrow-back-outline"> 
+        </ion-icon> 
 
-      </ion-button>
+      </ion-button> 
 
-    </ion-buttons>
+    </ion-buttons> 
 
-    <ion-title>
-      Attendance
-    </ion-title>
+    <ion-title> 
+      Attendance 
+    </ion-title> 
 
-  </ion-toolbar>
+  </ion-toolbar> 
 
-</ion-header>
+</ion-header> 
 
 
-<ion-content>
+<ion-content> 
 
-  <main class="attendance-container">
+  <main class="attendance-container"> 
 
 
-    <!-- =====================================================
-         STUDENT HEADER
-    ====================================================== -->
+    <!-- ===================================================== 
+         STUDENT HEADER 
+    ====================================================== --> 
 
-    <section class="student-card">
+    <section class="student-card"> 
 
-      <div class="student-info">
+      <div class="student-info"> 
 
-        <div class="student-avatar">
+        <div class="student-avatar"> 
 
-          {{
-            parent?.studentName
-              ?.charAt(0)
-              ?.toUpperCase()
-          }}
+          {{ 
+            parent?.studentName 
+              ?.charAt(0) 
+              ?.toUpperCase() 
+          }} 
 
-        </div>
+        </div> 
 
 
-        <div class="student-details">
+        <div class="student-details"> 
 
-          <h1>
-            {{ parent?.studentName }}
-          </h1>
+          <h1> 
+            {{ parent?.studentName }} 
+          </h1> 
 
-          <p>
-            {{ parent?.schoolName }}
-          </p>
+          <p> 
+            {{ parent?.schoolName }} 
+          </p> 
 
-          <span>
-            Parent ID: {{ parent?.parentId }}
-          </span>
+          <span> 
+            Parent ID: {{ parent?.parentId }} 
+          </span> 
 
-        </div>
+        </div> 
 
 
-        <div class="sync-badge">
+        <div class="sync-badge"> 
 
-          <ion-icon
-            name="checkmark-circle">
-          </ion-icon>
+          <ion-icon 
+            name="checkmark-circle"> 
+          </ion-icon> 
 
-          <span>
-            Live Sync
-          </span>
+          <span> 
+            Live Sync 
+          </span> 
 
-        </div>
+        </div> 
 
-      </div>
+      </div> 
 
-    </section>
+    </section> 
 
 
-    <!-- =====================================================
-         MONTH NAVIGATION
-    ====================================================== -->
+    <!-- ===================================================== 
+         MONTH NAVIGATION 
+    ====================================================== --> 
 
-    <section class="month-section">
+    <section class="month-section"> 
 
-      <ion-button
-        fill="clear"
-        class="month-nav-button"
-        (click)="previousMonth()">
+      <ion-button 
+        fill="clear" 
+        class="month-nav-button" 
+        (click)="previousMonth()"> 
 
-        <ion-icon
-          slot="icon-only"
-          name="chevron-back-outline">
-        </ion-icon>
+        <ion-icon 
+          slot="icon-only" 
+          name="chevron-back-outline"> 
+        </ion-icon> 
 
-      </ion-button>
+      </ion-button> 
 
 
-      <div class="month-title">
+      <div class="month-title"> 
 
-        <div class="month-icon">
+        <div class="month-icon"> 
 
-          <ion-icon
-            name="calendar-outline">
-          </ion-icon>
+          <ion-icon 
+            name="calendar-outline"> 
+          </ion-icon> 
 
-        </div>
+        </div> 
 
-        <div>
+        <div> 
 
-          <span>
-            ATTENDANCE MONTH
-          </span>
+          <span> 
+            ATTENDANCE MONTH 
+          </span> 
 
-          <strong>
-            {{ monthName }}
-          </strong>
+          <strong> 
+            {{ monthName }} 
+          </strong> 
 
-        </div>
+        </div> 
 
-      </div>
+      </div> 
 
 
-      <ion-button
-        fill="clear"
-        class="month-nav-button"
-        (click)="nextMonth()">
+      <ion-button 
+        fill="clear" 
+        class="month-nav-button" 
+        (click)="nextMonth()"> 
 
-        <ion-icon
-          slot="icon-only"
-          name="chevron-forward-outline">
-        </ion-icon>
+        <ion-icon 
+          slot="icon-only" 
+          name="chevron-forward-outline"> 
+        </ion-icon> 
 
-      </ion-button>
+      </ion-button> 
 
-    </section>
+    </section> 
 
 
-    <!-- =====================================================
-         BULK ACTIONS
-    ====================================================== -->
+    <!-- ===================================================== 
+         BULK ACTIONS 
+    ====================================================== --> 
 
-    <section class="bulk-actions">
+    <section class="bulk-actions"> 
 
-      <ion-button
-        color="success"
-        (click)="markAllPresent()">
+      <ion-button 
+        color="success" 
+        [disabled]="saving || !hasEditableDays"
+        (click)="markAllPresent()"> 
 
-        <ion-icon
-          slot="start"
-          name="checkmark-circle">
-        </ion-icon>
+        <ion-icon 
+          slot="start" 
+          name="checkmark-circle"> 
+        </ion-icon> 
 
-        Mark All Present
+        Mark All Present 
 
-      </ion-button>
+      </ion-button> 
 
 
-      <ion-button
-        fill="outline"
-        color="medium"
-        (click)="resetMonth()">
+      <ion-button 
+        fill="outline" 
+        color="medium" 
+        [disabled]="saving || !hasEditableDays"
+        (click)="resetMonth()"> 
 
-        <ion-icon
-          slot="start"
-          name="refresh-outline">
-        </ion-icon>
+        <ion-icon 
+          slot="start" 
+          name="refresh-outline"> 
+        </ion-icon> 
 
-        Reset Month
+        Reset Month 
 
-      </ion-button>
+      </ion-button> 
 
-    </section>
+    </section> 
 
 
-    <!-- =====================================================
-         LEGEND
-    ====================================================== -->
+    <!-- ===================================================== 
+         LEGEND 
+    ====================================================== --> 
 
-    <section class="legend">
+    <section class="legend"> 
 
-      <div>
+      <div> 
 
-        <span
-          class="legend-dot present">
-        </span>
+        <span 
+          class="legend-dot present"> 
+        </span> 
 
-        <span>
-          Present
-        </span>
+        <span> 
+          Present 
+        </span> 
 
-      </div>
+      </div> 
 
 
-      <div>
+      <div> 
 
-        <span
-          class="legend-dot absent">
-        </span>
+        <span 
+          class="legend-dot absent"> 
+        </span> 
 
-        <span>
-          Absent
-        </span>
+        <span> 
+          Absent 
+        </span> 
 
-      </div>
+      </div> 
 
+      <div> 
 
-      <div>
+        <span 
+          class="legend-dot sunday"> 
+        </span> 
 
-        <span
-          class="legend-dot sunday">
-        </span>
+        <span> 
+          Sunday 
+        </span> 
 
-        <span>
-          Sunday
-        </span>
+      </div> 
 
-      </div>
+      <div> 
 
-    </section>
+        <span 
+          class="legend-dot past"> 
+        </span> 
 
+        <span> 
+          Previous 
+        </span> 
 
-    <!-- =====================================================
-         CALENDAR
-    ====================================================== -->
+      </div> 
 
-    <section class="calendar-card">
+    </section> 
 
-      <div class="calendar-card-header">
 
-        <div>
+    <!-- ===================================================== 
+         CALENDAR 
+    ====================================================== --> 
 
-          <span>
-            MONTHLY CALENDAR
-          </span>
+    <section class="calendar-card"> 
 
-          <strong>
-            Tap a date to change attendance
-          </strong>
+      <div class="calendar-card-header"> 
 
-        </div>
+        <div> 
 
-        <ion-icon
-          name="calendar-outline">
-        </ion-icon>
+          <span> 
+            MONTHLY CALENDAR 
+          </span> 
 
-      </div>
+          <strong> 
+            Tap a date to change attendance 
+          </strong> 
 
+        </div> 
 
-      <div class="calendar-grid">
+        <ion-icon 
+          name="calendar-outline"> 
+        </ion-icon> 
 
-        <!-- WEEK DAYS -->
+      </div> 
 
-        <div
-          class="weekday"
-          *ngFor="let day of weekDays">
 
-          {{ day }}
+      <div class="calendar-grid"> 
 
-        </div>
+        <!-- WEEK DAYS --> 
 
+        <div 
+          class="weekday" 
+          *ngFor="let day of weekDays"> 
 
-        <!-- EMPTY DAYS -->
+          {{ day }} 
 
-        <div
-          class="calendar-day empty"
-          *ngFor="
-            let empty of calendarLeadingDays
-          ">
-        </div>
+        </div> 
 
 
-        <!-- ACTUAL DAYS -->
+        <!-- EMPTY DAYS --> 
 
-        <button
-          type="button"
-          class="calendar-day"
+        <div 
+          class="calendar-day empty" 
+          *ngFor=" 
+            let empty of calendarLeadingDays 
+          "> 
+        </div> 
 
-          *ngFor="
-            let day of attendanceDays
-          "
 
-          [class.present]="
-            !day.isSunday &&
-            day.status === 'present'
-          "
+        <!-- ACTUAL DAYS --> 
 
-          [class.absent]="
-            !day.isSunday &&
-            day.status === 'absent'
-          "
+        <button 
+          type="button" 
+          class="calendar-day" 
 
-          [class.sunday]="
+          *ngFor=" 
+            let day of attendanceDays 
+          " 
+
+          [class.present]=" 
+            !day.isSunday && 
+            day.status === 'present' 
+          " 
+
+          [class.absent]=" 
+            !day.isSunday && 
+            day.status === 'absent' 
+          " 
+
+          [class.sunday]=" 
+            day.isSunday 
+          " 
+
+          [class.past]=" 
+            day.isPast && 
+            !day.isSunday 
+          " 
+
+          [disabled]=" 
+            day.isSunday || 
+            day.isPast 
+          " 
+
+          [attr.aria-label]="
             day.isSunday
+              ? day.day + ' Sunday'
+              : day.isPast
+                ? day.day + ' Previous date, attendance locked'
+                : day.day + ' Attendance ' + day.status
           "
 
-          [disabled]="
-            day.isSunday
-          "
-
-          (click)="
-            toggleAttendance(day)
-          ">
+          (click)=" 
+            toggleAttendance(day) 
+          "> 
 
 
-          <span class="date-number">
-            {{ day.day }}
-          </span>
+          <span class="date-number"> 
+            {{ day.day }} 
+          </span> 
 
 
-          <!-- PRESENT -->
+          <!-- PRESENT --> 
 
-          <span
-            class="status-badge present-badge"
-            *ngIf="
-              !day.isSunday &&
-              day.status === 'present'
-            ">
+          <span 
+            class="status-badge present-badge" 
+            *ngIf=" 
+              !day.isSunday && 
+              day.status === 'present' 
+            "> 
 
-            P
+            P 
 
-          </span>
-
-
-          <!-- ABSENT -->
-
-          <span
-            class="status-badge absent-badge"
-            *ngIf="
-              !day.isSunday &&
-              day.status === 'absent'
-            ">
-
-            A
-
-          </span>
+          </span> 
 
 
-          <!-- SUNDAY -->
+          <!-- ABSENT --> 
 
-          <span
-            class="status-badge sunday-badge"
-            *ngIf="
-              day.isSunday
-            ">
+          <span 
+            class="status-badge absent-badge" 
+            *ngIf=" 
+              !day.isSunday && 
+              day.status === 'absent' 
+            "> 
 
-            —
+            A 
 
-          </span>
-
-        </button>
-
-      </div>
-
-    </section>
+          </span> 
 
 
-    <!-- =====================================================
-         SAVE REMINDER
-    ====================================================== -->
+          <!-- SUNDAY --> 
 
-    <section class="info-box attendance-save-reminder">
+          <span 
+            class="status-badge sunday-badge" 
+            *ngIf=" 
+              day.isSunday 
+            "> 
 
-      <ion-icon
-        name="save-outline">
-      </ion-icon>
+            — 
 
-      <div>
+          </span> 
 
-        <strong>
-          Review before saving
-        </strong>
+        </button> 
 
-        <p>
-          Changes are sent only after you select
-          Save Attendance.
-        </p>
+      </div> 
 
-      </div>
-
-    </section>
+    </section> 
 
 
-    <!-- =====================================================
-         SUMMARY
-    ====================================================== -->
+    <!-- ===================================================== 
+         SAVE REMINDER 
+    ====================================================== --> 
 
-    <section class="summary-grid">
+    <section class="info-box attendance-save-reminder"> 
 
-      <div class="summary-card">
+      <ion-icon 
+        name="save-outline"> 
+      </ion-icon> 
 
-        <span class="summary-label">
-          Working Days
-        </span>
+      <div> 
 
-        <strong>
-          {{ workingDays }}
-        </strong>
+        <strong> 
+          Review before saving 
+        </strong> 
 
-      </div>
+        <p> 
+          Changes are sent only after you select 
+          Save Attendance. 
+        </p> 
 
+      </div> 
 
-      <div
-        class="summary-card present-summary">
-
-        <span class="summary-label">
-          Present
-        </span>
-
-        <strong>
-          {{ presentCount }}
-        </strong>
-
-      </div>
+    </section> 
 
 
-      <div
-        class="summary-card absent-summary">
+    <!-- ===================================================== 
+         SUMMARY 
+    ====================================================== --> 
 
-        <span class="summary-label">
-          Absent
-        </span>
+    <section class="summary-grid"> 
 
-        <strong>
-          {{ absentCount }}
-        </strong>
+      <div class="summary-card"> 
 
-      </div>
+        <span class="summary-label"> 
+          Working Days 
+        </span> 
 
+        <strong> 
+          {{ workingDays }} 
+        </strong> 
 
-      <div class="summary-card">
-
-        <span class="summary-label">
-          Not Marked
-        </span>
-
-        <strong>
-          {{ unmarkedCount }}
-        </strong>
-
-      </div>
-
-    </section>
+      </div> 
 
 
-    <!-- =====================================================
-         SAVE
-    ====================================================== -->
+      <div 
+        class="summary-card present-summary"> 
 
-    <ion-button
-      expand="block"
-      color="success"
-      class="save-button"
+        <span class="summary-label"> 
+          Present 
+        </span> 
 
-      [disabled]="saving"
+        <strong> 
+          {{ presentCount }} 
+        </strong> 
 
-      (click)="saveAttendance()">
+      </div> 
 
-      <ion-icon
-        slot="start"
-        name="save-outline">
-      </ion-icon>
 
-      {{
-        saving
-          ? 'Saving...'
-          : 'Save Attendance'
-      }}
+      <div 
+        class="summary-card absent-summary"> 
 
-    </ion-button>
+        <span class="summary-label"> 
+          Absent 
+        </span> 
 
-  </main>
+        <strong> 
+          {{ absentCount }} 
+        </strong> 
 
-</ion-content>
+      </div> 
+
+
+      <div class="summary-card"> 
+
+        <span class="summary-label"> 
+          Not Marked 
+        </span> 
+
+        <strong> 
+          {{ unmarkedCount }} 
+        </strong> 
+
+      </div> 
+
+    </section> 
+
+
+    <!-- ===================================================== 
+         SAVE 
+    ====================================================== --> 
+
+    <ion-button 
+      expand="block" 
+      color="success" 
+      class="save-button" 
+
+      [disabled]="saving" 
+
+      (click)="saveAttendance()"> 
+
+      <ion-icon 
+        slot="start" 
+        name="save-outline"> 
+      </ion-icon> 
+
+      {{ 
+        saving 
+          ? 'Saving...' 
+          : 'Save Attendance' 
+      }} 
+
+    </ion-button> 
+
+  </main> 
+
+</ion-content> 

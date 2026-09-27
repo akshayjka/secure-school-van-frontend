@@ -63,6 +63,12 @@ interface AttendanceDay {
 
   isSunday: boolean;
 
+  /*
+   * Dates before TODAY are read-only.
+   * Today and all upcoming dates remain editable.
+   */
+  isPast: boolean;
+
   status:
     | 'present'
     | 'absent'
@@ -286,9 +292,6 @@ export class AttendancePage
 
     this.listenForAttendanceUpdates();
 
-
-    this.loadAttendance();
-
   }
 
 
@@ -356,26 +359,52 @@ export class AttendancePage
 
 
   /* ==========================================================
+     VIEW ENTER
+  ========================================================== */
+
+  /**
+   * Ionic keeps the dashboard page alive in the navigation stack.
+   * Therefore attendance must re-read the backend every time this
+   * page becomes visible instead of relying on ngOnInit only.
+   */
+  ionViewWillEnter(): void {
+
+    if (!this.parentId) {
+      this.parentId =
+        this.route.snapshot.paramMap
+          .get('parentId') || '';
+    }
+
+    if (!this.parentId) {
+      return;
+    }
+
+    this.loadAttendance();
+
+  }
+
+
+  /* ==========================================================
      LOAD ATTENDANCE
   ========================================================== */
 
   loadAttendance(): void {
 
-    this.loading = true;
+    if (this.saving) {
+      return;
+    }
 
+    this.loading = true;
 
     this.monthName =
       this.getMonthName(
         this.selectedMonth
       );
 
-
     this.parentService
-
       .getParentById(
         this.parentId
       )
-
       .subscribe({
 
         next: (res: any) => {
@@ -383,10 +412,13 @@ export class AttendancePage
           this.parent =
             res?.data || res;
 
-
           this.buildCalendar();
 
-
+          /*
+           * First load the selected month's historical records.
+           * Then load tomorrow's value from the dashboard API.
+           * The dashboard value is authoritative for tomorrow.
+           */
           this.loadSavedAttendance();
 
         },
@@ -398,9 +430,7 @@ export class AttendancePage
             error
           );
 
-
           this.loading = false;
-
 
           this.showToast(
             'Failed to load attendance',
@@ -468,6 +498,18 @@ export class AttendancePage
     const totalDays =
       lastDate.getDate();
 
+    /*
+     * IMPORTANT:
+     * Use the application's calendar date in IST so that
+     * "past" does not change unexpectedly because of UTC
+     * conversion or a device timezone difference.
+     *
+     * Today itself is NOT past.
+     * Only dates strictly before today are read-only.
+     */
+    const todayCalendarDate =
+      this.getTodayCalendarDate();
+
 
     for (
       let day = 1;
@@ -487,16 +529,25 @@ export class AttendancePage
         );
 
 
+      const calendarDate =
+        this.formatDate(
+          currentDate
+        );
+
+
       const isSunday =
         currentDate.getDay() === 0;
+
+
+      const isPast =
+        calendarDate <
+        todayCalendarDate;
 
 
       this.attendanceDays.push({
 
         date:
-          this.formatDate(
-            currentDate
-          ),
+          calendarDate,
 
         day,
 
@@ -509,6 +560,8 @@ export class AttendancePage
           ),
 
         isSunday,
+
+        isPast,
 
         /*
          * Default:
@@ -685,43 +738,21 @@ export class AttendancePage
 
 
           /*
-           * Tomorrow.
+           * Do NOT derive tomorrow attendance from the monthly GET.
+           *
+           * Tomorrow is maintained by the dedicated tomorrow-attendance
+           * API and dashboard contract. Reading it here from the monthly
+           * list was the source of the stale Present value after changing
+           * tomorrow from the dashboard.
+           *
+           * Wait for the authoritative dashboard value before marking
+           * the page as fully loaded.
            */
-          const tomorrowDate =
-            this.getTomorrowCalendarDate();
+          this.loadAuthoritativeTomorrowAttendance(
+            requestId
+          );
 
 
-          const tomorrowDay =
-            this.attendanceDays.find(
-              day =>
-                day.date ===
-                tomorrowDate
-            );
-
-
-          if (
-            tomorrowDay &&
-            !tomorrowDay.isSunday
-          ) {
-
-            this.tomorrowAttendanceStatus =
-              tomorrowDay.status;
-
-          } else {
-
-            this.tomorrowAttendanceStatus =
-              'not_marked';
-
-          }
-
-
-          /*
-           * Server state is now our clean snapshot.
-           */
-          this.refreshSavedAttendanceSnapshot();
-
-
-          this.loading = false;
 
         },
 
@@ -750,6 +781,121 @@ export class AttendancePage
             'Failed to load monthly attendance',
             'danger'
           );
+
+        }
+
+      });
+
+  }
+
+
+  /* ==========================================================
+     AUTHORITATIVE TOMORROW ATTENDANCE
+  ========================================================== */
+
+  private loadAuthoritativeTomorrowAttendance(
+    requestId: number
+  ): void {
+
+    this.parentService
+      .getDashboard(
+        this.parentId
+      )
+      .subscribe({
+
+        next: (response: any) => {
+
+          /* Ignore an older request if the user changed month. */
+          if (
+            requestId !==
+            this.attendanceLoadRequestId
+          ) {
+            return;
+          }
+
+          const data =
+            response?.data ||
+            response ||
+            {};
+
+          const status =
+            this.normalizeAttendanceStatus(
+              data?.tomorrowAttendanceStatus ??
+              data?.tomorrowAttendance?.status ??
+              data?.nextDayAttendanceStatus ??
+              data?.attendance?.tomorrow?.status ??
+              'not_marked'
+            );
+
+          this.tomorrowAttendanceStatus =
+            status;
+
+          /*
+           * The selected month may or may not contain tomorrow.
+           * Only update the matching calendar cell when it exists.
+           */
+          const tomorrowDate =
+            this.getTomorrowCalendarDate();
+
+          const tomorrowDay =
+            this.attendanceDays.find(
+              day =>
+                day.date ===
+                tomorrowDate
+            );
+
+          if (tomorrowDay) {
+
+            if (tomorrowDay.isSunday) {
+
+              tomorrowDay.status =
+                'not_marked';
+
+            } else if (
+              status === 'present' ||
+              status === 'absent'
+            ) {
+
+              tomorrowDay.status =
+                status;
+
+            }
+
+          }
+
+          /*
+           * The combination of monthly attendance + dedicated
+           * tomorrow attendance is now the clean saved snapshot.
+           */
+          this.refreshSavedAttendanceSnapshot();
+
+          this.loading = false;
+
+        },
+
+        error: (error) => {
+
+          if (
+            requestId !==
+            this.attendanceLoadRequestId
+          ) {
+            return;
+          }
+
+          console.error(
+            'LOAD TOMORROW ATTENDANCE ERROR:',
+            error
+          );
+
+          /*
+           * Keep the monthly data visible even if the secondary
+           * dashboard request fails. Do not invent a new status.
+           */
+          this.tomorrowAttendanceStatus =
+            'not_marked';
+
+          this.refreshSavedAttendanceSnapshot();
+          this.loading = false;
 
         }
 
@@ -927,7 +1073,14 @@ export class AttendancePage
     this.attendanceDays
       .forEach(day => {
 
-        if (!day.isSunday) {
+        /*
+         * NEVER modify Sundays or previous dates.
+         * Only today + upcoming working days can be changed.
+         */
+        if (
+          !day.isSunday &&
+          !day.isPast
+        ) {
 
           day.status =
             'present';
@@ -955,7 +1108,17 @@ export class AttendancePage
     this.attendanceDays
       .forEach(day => {
 
-        if (!day.isSunday) {
+        /*
+         * Reset only the editable portion of the month.
+         *
+         * Previous dates keep their saved/current status.
+         * Today and upcoming working days are reset to Present.
+         * Sundays remain untouched.
+         */
+        if (
+          !day.isSunday &&
+          !day.isPast
+        ) {
 
           day.status =
             'present';
@@ -977,6 +1140,7 @@ export class AttendancePage
 
     if (
       day.isSunday ||
+      day.isPast ||
       this.saving
     ) {
 
@@ -1438,38 +1602,15 @@ export class AttendancePage
         (response: any) => {
 
           console.log(
-            'MONTHLY SAVE RESPONSE:',
-            response?.monthly
+            'ATTENDANCE SAVE SUCCESS:',
+            response
           );
-
-
-          console.log(
-            'TOMORROW SAVE RESPONSE:',
-            response?.tomorrow
-          );
-
 
           /*
-           * ==================================================
-           * IMPORTANT
-           *
-           * DO NOT call loadSavedAttendance() here.
-           *
-           * The previous implementation did this:
-           *
-           * save
-           *   ↓
-           * GET
-           *   ↓
-           * stale backend result
-           *   ↓
-           * 25 becomes Present
-           *
-           * Instead, commit the exact snapshot that the
-           * server accepted.
-           * ==================================================
+           * Both APIs have completed successfully. Preserve exactly
+           * what the user saved instead of allowing a socket/GET race
+           * to put tomorrow back to Present.
            */
-
           this.attendanceDays
             .forEach(day => {
 
@@ -1480,68 +1621,58 @@ export class AttendancePage
                     day.date
                 );
 
-
-              if (!saved) {
-
-                return;
-
+              if (saved) {
+                day.status =
+                  saved.status;
               }
-
-
-              day.status =
-                saved.status;
 
             });
 
+          if (shouldSyncTomorrow) {
 
-          /*
-           * Update tomorrow state.
-           */
-          if (
-            shouldSyncTomorrow
-          ) {
+            const responseStatus =
+              this.normalizeAttendanceStatus(
+                response?.tomorrow?.data?.status ??
+                response?.tomorrow?.status ??
+                tomorrowStatus
+              );
 
             this.tomorrowAttendanceStatus =
-              tomorrowStatus ===
-                'absent'
+              responseStatus;
 
-                ? 'absent'
+            const tomorrowDay =
+              this.attendanceDays.find(
+                day =>
+                  day.date ===
+                  tomorrowDate
+              );
 
-                : 'present';
+            if (
+              tomorrowDay &&
+              !tomorrowDay.isSunday &&
+              (
+                responseStatus === 'present' ||
+                responseStatus === 'absent'
+              )
+            ) {
+              tomorrowDay.status =
+                responseStatus;
+            }
 
           }
 
-
-          /*
-           * The exact calendar state is now considered
-           * saved.
-           */
           this.refreshSavedAttendanceSnapshot();
 
-
-          /*
-           * Unlock only AFTER both APIs succeeded.
-           */
           this.saving = false;
-
           this.saveInProgress = false;
 
-
-          console.log(
-            'ATTENDANCE SAVE COMPLETE:',
-            this.attendanceDays.map(
-              day => ({
-
-                date:
-                  day.date,
-
-                status:
-                  day.status
-
-              })
-            )
+          /*
+           * One final authoritative read guarantees that reopening
+           * the page cannot display an old tomorrow value.
+           */
+          this.loadAuthoritativeTomorrowAttendance(
+            this.attendanceLoadRequestId
           );
-
 
           this.showToast(
             'Attendance saved successfully',
@@ -1549,7 +1680,6 @@ export class AttendancePage
           );
 
         },
-
 
       error:
         (error) => {
@@ -1690,6 +1820,68 @@ export class AttendancePage
         date.getDate()
       ).padStart(2, '0')}`
 
+    );
+
+  }
+
+
+  /* ==========================================================
+     TODAY CALENDAR DATE
+  ========================================================== */
+
+  private getTodayCalendarDate(): string {
+
+    /*
+     * Keep the comparison in the same calendar timezone used
+     * elsewhere in this page (Asia/Kolkata).
+     */
+    const parts =
+      new Intl.DateTimeFormat(
+        'en-CA',
+        {
+          timeZone:
+            'Asia/Kolkata',
+
+          year:
+            'numeric',
+
+          month:
+            '2-digit',
+
+          day:
+            '2-digit'
+        }
+      ).formatToParts(
+        new Date()
+      );
+
+
+    const year =
+      parts.find(
+        part =>
+          part.type ===
+          'year'
+      )?.value || '';
+
+
+    const month =
+      parts.find(
+        part =>
+          part.type ===
+          'month'
+      )?.value || '';
+
+
+    const day =
+      parts.find(
+        part =>
+          part.type ===
+          'day'
+      )?.value || '';
+
+
+    return (
+      `${year}-${month}-${day}`
     );
 
   }
@@ -1959,8 +2151,13 @@ export class AttendancePage
 
       .filter(day => {
 
+        /*
+         * Only editable working days can be pending changes.
+         * Previous dates are permanently read-only.
+         */
         if (
-          day.isSunday
+          day.isSunday ||
+          day.isPast
         ) {
 
           return false;
@@ -1980,6 +2177,22 @@ export class AttendancePage
         );
 
       });
+
+  }
+
+
+  /* ==========================================================
+     EDITABLE DAYS
+  ========================================================== */
+
+  get hasEditableDays(): boolean {
+
+    return this.attendanceDays
+      .some(
+        day =>
+          !day.isSunday &&
+          !day.isPast
+      );
 
   }
 

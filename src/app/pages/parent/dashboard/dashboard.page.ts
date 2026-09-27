@@ -458,6 +458,31 @@ export class DashboardPage
 
 
 
+  /**
+   * Ionic keeps this dashboard page alive when navigating to
+   * Attendance. When the user comes back, ngOnInit() does NOT
+   * run again. Always re-read the backend here so tomorrow
+   * attendance cannot remain as the old Present value.
+   */
+  ionViewWillEnter(): void {
+
+    const storedParentId =
+      localStorage.getItem('parentId');
+
+    if (storedParentId) {
+      this.parentId =
+        storedParentId;
+    }
+
+    if (!this.parentId) {
+      return;
+    }
+
+    this.loadDashboard();
+
+  }
+
+
   // =====================================================
   // SOCKET LISTENERS
   // =====================================================

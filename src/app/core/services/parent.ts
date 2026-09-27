@@ -34,45 +34,29 @@ export class ParentService {
   // =====================================================
 
   getParents(): Observable<any> {
-
-    return this.http.get(
-      this.apiUrl
-    );
-
+    return this.http.get(this.apiUrl);
   }
 
 
-  getParent(
-    id: string
-  ): Observable<any> {
-
+  getParent(id: string): Observable<any> {
     return this.http.get(
       `${this.apiUrl}/${encodeURIComponent(id)}`
     );
-
   }
 
 
-  getParentById(
-    parentId: string
-  ): Observable<any> {
-
+  getParentById(parentId: string): Observable<any> {
     return this.http.get(
       `${this.apiUrl}/${encodeURIComponent(parentId)}`
     );
-
   }
 
 
-  addParent(
-    parent: any
-  ): Observable<any> {
-
+  addParent(parent: any): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/add`,
       parent
     );
-
   }
 
 
@@ -80,23 +64,17 @@ export class ParentService {
     id: string,
     parent: any
   ): Observable<any> {
-
     return this.http.put(
       `${this.apiUrl}/${encodeURIComponent(id)}`,
       parent
     );
-
   }
 
 
-  deleteParent(
-    id: string
-  ): Observable<any> {
-
+  deleteParent(id: string): Observable<any> {
     return this.http.delete(
       `${this.apiUrl}/${encodeURIComponent(id)}`
     );
-
   }
 
 
@@ -104,14 +82,10 @@ export class ParentService {
   // DASHBOARD
   // =====================================================
 
-  getDashboard(
-    parentId: string
-  ): Observable<any> {
-
+  getDashboard(parentId: string): Observable<any> {
     return this.http.get(
       `${this.apiUrl}/dashboard/${encodeURIComponent(parentId)}`
     );
-
   }
 
 
@@ -119,14 +93,10 @@ export class ParentService {
   // PROFILE
   // =====================================================
 
-  getProfile(
-    parentId: string
-  ): Observable<any> {
-
+  getProfile(parentId: string): Observable<any> {
     return this.http.get(
       `${this.apiUrl}/profile/${encodeURIComponent(parentId)}`
     );
-
   }
 
 
@@ -141,20 +111,15 @@ export class ParentService {
   ): Observable<any> {
 
     const params =
-      new HttpParams()
-        .set(
-          'parentId',
-          parentId
-        );
-
+      new HttpParams().set(
+        'parentId',
+        parentId
+      );
 
     return this.http.get(
       `${environment.apiUrl}/rides/live/${encodeURIComponent(driverId)}/${encodeURIComponent(rideType)}`,
-      {
-        params
-      }
+      { params }
     );
-
   }
 
 
@@ -164,34 +129,23 @@ export class ParentService {
 
   getRideStatus(
     driverId: string,
-    rideType:
-      | 'morning'
-      | 'evening',
+    rideType: 'morning' | 'evening',
     parentId?: string
   ): Observable<any> {
 
-    let params =
-      new HttpParams();
-
+    let params = new HttpParams();
 
     if (parentId) {
-
-      params =
-        params.set(
-          'parentId',
-          parentId
-        );
-
+      params = params.set(
+        'parentId',
+        parentId
+      );
     }
-
 
     return this.http.get(
       `${environment.apiUrl}/rides/status/${encodeURIComponent(driverId)}/${encodeURIComponent(rideType)}`,
-      {
-        params
-      }
+      { params }
     );
-
   }
 
 
@@ -199,23 +153,21 @@ export class ParentService {
   // MONTHLY ATTENDANCE
   // =====================================================
 
-saveMonthlyAttendance(
-  payload: {
-    parentId: string;
+  saveMonthlyAttendance(
+    payload: {
+      parentId: string;
+      records: {
+        date: string;
+        status: 'present' | 'absent';
+      }[];
+    }
+  ): Observable<any> {
 
-    records: {
-      date: string;
-      status: 'present' | 'absent';
-    }[];
+    return this.http.put(
+      `${this.apiUrl}/attendance`,
+      payload
+    );
   }
-) {
-
-  return this.http.put(
-    `${this.apiUrl}/attendance`,
-    payload
-  );
-
-}
 
 
   // =====================================================
@@ -224,44 +176,32 @@ saveMonthlyAttendance(
 
   updateTomorrowAttendance(
     parentId: string,
-    status:
-      | 'present'
-      | 'absent',
+    status: 'present' | 'absent',
     date?: string
   ): Observable<any> {
 
-    const body: any = {
-
+    const body: {
+      parentId: string;
+      status: 'present' | 'absent';
+      date?: string;
+    } = {
       parentId,
-
       status
-
     };
 
-
-    if (date) {
-
-      body.date =
-        date;
-
-    }
-
-
     /*
-     * IMPORTANT:
-     *
-     * this.apiUrl already equals:
-     *
-     * /api/parents
-     *
-     * Therefore DO NOT add /parents again.
+     * Always send the browser's explicit calendar date when one is
+     * available. This prevents client/server timezone differences
+     * from saving attendance against different calendar days.
      */
+    if (date) {
+      body.date = date;
+    }
 
     return this.http.post(
       `${this.apiUrl}/tomorrow-attendance`,
       body
     );
-
   }
 
 
@@ -279,17 +219,11 @@ saveMonthlyAttendance(
       `${this.apiUrl}/attendance/${encodeURIComponent(parentId)}`,
       {
         params: {
-
-          year:
-            year.toString(),
-
-          month:
-            month.toString()
-
+          year: year.toString(),
+          month: month.toString()
         }
       }
     );
-
   }
 
 
@@ -309,7 +243,6 @@ saveMonthlyAttendance(
       `${this.apiUrl}/attendance`,
       payload
     );
-
   }
 
 
@@ -323,20 +256,14 @@ saveMonthlyAttendance(
   ): Observable<any> {
 
     const params =
-      new HttpParams()
-        .set(
-          'date',
-          date
-        );
-
+      new HttpParams().set(
+        'date',
+        date
+      );
 
     return this.http.get(
       `${environment.apiUrl}/rides/journey-report/${encodeURIComponent(parentId)}`,
-      {
-        params
-      }
+      { params }
     );
-
   }
-
 }

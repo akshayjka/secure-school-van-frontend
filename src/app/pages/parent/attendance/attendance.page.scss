@@ -786,3 +786,46 @@ ion-content {
   }
 
 }
+
+
+/* =====================================================
+   PREVIOUS / LOCKED DATES
+   ===================================================== */
+
+/*
+ * Previous dates are intentionally greyed out and cannot
+ * be edited. The status badge remains visible so parents
+ * can still see the historical attendance.
+ */
+.calendar-day.past,
+.calendar-day.past.present,
+.calendar-day.past.absent {
+  background: #f1f2f4 !important;
+  color: #9a9da5;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.calendar-day.past .date-number {
+  color: #8b8e96;
+}
+
+.calendar-day.past .status-badge {
+  opacity: 0.78;
+}
+
+.calendar-day.past:disabled {
+  pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Previous-date legend */
+.legend-dot.past {
+  background: #9a9da5;
+}
+
+/* Disabled bulk actions when the selected month has
+   no editable working days. */
+.bulk-actions ion-button[disabled] {
+  opacity: 0.48;
+}
