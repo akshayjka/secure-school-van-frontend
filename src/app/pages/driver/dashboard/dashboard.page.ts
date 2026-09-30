@@ -107,6 +107,10 @@ export class DashboardPage implements OnInit, OnDestroy {
     'driverEveningStudentStatuses';
 
   private attendanceSubscription?: Subscription;
+  private dashboardSubscription?: Subscription;
+
+  /** Prevent duplicate pickup/drop requests for the same student. */
+  private readonly studentActionLocks = new Set<string>();
 
   // =====================================================
 // FLEXIBLE CAROUSEL SELECTION
@@ -184,25 +188,23 @@ private returnDropSwipeStartX = 0;
   }
 
   ngOnInit(): void {
-
     this.driverId =
       localStorage.getItem('driverId') || '';
 
-    // IMPORTANT:
-    // Never restore ride workflow from localStorage.
+    /*
+     * IMPORTANT:
+     * MongoDB/backend is the source of truth.
+     * Never restore the ride stage from localStorage.
+     */
     this.stage = 'morning-ready';
-
-    // =====================================================
-// DO NOT RESTORE STUDENT WORKFLOW FROM LOCAL STORAGE
-//
-// Backend/MongoDB is the source of truth.
-// =====================================================
-
-this.morningStatuses = {};
-
-this.eveningStatuses = {};
+    this.morningStatuses = {};
+    this.eveningStatuses = {};
 
     if (!this.driverId) {
+      this.router.navigateByUrl(
+        '/auth/login',
+        { replaceUrl: true }
+      );
       return;
     }
 
@@ -213,100 +215,41 @@ this.eveningStatuses = {};
     );
 
     this.listenForAttendanceUpdates();
+    this.listenForDashboardUpdates();
 
+    /*
+     * One backend dashboard request returns the complete
+     * workflow. This prevents morning/evening restore calls
+     * from overwriting each other.
+     */
     this.loadDashboard();
 
     this.loadReferralDetails();
-
-    this.restoreRideFromBackend();
   }
 
   ngOnDestroy(): void {
     this.attendanceSubscription?.unsubscribe();
+    this.dashboardSubscription?.unsubscribe();
+    this.locationService.stopTracking();
   }
 
-  private restoreRideFromBackend(): void {
+  // =====================================================
+  // BACKEND WORKFLOW
+  // =====================================================
 
-    this.rideService
-      .getRideStatus(
-        this.driverId,
-        'morning'
-      )
-      .subscribe({
+  /*
+   * There is intentionally no restoreRideFromBackend()
+   * and no restoreEveningRide().
+   *
+   * GET /drivers/dashboard/:driverId returns:
+   *
+   * workflow.stage
+   * workflow.activeRideType
+   * workflow.activeRideStatus
+   *
+   * That one object controls the dashboard.
+   */
 
-        next: response => {
-
-          const data = response?.data;
-
-          /**
-           * No active morning ride.
-           *
-           * Driver MUST see START RIDE.
-           */
-          if (
-            !data ||
-            data.rideStarted !== true ||
-            data.status !== 'started'
-          ) {
-
-            this.locationService.stopTracking();
-
-            this.stage =
-              'morning-ready';
-
-            // localStorage.setItem(
-            //   this.STAGE_KEY,
-            //   'morning-ready'
-            // );
-
-            return;
-          }
-
-          /**
-           * Active ride really exists in backend.
-           *
-           * Only now allow pickup.
-           */
-          this.stage =
-            'morning-pickup';
-
-          // localStorage.setItem(
-          //   this.STAGE_KEY,
-          //   'morning-pickup'
-          // );
-
-          this.locationService.startTracking(
-            this.driverId,
-            'morning'
-          );
-
-        },
-
-        error: error => {
-
-          console.error(
-            'Ride status error:',
-            error
-          );
-
-          /**
-           * Fail safely.
-           *
-           * If backend cannot confirm an active ride,
-           * do NOT allow pickup.
-           */
-          this.locationService.stopTracking();
-
-          this.stage =
-            'morning-ready';
-
-        }
-
-      });
-
-  }
-
-  
 
   // =====================================================
   // SELECTED MORNING PICKUP
@@ -643,81 +586,6 @@ onReturnDropSwipeEnd(event: TouchEvent): void {
       : 0;
   }
 
-  private restoreEveningRide(): void {
-
-    this.rideService
-      .getRideStatus(
-        this.driverId,
-        'evening'
-      )
-      .subscribe({
-
-        next: response => {
-
-          const data =
-            response?.data;
-
-          if (
-            data?.rideStarted === true &&
-            data?.status === 'started'
-          ) {
-
-            if (
-              this.stage === 'return-ready'
-            ) {
-
-              this.setStage(
-                'return-boarding'
-              );
-
-            }
-
-            this.locationService.startTracking(
-              this.driverId,
-              'evening'
-            );
-
-            return;
-
-          }
-
-          /**
-           * No active ride.
-           *
-           * If the locally stored stage says
-           * that a ride is running, it is stale.
-           */
-          if (
-            this.isMorningRideActive ||
-            this.isReturnRideActive
-          ) {
-
-            this.locationService.stopTracking();
-
-            this.setStage(
-              this.stage.startsWith('return')
-                ? 'return-ready'
-                : 'morning-ready'
-            );
-
-          }
-
-        },
-
-        error: error => {
-
-          console.error(
-            'Evening ride status error:',
-            error
-          );
-
-          this.locationService.stopTracking();
-
-        }
-
-      });
-
-  }
 
 
   // =====================================================
@@ -725,39 +593,50 @@ onReturnDropSwipeEnd(event: TouchEvent): void {
   // =====================================================
 
   get isMorningRideActive(): boolean {
-    return [
-      'morning-pickup',
-      'morning-school-drop',
-      'morning-complete'
-    ].includes(this.stage);
+    return (
+      this.stage === 'morning-pickup' ||
+      this.stage === 'morning-school-drop'
+    );
   }
 
   get isReturnRideActive(): boolean {
-    return [
-      'return-boarding',
-      'return-home-drop',
-      'return-complete'
-    ].includes(this.stage);
+    return (
+      this.stage === 'return-boarding' ||
+      this.stage === 'return-home-drop'
+    );
   }
 
+  /*
+   * A "complete" screen is not an active Ride document.
+   * Only pickup/drop stages represent a running ride.
+   */
   get rideRunning(): boolean {
     return (
-      this.isMorningRideActive ||
-      this.isReturnRideActive
+      this.stage === 'morning-pickup' ||
+      this.stage === 'morning-school-drop' ||
+      this.stage === 'return-boarding' ||
+      this.stage === 'return-home-drop'
     );
   }
 
   get activeRideType(): RideType | null {
-    if (this.isMorningRideActive) {
+    if (
+      this.stage === 'morning-pickup' ||
+      this.stage === 'morning-school-drop'
+    ) {
       return 'morning';
     }
 
-    if (this.isReturnRideActive) {
+    if (
+      this.stage === 'return-boarding' ||
+      this.stage === 'return-home-drop'
+    ) {
       return 'evening';
     }
 
     return null;
   }
+
 
   get morningPendingStudents(): any[] {
     return this.presentStudents.filter(
@@ -944,203 +823,299 @@ onReturnDropSwipeEnd(event: TouchEvent): void {
   }
 
   // =====================================================
+  // REAL-TIME WORKFLOW STATE
+  // =====================================================
+
+  private listenForDashboardUpdates(): void {
+    this.dashboardSubscription =
+      this.socketService
+        .listenDashboardUpdated()
+        .subscribe({
+          next: (event: any) => {
+            if (event?.driverId && event.driverId !== this.driverId) {
+              return;
+            }
+
+            // MongoDB remains the source of truth. The socket only
+            // tells the UI that it should re-read the authoritative state.
+            this.loadDashboard();
+          },
+          error: error => {
+            console.error('Driver dashboard socket error:', error);
+          }
+        });
+  }
+
+  // =====================================================
   // LOAD
   // =====================================================
 
   private loadDashboard(): void {
+    if (!this.driverId) {
+      return;
+    }
 
-  this.driverService
-    .getDashboard(this.driverId)
-    .subscribe({
-
-      next: res => {
-
-        this.students =
-          res.students || [];
-
-        this.rebuildAttendanceGroups();
-
-        // =================================================
-        // SYNC UI STATUS FROM BACKEND
-        // DATABASE IS THE SOURCE OF TRUTH
-        // =================================================
-
-        const morningStatuses:
-          Record<string, StudentUiStatus> = {};
-
-        const eveningStatuses:
-          Record<string, StudentUiStatus> = {};
-
-        this.presentStudents.forEach(student => {
-
-          // =================================================
-          // MORNING
-          // =================================================
-
-          switch (student.morningStatus) {
-
-            case 'picked_up':
-
-              morningStatuses[
-                student.parentId
-              ] = 'Picked';
-
-              break;
-
-            case 'dropped_at_school':
-
-              morningStatuses[
-                student.parentId
-              ] = 'DroppedAtSchool';
-
-              break;
-
-            case 'waiting':
-            case 'pending':
-            default:
-
-              morningStatuses[
-                student.parentId
-              ] = 'Pending';
-
-              break;
-
+    this.driverService
+      .getDashboard(this.driverId)
+      .subscribe({
+        next: (res: any) => {
+          if (!res?.success) {
+            this.toastService.showToast(
+              'Unable to load dashboard',
+              'danger'
+            );
+            return;
           }
 
+          /*
+           * -------------------------------------------------
+           * 1. LOAD STUDENTS
+           * -------------------------------------------------
+           */
+          this.students =
+            res.students || [];
 
-          // =================================================
-          // EVENING
-          // =================================================
+          this.rebuildAttendanceGroups();
 
-          switch (student.eveningStatus) {
+          /*
+           * -------------------------------------------------
+           * 2. LOAD PERSISTED STUDENT STATUS
+           * -------------------------------------------------
+           */
+          const morningStatuses:
+            Record<string, StudentUiStatus> = {};
 
-            case 'picked_from_school':
+          const eveningStatuses:
+            Record<string, StudentUiStatus> = {};
 
-              eveningStatuses[
-                student.parentId
-              ] = 'PickedFromSchool';
+          this.students.forEach(
+            (student: any) => {
+              if (!student?.parentId) {
+                return;
+              }
 
-              break;
+              switch (
+                student.morningStatus
+              ) {
+                case 'picked_up':
+                  morningStatuses[
+                    student.parentId
+                  ] = 'Picked';
+                  break;
 
-            case 'dropped_at_home':
+                case 'dropped_at_school':
+                  morningStatuses[
+                    student.parentId
+                  ] = 'DroppedAtSchool';
+                  break;
 
-              eveningStatuses[
-                student.parentId
-              ] = 'DroppedAtHome';
+                case 'waiting':
+                case 'pending':
+                default:
+                  morningStatuses[
+                    student.parentId
+                  ] = 'Pending';
+                  break;
+              }
 
-              break;
+              switch (
+                student.eveningStatus
+              ) {
+                case 'picked_from_school':
+                  eveningStatuses[
+                    student.parentId
+                  ] = 'PickedFromSchool';
+                  break;
 
-            case 'waiting_school_finish':
-            case 'waiting_at_school':
-            case 'waiting':
-            default:
+                case 'dropped_at_home':
+                  eveningStatuses[
+                    student.parentId
+                  ] = 'DroppedAtHome';
+                  break;
 
-              eveningStatuses[
-                student.parentId
-              ] = 'Waiting';
+                case 'waiting_school_finish':
+                case 'waiting_at_school':
+                case 'waiting':
+                default:
+                  eveningStatuses[
+                    student.parentId
+                  ] = 'Waiting';
+                  break;
+              }
+            }
+          );
 
-              break;
+          this.morningStatuses =
+            morningStatuses;
 
+          this.eveningStatuses =
+            eveningStatuses;
+
+          /*
+           * -------------------------------------------------
+           * 3. CRITICAL FIX
+           * -------------------------------------------------
+           *
+           * The backend decides the current workflow.
+           *
+           * Therefore after logout/login:
+           *
+           * morning pickup -> morning pickup
+           * school drop    -> school drop
+           * return ready   -> return ready
+           * return boarding -> return boarding
+           * home drop      -> home drop
+           * day complete   -> day complete
+           */
+          if (res.workflow?.stage) {
+            this.stage =
+              res.workflow.stage as DriverStage;
+          } else {
+            /*
+             * Compatibility fallback only for an old backend.
+             */
+            this.stage =
+              this.calculateFallbackStage();
           }
 
-        });
+          this.reconcileStageWithStudentState(
+            res.workflow
+          );
 
+          /*
+           * -------------------------------------------------
+           * 4. RESUME GPS IF RIDE IS STILL ACTIVE
+           * -------------------------------------------------
+           */
+          if (
+            res.workflow?.activeRideType &&
+            res.workflow?.activeRideStatus ===
+              'started'
+          ) {
+            this.locationService.startTracking(
+              this.driverId,
+              res.workflow.activeRideType as RideType
+            );
+          } else {
+            this.locationService.stopTracking();
+          }
 
-        // =================================================
-        // REPLACE LOCAL UI STATE
-        // =================================================
+          this.normalizeAllCarouselIndexes();
+        },
 
-        this.morningStatuses =
-          morningStatuses;
+        error: (err: any) => {
+          console.error(
+            'Dashboard loading error:',
+            err
+          );
 
-        this.eveningStatuses =
-          eveningStatuses;
+          /*
+           * Do not allow the UI to assume a ride is running
+           * when the backend cannot confirm it.
+           */
+          this.locationService.stopTracking();
 
-
-        // =================================================
-        // SAVE ONLY AS CACHE
-        //
-        // localStorage is NOT the source of truth.
-        // =================================================
-
-        this.persistStatuses();
-
-
-        // =================================================
-        // RESET INVALID CAROUSEL INDEXES
-        // =================================================
-
-        if (
-          this.returnWaitingStudents.length === 0
-        ) {
-
-          this.selectedReturnBoardingIndex = 0;
-
+          this.toastService.showToast(
+            'Unable to load dashboard',
+            'danger'
+          );
         }
-        else if (
-          this.selectedReturnBoardingIndex >=
-          this.returnWaitingStudents.length
-        ) {
+      });
+  }
 
-          this.selectedReturnBoardingIndex =
-            this.returnWaitingStudents.length - 1;
+  /*
+   * Compatibility fallback.
+   *
+   * With the updated backend this should normally never run.
+   */
+  private calculateFallbackStage(): DriverStage {
+    const total =
+      this.presentStudents.length;
 
-        }
+    if (total === 0) {
+      return 'morning-ready';
+    }
 
+    const morningPicked =
+      this.morningPickedStudents.length;
 
-        if (
-          this.returnOnboardStudents.length === 0
-        ) {
+    const morningDropped =
+      this.morningDroppedStudents.length;
 
-          this.selectedReturnDropIndex = 0;
+    const eveningPicked =
+      this.returnOnboardStudents.length;
 
-        }
-        else if (
-          this.selectedReturnDropIndex >=
-          this.returnOnboardStudents.length
-        ) {
+    const eveningDropped =
+      this.returnDroppedStudents.length;
 
-          this.selectedReturnDropIndex =
-            this.returnOnboardStudents.length - 1;
+    if (eveningDropped === total) {
+      return 'day-complete';
+    }
 
-        }
-
-
-        // =================================================
-        // ADVANCE WORKFLOW
-        // =================================================
-
-        this.advanceStageIfNeeded();
-
-      },
-
-      error: err => {
-
-        console.error(
-          'Dashboard loading error:',
-          err
-        );
-
-        this.toastService.showToast(
-          'Unable to load dashboard',
-          'danger'
-        );
-
+    if (morningDropped === total) {
+      if (eveningPicked === total) {
+        return 'return-home-drop';
       }
 
-    });
+      return 'return-ready';
+    }
 
-}
+    if (morningPicked === 0) {
+      return 'morning-ready';
+    }
+
+    if (morningPicked < total) {
+      return 'morning-pickup';
+    }
+
+    return 'morning-school-drop';
+  }
+
+  private normalizeAllCarouselIndexes(): void {
+    this.selectedMorningPickupIndex =
+      this.morningPendingStudents.length > 0
+        ? this.normalizeCarouselIndex(
+            this.selectedMorningPickupIndex,
+            this.morningPendingStudents.length
+          )
+        : 0;
+
+    this.selectedMorningDropIndex =
+      this.morningPickedStudents.length > 0
+        ? this.normalizeCarouselIndex(
+            this.selectedMorningDropIndex,
+            this.morningPickedStudents.length
+          )
+        : 0;
+
+    this.selectedReturnBoardingIndex =
+      this.returnWaitingStudents.length > 0
+        ? this.normalizeCarouselIndex(
+            this.selectedReturnBoardingIndex,
+            this.returnWaitingStudents.length
+          )
+        : 0;
+
+    this.selectedReturnDropIndex =
+      this.returnOnboardStudents.length > 0
+        ? this.normalizeCarouselIndex(
+            this.selectedReturnDropIndex,
+            this.returnOnboardStudents.length
+          )
+        : 0;
+  }
 
   private rebuildAttendanceGroups(): void {
     this.presentStudents =
       this.students.filter(
-        s => s.attendance === true
+        (s: any) =>
+          s.attendance === true
       );
 
     this.absentStudents =
       this.students.filter(
-        s => s.attendance === false
+        (s: any) =>
+          s.attendance !== true
       );
 
     this.todayStats = {
@@ -1149,41 +1124,52 @@ onReturnDropSwipeEnd(event: TouchEvent): void {
       absent: this.absentStudents.length
     };
 
-    this.students = [...this.students];
-    this.presentStudents =
-      [...this.presentStudents];
-    this.absentStudents =
-      [...this.absentStudents];
+    this.students = [
+      ...this.students
+    ];
+
+    this.presentStudents = [
+      ...this.presentStudents
+    ];
+
+    this.absentStudents = [
+      ...this.absentStudents
+    ];
   }
+
 
   // =====================================================
   // MORNING
   // =====================================================
 
-  async confirmStartMorning(): Promise<void> {
+ async confirmStartMorning(): Promise<void> {
 
-    if (this.presentStudents.length === 0) {
+  if (
+    this.presentStudents.length === 0
+  ) {
+    this.toastService.showToast(
+      'No present students available for pickup',
+      'warning'
+    );
 
-      this.toastService.showToast(
-        'No present students available for pickup',
-        'warning'
-      );
-
-      return;
-    }
-
-    const confirmed =
-      await this.dialogService.confirm(
-        'Start Morning Ride?',
-        `${this.presentStudents.length} student(s) are present. Start the ride before picking up students?`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.startRide('morning');
+    return;
   }
+
+  const confirmed =
+    await this.dialogService.confirm(
+      'Start Morning Ride?',
+      `${this.presentStudents.length} student(s) are present. Start the ride before picking up students?`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  this.startRide(
+    'morning'
+  );
+}
+
 
 
   // =====================================================
@@ -1191,45 +1177,77 @@ onReturnDropSwipeEnd(event: TouchEvent): void {
 // =====================================================
 
 private resetMorningStatusesForNewRide(): void {
-  const statuses: Record<string, StudentUiStatus> = {};
-
-  this.presentStudents.forEach(student => {
-    statuses[student.parentId] = 'Pending';
-  });
-
-  this.morningStatuses = statuses;
-
+  /*
+   * Compatibility method only.
+   * Never reset persisted student progress when a ride starts.
+   */
   this.selectedMorningPickupIndex = 0;
   this.selectedMorningDropIndex = 0;
-
-  localStorage.setItem(
-    this.MORNING_STATUS_KEY,
-    JSON.stringify(this.morningStatuses)
-  );
 }
+
+
 
 
 private resetEveningStatusesForNewRide(): void {
-  const statuses: Record<string, StudentUiStatus> = {};
-
-  this.presentStudents.forEach(student => {
-    statuses[student.parentId] = 'Waiting';
-  });
-
-  this.eveningStatuses = statuses;
-
+  /*
+   * Compatibility method only.
+   * Never reset persisted student progress when a return ride starts.
+   */
   this.selectedReturnBoardingIndex = 0;
   this.selectedReturnDropIndex = 0;
-
-  localStorage.setItem(
-    this.EVENING_STATUS_KEY,
-    JSON.stringify(this.eveningStatuses)
-  );
 }
+
 
 private startRide(
   rideType: RideType
 ): void {
+
+  if (!this.driverId) {
+
+    this.toastService.showToast(
+      'Driver ID is missing. Please login again.',
+      'danger'
+    );
+
+    return;
+  }
+
+  /*
+   * Prevent accidental duplicate calls.
+   */
+  if (
+    rideType === 'morning' &&
+    this.isMorningRideActive
+  ) {
+    this.toastService.showToast(
+      'Morning ride is already active.',
+      'warning'
+    );
+
+    return;
+  }
+
+  if (
+    rideType === 'evening' &&
+    this.isReturnRideActive
+  ) {
+    this.toastService.showToast(
+      'Return ride is already active.',
+      'warning'
+    );
+
+    return;
+  }
+
+  console.log(
+    '[RIDE] Starting ride',
+    {
+      driverId:
+        this.driverId,
+
+      rideType
+    }
+  );
 
   this.rideService
     .startRide(
@@ -1238,137 +1256,115 @@ private startRide(
     )
     .subscribe({
 
-      next: response => {
+      next: (
+        response: any
+      ) => {
 
         console.log(
-          'START RIDE SUCCESS:',
+          '[RIDE] Start success',
           response
         );
 
+        if (
+          !response?.success
+        ) {
 
-        const alreadyStarted =
-          response?.alreadyStarted === true;
+          this.toastService.showToast(
+            response?.message ||
+            'Ride could not be started',
+            'danger'
+          );
 
-
-        // =================================================
-        // IMPORTANT
-        //
-        // ONLY RESET STUDENTS WHEN A BRAND NEW RIDE
-        // WAS CREATED.
-        // =================================================
-
-        if (!alreadyStarted) {
-
-          if (rideType === 'morning') {
-
-            this.resetMorningStatusesForNewRide();
-
-            this.setStage(
-              'morning-pickup'
-            );
-
-          }
-          else {
-
-            this.resetEveningStatusesForNewRide();
-
-            this.setStage(
-              'return-boarding'
-            );
-
-          }
-
-        }
-        else {
-
-          // =================================================
-          // EXISTING RIDE
-          //
-          // DO NOT RESET STUDENT STATUS.
-          // Reload backend state.
-          // =================================================
-
-          if (rideType === 'morning') {
-
-            this.setStage(
-              'morning-pickup'
-            );
-
-          }
-          else {
-
-            this.setStage(
-              'return-boarding'
-            );
-
-          }
-
-          this.loadDashboard();
-
+          return;
         }
 
+        const startedRideType =
+          response?.data?.rideType;
 
-        // =================================================
-        // START GPS AFTER BACKEND CONFIRMATION
-        // =================================================
+        const status =
+          response?.data?.status;
 
-        this.locationService.startTracking(
-          this.driverId,
-          rideType
-        );
+        /*
+         * NEVER start GPS unless backend
+         * confirms the exact ride type.
+         */
+        if (
+          startedRideType !==
+          rideType ||
+          status !==
+          'started'
+        ) {
 
+          console.error(
+            '[RIDE] Invalid start response',
+            response
+          );
 
-        // =================================================
-        // MESSAGE
-        // =================================================
+          this.toastService.showToast(
+            'Ride started response is invalid.',
+            'danger'
+          );
+
+          return;
+        }
+
+        /*
+         * Backend has confirmed the ride.
+         */
+        this.locationService
+          .startTracking(
+            this.driverId,
+            rideType
+          );
 
         this.toastService.showToast(
-
-          alreadyStarted
-
+          response.alreadyStarted
             ? (
-              rideType === 'morning'
-                ? 'Morning ride resumed'
-                : 'Return ride resumed'
-            )
-
+                rideType ===
+                'morning'
+                  ? 'Morning ride resumed'
+                  : 'Return ride resumed'
+              )
             : (
-              rideType === 'morning'
-                ? 'Ride started. You can now pick up students.'
-                : 'Return ride started. You can now pick up students.'
-            ),
-
+                rideType ===
+                'morning'
+                  ? 'Morning ride started'
+                  : 'Return ride started'
+              ),
           'success'
-
         );
 
+        /*
+         * Backend is source of truth.
+         */
+        this.loadDashboard();
       },
 
-      error: error => {
+      error: (
+        error: any
+      ) => {
 
         console.error(
-          'START RIDE ERROR:',
+          '[RIDE] Start error',
           error
         );
 
-        this.stage =
-          rideType === 'morning'
-            ? 'morning-ready'
-            : 'return-ready';
+        this.locationService
+          .stopTracking();
 
-        this.locationService.stopTracking();
+        this.loadDashboard();
 
         this.toastService.showToast(
           error?.error?.message ||
-          'Ride could not be started',
+          error?.message ||
+          'Unable to start ride',
           'danger'
         );
-
       }
-
     });
-
 }
+
+
 
   async markMorningPicked(
     student: any
@@ -1444,13 +1440,17 @@ private startRide(
       this.morningDroppedStudents.length !==
       this.presentStudents.length
     ) {
+      this.toastService.showToast(
+        'Drop all present students at school before ending the morning ride.',
+        'warning'
+      );
       return;
     }
 
     const confirmed =
       await this.dialogService.confirm(
         'End Morning Ride?',
-        'All student school drop-offs are complete. Driver GPS and admin live tracking will stop.'
+        'All student school drop-offs are complete. End the morning ride?'
       );
 
     if (!confirmed) {
@@ -1465,17 +1465,29 @@ private startRide(
       .subscribe({
         next: () => {
           this.locationService.stopTracking();
-          this.setStage('return-ready');
 
           this.toastService.showToast(
             'Morning ride ended',
             'success'
           );
+
+          /*
+           * Do not manually force return-ready.
+           * Backend calculates the next workflow.
+           */
+          this.loadDashboard();
         },
-        error: error => {
-          console.error(error);
+
+        error: (error: any) => {
+          console.error(
+            'Unable to end morning ride:',
+            error
+          );
+
+          this.loadDashboard();
 
           this.toastService.showToast(
+            error?.error?.message ||
             'Unable to end morning ride',
             'danger'
           );
@@ -1483,46 +1495,96 @@ private startRide(
       });
   }
 
+
   // =====================================================
   // RETURN
   // =====================================================
 
-  async confirmStartReturn(): Promise<void> {
-    if (this.presentStudents.length === 0) {
-      this.toastService.showToast(
-        'No students available for return journey',
-        'warning'
-      );
-      return;
-    }
+async confirmStartReturn(): Promise<void> {
 
-    const confirmed =
-      await this.dialogService.confirm(
-        'Start Return Journey?',
-        'Start driver GPS/admin tracking. Parent tracking starts individually after each child boards.'
-      );
+  if (
+    this.presentStudents.length === 0
+  ) {
+    this.toastService.showToast(
+      'No students available for return journey',
+      'warning'
+    );
 
-    if (!confirmed) {
-      return;
-    }
-
-    this.startRide('evening');
+    return;
   }
 
-  async markPickedFromSchool(
+  /*
+   * Before starting evening ride,
+   * morning must be completed.
+   */
+  if (
+    this.morningDroppedStudents.length !==
+    this.presentStudents.length
+  ) {
+    this.toastService.showToast(
+      'Complete all school drop-offs before starting the return ride.',
+      'warning'
+    );
+
+    return;
+  }
+
+  const confirmed =
+    await this.dialogService.confirm(
+      'Start Return Journey?',
+      'Start the return ride before picking students from school.'
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  this.startRide(
+    'evening'
+  );
+}
+
+
+async markPickedFromSchool(
   student: any
 ): Promise<void> {
 
-  if (!this.isReturnRideActive) {
+  if (!student?.parentId) {
     this.toastService.showToast(
-      'Please start the return ride first',
+      'Student information is missing.',
+      'danger'
+    );
+
+    return;
+  }
+
+  /*
+   * IMPORTANT:
+   *
+   * UI state alone is not enough.
+   * We first verify that the backend
+   * confirms an active evening ride.
+   */
+  if (
+    !this.isReturnRideActive
+  ) {
+
+    this.toastService.showToast(
+      'Please start the return ride first.',
       'warning'
     );
+
+    /*
+     * Re-read backend state.
+     */
+    this.loadDashboard();
+
     return;
   }
 
   if (
-    this.getEveningStatus(student) !== 'Waiting'
+    this.getEveningStatus(student)
+    !== 'Waiting'
   ) {
     return;
   }
@@ -1540,7 +1602,7 @@ private startRide(
   this.updateStudentAction(
     student,
     'evening',
-    'picked_up',
+    'picked_from_school',
     'PickedFromSchool',
     `${student.studentName} picked up from school`
   );
@@ -1585,21 +1647,21 @@ async markDroppedAtHome(
 }
 
   async endReturnRide(): Promise<void> {
-    const boardedCount =
-      this.returnOnboardStudents.length +
-      this.returnDroppedStudents.length;
-
     if (
-      boardedCount === 0 ||
-      this.returnOnboardStudents.length > 0
+      this.returnDroppedStudents.length !==
+      this.presentStudents.length
     ) {
+      this.toastService.showToast(
+        'Drop all present students at home before ending the return ride.',
+        'warning'
+      );
       return;
     }
 
     const confirmed =
       await this.dialogService.confirm(
         'End Today\'s Ride?',
-        'All boarded students have been dropped home. Live location sharing will stop.'
+        'All present students have been dropped home. End the return ride?'
       );
 
     if (!confirmed) {
@@ -1615,22 +1677,27 @@ async markDroppedAtHome(
         next: () => {
           this.locationService.stopTracking();
 
-          /*
-           * Stay on complete screen.
-           * resetDay() is available if you want a manual
-           * test/reset button during development.
-           */
-          this.setStage('day-complete');
-
           this.toastService.showToast(
             'Return ride ended',
             'success'
           );
+
+          /*
+           * Backend should now return day-complete.
+           */
+          this.loadDashboard();
         },
-        error: error => {
-          console.error(error);
+
+        error: (error: any) => {
+          console.error(
+            'Unable to end return ride:',
+            error
+          );
+
+          this.loadDashboard();
 
           this.toastService.showToast(
+            error?.error?.message ||
             'Unable to end return ride',
             'danger'
           );
@@ -1638,494 +1705,249 @@ async markDroppedAtHome(
       });
   }
 
+
   // =====================================================
   // ACTION API + STATE ADVANCE
   // =====================================================
 
- private updateStudentAction(
+private updateStudentAction(
   student: any,
   rideType: RideType,
   apiStatus:
     | 'picked_up'
+    | 'picked_from_school'
     | 'dropped_at_school'
     | 'dropped_at_home',
   uiStatus: StudentUiStatus,
   successMessage: string
 ): void {
 
-
-  // =====================================================
-  // VALIDATE DRIVER
-  // =====================================================
-
   if (!this.driverId) {
-
     this.toastService.showToast(
-
       'Driver ID is missing. Please login again.',
-
       'danger'
-
     );
-
     return;
-
   }
-
-
-  // =====================================================
-  // VALIDATE STUDENT
-  // =====================================================
 
   if (!student?.parentId) {
-
     this.toastService.showToast(
-
       'Student information is missing.',
-
       'danger'
-
     );
-
     return;
-
   }
 
-
-  // =====================================================
-  // REMEMBER CURRENT POSITION
-  // BEFORE STATUS CHANGES
-  // =====================================================
-
-  let previousIndex = -1;
-
-
-  if (rideType === 'morning') {
-
-
-    // ---------------------------------------------------
-    // MORNING PICKUP
-    // ---------------------------------------------------
-
-    if (apiStatus === 'picked_up') {
-
-      previousIndex =
-        this.morningPendingStudents.findIndex(
-
-          s =>
-            s.parentId ===
-            student.parentId
-
-        );
-
-    }
-
-
-    // ---------------------------------------------------
-    // MORNING SCHOOL DROP
-    // ---------------------------------------------------
-
-    else if (
-      apiStatus === 'dropped_at_school'
-    ) {
-
-      previousIndex =
-        this.morningPickedStudents.findIndex(
-
-          s =>
-            s.parentId ===
-            student.parentId
-
-        );
-
-    }
-
+  if (
+    rideType === 'morning' &&
+    !this.isMorningRideActive
+  ) {
+    this.toastService.showToast(
+      'Morning ride is not active.',
+      'warning'
+    );
+    this.loadDashboard();
+    return;
   }
 
-
-  else {
-
-
-    // ---------------------------------------------------
-    // EVENING SCHOOL PICKUP
-    // ---------------------------------------------------
-
-    if (apiStatus === 'picked_up') {
-
-      previousIndex =
-        this.returnWaitingStudents.findIndex(
-
-          s =>
-            s.parentId ===
-            student.parentId
-
-        );
-
-    }
-
-
-    // ---------------------------------------------------
-    // EVENING HOME DROP
-    // ---------------------------------------------------
-
-    else if (
-      apiStatus === 'dropped_at_home'
-    ) {
-
-      previousIndex =
-        this.returnOnboardStudents.findIndex(
-
-          s =>
-            s.parentId ===
-            student.parentId
-
-        );
-
-    }
-
+  if (
+    rideType === 'evening' &&
+    !this.isReturnRideActive
+  ) {
+    this.toastService.showToast(
+      'Return ride is not active. Start the return ride first.',
+      'warning'
+    );
+    this.loadDashboard();
+    return;
   }
 
-
-
-  // =====================================================
-  // LOG
-  // =====================================================
-
-  console.log(
-    '🚐 STUDENT ACTION',
-    {
-      driverId: this.driverId,
-      parentId: student.parentId,
-      rideType,
-      status: apiStatus
-    }
-  );
-
-
-
-  // =====================================================
-  // CALL DEDICATED RIDE API
-  // =====================================================
-
-  this.driverService
-
-    .updateStudentStatus(
-
-      this.driverId,
-
-      student.parentId,
-
-      rideType,
-
-      apiStatus
-
-    )
-
-    .subscribe({
-
-      // =================================================
-      // SUCCESS
-      // =================================================
-
-      next: (response: any) => {
-
-
-        console.log(
-          '✅ STUDENT ACTION SUCCESS:',
-          response
-        );
-
-
-        // ===============================================
-        // UPDATE LOCAL STATUS
-        // ===============================================
-
-        if (rideType === 'morning') {
-
-          this.morningStatuses[
-            student.parentId
-          ] = uiStatus;
-
-        }
-
-        else {
-
-          this.eveningStatuses[
-            student.parentId
-          ] = uiStatus;
-
-        }
-
-
-        // ===============================================
-        // SAVE LOCAL STATUS
-        // ===============================================
-
-        this.persistStatuses();
-
-
-
-        // ===============================================
-        // MAINTAIN MORNING CAROUSEL
-        // ===============================================
-
-        if (rideType === 'morning') {
-
-
-          // ---------------------------------------------
-          // MORNING PICKUP
-          // ---------------------------------------------
-
-          if (
-            apiStatus === 'picked_up'
-          ) {
-
-
-            const remaining =
-
-              this.morningPendingStudents.length;
-
-
-            this.selectedMorningPickupIndex =
-
-              remaining > 0
-
-                ? Math.min(
-
-                    previousIndex >= 0
-                      ? previousIndex
-                      : 0,
-
-                    remaining - 1
-
-                  )
-
-                : 0;
-
-          }
-
-
-          // ---------------------------------------------
-          // MORNING SCHOOL DROP
-          // ---------------------------------------------
-
-          else if (
-
-            apiStatus ===
-            'dropped_at_school'
-
-          ) {
-
-
-            const remaining =
-
-              this.morningPickedStudents.length;
-
-
-            this.selectedMorningDropIndex =
-
-              remaining > 0
-
-                ? Math.min(
-
-                    previousIndex >= 0
-                      ? previousIndex
-                      : 0,
-
-                    remaining - 1
-
-                  )
-
-                : 0;
-
-          }
-
-        }
-
-
-
-        // ===============================================
-        // MAINTAIN EVENING CAROUSEL
-        // ===============================================
-
-        else {
-
-
-          // ---------------------------------------------
-          // SCHOOL PICKUP
-          // ---------------------------------------------
-
-          if (
-            apiStatus === 'picked_up'
-          ) {
-
-
-            const remaining =
-
-              this.returnWaitingStudents.length;
-
-
-            this.selectedReturnBoardingIndex =
-
-              remaining > 0
-
-                ? Math.min(
-
-                    previousIndex >= 0
-                      ? previousIndex
-                      : 0,
-
-                    remaining - 1
-
-                  )
-
-                : 0;
-
-
-
-            // -------------------------------------------
-            // AUTO SELECT NEWLY BOARDED STUDENT
-            // FOR HOME DROP
-            // -------------------------------------------
-
-            const onboardIndex =
-
-              this.returnOnboardStudents.findIndex(
-
-                s =>
-                  s.parentId ===
-                  student.parentId
-
-              );
-
-
-            if (onboardIndex >= 0) {
-
-              this.selectedReturnDropIndex =
-                onboardIndex;
-
-            }
-
-          }
-
-
-          // ---------------------------------------------
-          // HOME DROP
-          // ---------------------------------------------
-
-          if (
-            apiStatus ===
-            'dropped_at_home'
-          ) {
-
-
-            const remaining =
-
-              this.returnOnboardStudents.length;
-
-
-            this.selectedReturnDropIndex =
-
-              remaining > 0
-
-                ? Math.min(
-
-                    previousIndex >= 0
-                      ? previousIndex
-                      : 0,
-
-                    remaining - 1
-
-                  )
-
-                : 0;
-
-          }
-
-        }
-
-
-
-        // ===============================================
-        // FORCE ANGULAR CHANGE DETECTION
-        // ===============================================
-
-        this.morningStatuses = {
-
-          ...this.morningStatuses
-
-        };
-
-
-        this.eveningStatuses = {
-
-          ...this.eveningStatuses
-
-        };
-
-
-
-        // ===============================================
-        // ADVANCE DRIVER WORKFLOW
-        // ===============================================
-
-        this.advanceStageIfNeeded();
-
-
-
-        // ===============================================
-        // SUCCESS TOAST
-        // ===============================================
-
+  const actionKey =
+    `${rideType}:${student.parentId}:${apiStatus}`;
+
+  if (this.studentActionLocks.has(actionKey)) {
+    return;
+  }
+
+  this.studentActionLocks.add(actionKey);
+
+  let request$;
+
+  if (rideType === 'morning' && apiStatus === 'picked_up') {
+    request$ = this.rideService.pickStudentMorning(
+      this.driverId, student.parentId
+    );
+  } else if (rideType === 'morning' && apiStatus === 'dropped_at_school') {
+    request$ = this.rideService.dropStudentSchool(
+      this.driverId, student.parentId
+    );
+  } else if (rideType === 'evening' && apiStatus === 'picked_from_school') {
+    request$ = this.rideService.pickStudentFromSchool(
+      this.driverId, student.parentId
+    );
+  } else if (rideType === 'evening' && apiStatus === 'dropped_at_home') {
+    request$ = this.rideService.dropStudentHome(
+      this.driverId, student.parentId
+    );
+  } else {
+    this.studentActionLocks.delete(actionKey);
+    this.toastService.showToast(
+      `Unsupported ${rideType} student action`,
+      'danger'
+    );
+    return;
+  }
+
+  request$.subscribe({
+    next: (response: any) => {
+      if (!response?.success) {
+        this.studentActionLocks.delete(actionKey);
         this.toastService.showToast(
-
-          successMessage,
-
-          'success'
-
-        );
-
-      },
-
-
-      // =================================================
-      // ERROR
-      // =================================================
-
-      error: (error: any) => {
-
-
-        console.error(
-
-          '❌ STUDENT ACTION ERROR:',
-
-          error
-
-        );
-
-
-        const message =
-
-          error?.error?.message ||
-
-          error?.message ||
-
-          'Unable to update student';
-
-
-        this.toastService.showToast(
-
-          message,
-
+          response?.message || 'Unable to update student',
           'danger'
-
         );
-
+        this.loadDashboard();
+        return;
       }
 
-    });
+      const timestamp =
+        response?.data?.timestamp ||
+        response?.timestamp ||
+        new Date().toISOString();
 
+      this.applyLocalStudentStatus(
+        student, rideType, apiStatus, timestamp
+      );
+
+      if (rideType === 'morning') {
+        this.morningStatuses = {
+          ...this.morningStatuses,
+          [student.parentId]: uiStatus
+        };
+      } else {
+        this.eveningStatuses = {
+          ...this.eveningStatuses,
+          [student.parentId]: uiStatus
+        };
+      }
+
+      this.persistStatuses();
+      this.normalizeAllCarouselIndexes();
+      this.studentActionLocks.delete(actionKey);
+
+      this.toastService.showToast(
+        successMessage,
+        'success'
+      );
+
+      this.loadDashboard();
+    },
+
+    error: (error: any) => {
+      this.studentActionLocks.delete(actionKey);
+      console.error('[STUDENT ACTION] ERROR', error);
+      this.loadDashboard();
+      this.toastService.showToast(
+        error?.error?.message ||
+        error?.message ||
+        'Unable to update student',
+        'danger'
+      );
+    }
+  });
 }
+
+private applyLocalStudentStatus(
+  student: any,
+  rideType: RideType,
+  status:
+    | 'picked_up'
+    | 'picked_from_school'
+    | 'dropped_at_school'
+    | 'dropped_at_home',
+  timestamp: string | Date
+): void {
+  const value = timestamp instanceof Date
+    ? timestamp
+    : new Date(timestamp);
+
+  if (rideType === 'morning') {
+    student.morningStatus = status;
+
+    if (status === 'picked_up') {
+      student.morningPickedUpAt = value;
+    }
+
+    if (status === 'dropped_at_school') {
+      student.morningDroppedAtSchoolAt = value;
+    }
+
+    return;
+  }
+
+  student.eveningStatus = status;
+
+  if (status === 'picked_from_school') {
+    student.eveningPickedFromSchoolAt = value;
+  }
+
+  if (status === 'dropped_at_home') {
+    student.eveningDroppedAtHomeAt = value;
+  }
+}
+
+private reconcileStageWithStudentState(
+  workflow: any
+): void {
+  if (!workflow || workflow.activeRideStatus !== 'started') {
+    return;
+  }
+
+  const activeRideType = workflow.activeRideType as RideType | null;
+
+  if (activeRideType === 'morning') {
+    if (
+      this.morningDroppedStudents.length === this.presentStudents.length &&
+      this.presentStudents.length > 0
+    ) {
+      this.stage = 'morning-complete';
+      return;
+    }
+
+    if (this.morningPendingStudents.length > 0) {
+      this.stage = 'morning-pickup';
+      return;
+    }
+
+    if (this.morningPickedStudents.length > 0) {
+      this.stage = 'morning-school-drop';
+    }
+
+    return;
+  }
+
+  if (activeRideType === 'evening') {
+    if (
+      this.returnDroppedStudents.length === this.presentStudents.length &&
+      this.presentStudents.length > 0
+    ) {
+      this.stage = 'return-complete';
+      return;
+    }
+
+    if (
+      this.returnWaitingStudents.length === 0 &&
+      this.returnOnboardStudents.length > 0
+    ) {
+      this.stage = 'return-home-drop';
+      return;
+    }
+
+    this.stage = 'return-boarding';
+  }
+}
+
+
 
 // =====================================================
 // STUDENT ADDRESS + GOOGLE MAPS DIRECTIONS
@@ -2301,146 +2123,61 @@ private getStudentMapDestination(
   ).trim();
 }
 
+  /*
+   * Kept for compatibility with older template/code.
+   *
+   * IMPORTANT:
+   * This method must NOT change this.stage.
+   * The backend workflow is the only authority.
+   */
   private advanceStageIfNeeded(): void {
-
-
-    /*
-      * Keep morning swipe selection valid.
-      */
-    if (
-      this.morningPendingStudents.length > 0 &&
-      this.selectedMorningPickupIndex >=
-      this.morningPendingStudents.length
-    ) {
-
-      this.selectedMorningPickupIndex =
-        this.morningPendingStudents.length - 1;
-    }
-
-
-    /*
-     * Keep return swipe selection valid.
-     */
-    if (
-      this.returnWaitingStudents.length > 0 &&
-      this.selectedReturnBoardingIndex >=
-      this.returnWaitingStudents.length
-    ) {
-
-      this.selectedReturnBoardingIndex =
-        this.returnWaitingStudents.length - 1;
-    }
-
-
-    if (
-      this.stage === 'morning-pickup' &&
-      this.morningPendingStudents.length === 0
-    ) {
-
-      this.setStage(
-        'morning-school-drop'
-      );
-
-      return;
-    }
-
-
-    if (
-      this.stage === 'morning-school-drop' &&
-      this.morningPickedStudents.length === 0 &&
-      this.presentStudents.length > 0
-    ) {
-
-      this.setStage(
-        'morning-complete'
-      );
-
-      return;
-    }
-
-
-    if (
-      this.stage === 'return-boarding' &&
-      this.returnWaitingStudents.length === 0
-    ) {
-
-      this.setStage(
-        'return-home-drop'
-      );
-
-      return;
-    }
-
-
-    if (
-      this.stage === 'return-home-drop' &&
-      this.returnOnboardStudents.length === 0 &&
-      this.returnDroppedStudents.length > 0
-    ) {
-
-      this.setStage(
-        'return-complete'
-      );
-    }
-
-    //exisiting
-    if (
-      this.stage === 'morning-pickup' &&
-      this.morningPendingStudents.length === 0
-    ) {
-      this.setStage('morning-school-drop');
-      return;
-    }
-
-    if (
-      this.stage === 'morning-school-drop' &&
-      this.morningPickedStudents.length === 0 &&
-      this.presentStudents.length > 0
-    ) {
-      this.setStage('morning-complete');
-      return;
-    }
-
-    if (
-      this.stage === 'return-boarding' &&
-      this.returnWaitingStudents.length === 0
-    ) {
-      this.setStage('return-home-drop');
-      return;
-    }
-
-    if (
-      this.stage === 'return-home-drop' &&
-      this.returnOnboardStudents.length === 0 &&
-      this.returnDroppedStudents.length > 0
-    ) {
-      this.setStage('return-complete');
-    }
+    this.normalizeAllCarouselIndexes();
   }
+
 
   private setStage(stage: DriverStage): void {
     this.stage = stage;
   }
 
-   getMorningStatus(
-    student: any
-  ): StudentUiStatus {
-    return (
-      this.morningStatuses[
-      student.parentId
-      ] || 'Pending'
-    );
+  getMorningStatus(student: any): StudentUiStatus {
+    switch (student?.morningStatus) {
+      case 'picked_up':
+        return 'Picked';
+      case 'dropped_at_school':
+        return 'DroppedAtSchool';
+      case 'waiting':
+      case 'pending':
+        return 'Pending';
+    }
+
+    // Backend always returns morningStatus. Keep local fallback only for legacy
+    // objects that do not contain the field at all.
+    if (student && Object.prototype.hasOwnProperty.call(student, 'morningStatus')) {
+      return 'Pending';
+    }
+
+    return this.morningStatuses[student?.parentId] || 'Pending';
   }
 
-   getEveningStatus(
-    student: any
-  ): StudentUiStatus {
-    return (
-      this.eveningStatuses[
-      student.parentId
-      ] || 'Waiting'
-    );
+  getEveningStatus(student: any): StudentUiStatus {
+    switch (student?.eveningStatus) {
+      case 'picked_from_school':
+        return 'PickedFromSchool';
+      case 'dropped_at_home':
+        return 'DroppedAtHome';
+      case 'waiting_school_finish':
+      case 'waiting_at_school':
+      case 'waiting':
+        return 'Waiting';
+    }
+
+    if (student && Object.prototype.hasOwnProperty.call(student, 'eveningStatus')) {
+      return 'Waiting';
+    }
+
+    return this.eveningStatuses[student?.parentId] || 'Waiting';
   }
+
 
   private restoreStatuses(
     key: string
@@ -2518,9 +2255,78 @@ private getStudentMapDestination(
       || 'Driver Dashboard';
   }
 
-  goBack() {
+  /**
+   * Return to the dashboard.
+   *
+   * TEST MODE:
+   * When the complete screen is visible, the Back to Dashboard
+   * button resets today's completed test cycle first. This lets
+   * QA immediately start Home -> School again without waiting
+   * for the next day.
+   */
+  goBack(): void {
+    if (this.stage === 'day-complete') {
+      this.resetCompletedTestCycle();
+      return;
+    }
+
     this.currentView = 'dashboard';
     this.pageTitle = 'Driver Dashboard';
+  }
+
+  private resetCompletedTestCycle(): void {
+    if (!this.driverId) {
+      this.toastService.showToast(
+        'Driver ID is missing. Please login again.',
+        'danger'
+      );
+      return;
+    }
+
+    this.rideService
+      .resetTestCycle(this.driverId)
+      .subscribe({
+        next: () => {
+          // Stop any remaining GPS session before reloading.
+          this.locationService.stopTracking();
+
+          // Clear only UI-side cached student statuses.
+          this.morningStatuses = {};
+          this.eveningStatuses = {};
+
+          localStorage.removeItem(
+            this.MORNING_STATUS_KEY
+          );
+
+          localStorage.removeItem(
+            this.EVENING_STATUS_KEY
+          );
+
+          this.stage = 'morning-ready';
+          this.currentView = 'dashboard';
+          this.pageTitle = 'Driver Dashboard';
+
+          this.toastService.showToast(
+            'Test cycle reset. Start the morning ride again.',
+            'success'
+          );
+
+          // MongoDB is authoritative; reload the dashboard.
+          this.loadDashboard();
+        },
+        error: (error: any) => {
+          console.error(
+            'Test cycle reset error:',
+            error
+          );
+
+          this.toastService.showToast(
+            error?.error?.message ||
+            'Unable to reset the test ride cycle',
+            'danger'
+          );
+        }
+      });
   }
 
   // =====================================================
@@ -2609,23 +2415,22 @@ private getStudentMapDestination(
   // DEV / NEXT-DAY RESET
   // =====================================================
 
+  /**
+   * Legacy UI-only reset helper.
+   *
+   * This intentionally does NOT reset MongoDB. Use the
+   * day-complete Back to Dashboard button for the test-cycle
+   * reset, because that calls the protected backend endpoint.
+   */
   resetDay(): void {
-
     this.locationService.stopTracking();
-
     this.morningStatuses = {};
     this.eveningStatuses = {};
 
-    localStorage.removeItem(
-      this.MORNING_STATUS_KEY
-    );
-
-    localStorage.removeItem(
-      this.EVENING_STATUS_KEY
-    );
+    localStorage.removeItem(this.MORNING_STATUS_KEY);
+    localStorage.removeItem(this.EVENING_STATUS_KEY);
 
     this.stage = 'morning-ready';
-
     this.loadDashboard();
   }
 
@@ -2641,6 +2446,17 @@ private getStudentMapDestination(
       return;
     }
 
+    /*
+     * LOGOUT IS NOT END RIDE.
+     *
+     * Do NOT call rideService.endRide().
+     * Do NOT reset Parent.morningStatus/eveningStatus.
+     * Do NOT delete the Ride document.
+     *
+     * MongoDB keeps the ride and student progress.
+     * After login, loadDashboard() reads the same workflow
+     * and resumes the correct screen.
+     */
     this.locationService.stopTracking();
 
     [
@@ -2650,7 +2466,6 @@ private getStudentMapDestination(
       'driverId',
       'userName',
       'rideStarted',
-      // this.STAGE_KEY,
       this.MORNING_STATUS_KEY,
       this.EVENING_STATUS_KEY
     ].forEach(
