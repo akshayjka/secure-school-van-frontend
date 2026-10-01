@@ -1,5 +1,6 @@
 import {
   Component,
+  OnDestroy,
   OnInit
 } from '@angular/core';
 
@@ -13,9 +14,9 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonSpinner,
   IonTitle,
-  IonToolbar,
-  IonSpinner
+  IonToolbar
 } from '@ionic/angular/standalone';
 
 import {
@@ -40,370 +41,278 @@ import {
 
 
 @Component({
-
-  selector:
-    'app-journey-report',
-
-  templateUrl:
-    './journey-report.page.html',
-
-  styleUrls:
-    ['./journey-report.page.scss'],
-
+  selector: 'app-journey-report',
+  templateUrl: './journey-report.page.html',
+  styleUrls: ['./journey-report.page.scss'],
   standalone: true,
-
   imports: [
-
     CommonModule,
-
     IonContent,
-
     IonHeader,
-
     IonToolbar,
-
     IonTitle,
-
     IonButtons,
-
     IonButton,
-
     IonIcon,
-
     IonSpinner
-
   ]
-
 })
-
-
 export class JourneyReportPage
-  implements OnInit {
+  implements OnInit, OnDestroy {
 
-
-  // =====================================================
-  // IDENTIFIER
-  // =====================================================
-
-  parentId:
-    string | null = null;
-
-
-  // =====================================================
-  // DATE
-  // =====================================================
+  parentId: string | null = null;
 
   selectedReportDate = '';
 
-  todayDate = '';
+  /**
+   * Prevent selecting a future date.
+   */
+  maxReportDate = '';
 
+  journeyReport: any = null;
 
-  // =====================================================
-  // REPORT
-  // =====================================================
+  journeyReportLoading = false;
 
-  journeyReport:
-    any = null;
+  private destroyed = false;
 
-  journeyReportLoading =
-    false;
-
-
-  // =====================================================
-  // CONSTRUCTOR
-  // =====================================================
 
   constructor(
-
-    private parentService:
-      ParentService,
-
-    private router:
-      Router
-
+    private parentService: ParentService,
+    private router: Router
   ) {
 
     addIcons({
-
       arrowBackOutline,
-
       calendarOutline,
-
       homeOutline,
-
       schoolOutline,
-
       informationCircleOutline
-
     });
 
   }
 
 
-  // =====================================================
-  // INIT
-  // =====================================================
-
   ngOnInit(): void {
 
     this.parentId =
-      localStorage.getItem(
-        'parentId'
-      );
-
+      localStorage.getItem('parentId');
 
     if (!this.parentId) {
 
       this.router.navigateByUrl(
-
         '/auth/login',
-
         {
           replaceUrl: true
         }
-
       );
 
       return;
-
     }
 
-
-    this.todayDate =
+    this.selectedReportDate =
       this.getTodayDate();
 
-
-    this.selectedReportDate =
-      this.todayDate;
-
+    this.maxReportDate =
+      this.selectedReportDate;
 
     this.loadJourneyReport();
-
   }
 
 
-  // =====================================================
-  // TODAY
-  // =====================================================
+  /**
+   * Reload whenever Ionic brings this page back into view.
+   * This keeps the report current after returning from another page.
+   */
+  ionViewWillEnter(): void {
+
+    const storedParentId =
+      localStorage.getItem('parentId');
+
+    if (storedParentId) {
+      this.parentId = storedParentId;
+    }
+
+    if (!this.parentId) {
+      return;
+    }
+
+    if (!this.selectedReportDate) {
+      this.selectedReportDate =
+        this.getTodayDate();
+    }
+
+    this.maxReportDate =
+      this.getTodayDate();
+
+    this.loadJourneyReport();
+  }
+
 
   private getTodayDate(): string {
 
     const now =
       new Date();
 
-
     const year =
       now.getFullYear();
-
 
     const month =
       String(
         now.getMonth() + 1
-      )
-        .padStart(
-          2,
-          '0'
-        );
-
+      ).padStart(
+        2,
+        '0'
+      );
 
     const day =
       String(
         now.getDate()
-      )
-        .padStart(
-          2,
-          '0'
-        );
-
+      ).padStart(
+        2,
+        '0'
+      );
 
     return `${year}-${month}-${day}`;
-
   }
 
 
-  // =====================================================
-  // LOAD REPORT
-  // =====================================================
-
   loadJourneyReport(): void {
 
-    if (!this.parentId) {
-
+    if (
+      this.destroyed ||
+      !this.parentId ||
+      !this.selectedReportDate
+    ) {
       return;
-
     }
 
-
-    if (!this.selectedReportDate) {
-
-      return;
-
-    }
-
-
-    this.journeyReportLoading =
-      true;
-
-
-    this.journeyReport =
-      null;
-
+    this.journeyReportLoading = true;
+    this.journeyReport = null;
 
     this.parentService
-
       .getJourneyReport(
-
         this.parentId,
-
         this.selectedReportDate
-
       )
-
       .subscribe({
 
         next: (response: any) => {
 
-          console.log(
-
-            'JOURNEY REPORT:',
-
-            response
-
-          );
-
+          if (this.destroyed) {
+            return;
+          }
 
           this.journeyReport =
-            response?.data ||
-            null;
-
+            response?.data || null;
 
           this.journeyReportLoading =
             false;
-
         },
 
+        error: (error: any) => {
 
-        error: (error) => {
+          if (this.destroyed) {
+            return;
+          }
 
           console.error(
-
             'Journey report error:',
-
             error
-
           );
-
 
           this.journeyReport =
             null;
 
-
           this.journeyReportLoading =
             false;
-
         }
-
       });
-
   }
 
 
-  // =====================================================
-  // DATE CHANGE
-  // =====================================================
-
   onReportDateChange(
-    event: any
+    event: Event
   ): void {
 
+    const input =
+      event.target as HTMLInputElement;
+
     const selectedDate =
-      event?.detail?.value ||
-
-      event?.target?.value ||
-
-      '';
-
+      input?.value || '';
 
     if (!selectedDate) {
-
       return;
-
     }
-
 
     this.selectedReportDate =
       selectedDate;
 
-
     this.loadJourneyReport();
-
   }
 
 
-  // =====================================================
-  // FORMAT TIME
-  // =====================================================
+  get hasJourneyData(): boolean {
+
+    if (!this.journeyReport) {
+      return false;
+    }
+
+    return Boolean(
+      this.journeyReport.morning?.pickedUpAt ||
+      this.journeyReport.morning?.droppedAtSchoolAt ||
+      this.journeyReport.evening?.pickedFromSchoolAt ||
+      this.journeyReport.evening?.droppedAtHomeAt
+    );
+  }
+
 
   formatJourneyTime(
-
-    value:
-      string |
-      Date |
-      null
-
+    value: string | Date | null
   ): string {
 
     if (!value) {
-
       return 'Not recorded';
-
     }
-
 
     const date =
       new Date(value);
 
-
     if (
-      isNaN(
+      Number.isNaN(
         date.getTime()
       )
     ) {
-
       return 'Not recorded';
-
     }
 
-
     return date.toLocaleTimeString(
-
       'en-IN',
-
       {
-
         hour: 'numeric',
-
         minute: '2-digit',
-
         hour12: true
-
       }
-
     );
-
   }
 
 
-  // =====================================================
-  // BACK
-  // =====================================================
-
   goBack(): void {
+
+    if (
+      window.history.length > 1
+    ) {
+      window.history.back();
+      return;
+    }
 
     this.router.navigateByUrl(
       '/parent/dashboard'
     );
-
   }
 
+
+  ngOnDestroy(): void {
+
+    this.destroyed = true;
+  }
 }

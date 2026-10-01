@@ -264,6 +264,9 @@ export class DashboardPage
 
   showStudentProfile = false;
 
+  // Driver details modal
+  showDriverDetails = false;
+
 
 
   // =====================================================
@@ -3275,6 +3278,32 @@ export class DashboardPage
 
 
   // =====================================================
+  // DRIVER DETAILS MODAL
+  // =====================================================
+
+  openDriverDetails(): void {
+    this.showDriverDetails = true;
+  }
+
+  closeDriverDetails(): void {
+    this.showDriverDetails = false;
+  }
+
+
+  /**
+   * Normalized vehicle number used by the Driver Details modal.
+   */
+  get driverVehicleNumber(): string {
+    return (
+      this.driver?.vehicleNumber ||
+      this.driver?.vehicleNo ||
+      this.driver?.vehicle?.vehicleNumber ||
+      'Vehicle number not available'
+    );
+  }
+
+
+  // =====================================================
   // STUDENT PROFILE
   // =====================================================
 
@@ -3502,6 +3531,8 @@ export class DashboardPage
     this.parent = {};
 
     this.driver = {};
+
+    this.showDriverDetails = false;
 
     this.driverId = null;
 

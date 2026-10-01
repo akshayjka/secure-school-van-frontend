@@ -1,516 +1,505 @@
-/* =====================================================
-   TOOLBAR
-===================================================== */
+:host {
+  --navy: #172033;
+  --navy-soft: #253653;
+  --orange: #ffad18;
+  --orange-dark: #e58a00;
+  --yellow-soft: #fff4c9;
+  --blue: #4161d1;
+  --green: #16833f;
+  --purple: #7358d8;
+  --red: #c83a3a;
+  --text: #172033;
+  --muted: #718096;
+  --border: #e9edf3;
+  --surface: #ffffff;
+  --page: #f7f9fc;
+  --shadow: 0 8px 26px rgba(23, 32, 51, .06);
 
-ion-toolbar {
-  --background: #ffffff;
-
-  --color: #172033;
-
-  border-bottom: 1px solid #edf0f5;
+  display: block;
 }
 
+/* =========================================================
+   SAME PARENT THEME TOP BAR AS DASHBOARD
+   ========================================================= */
 
-/* =====================================================
-   PAGE
-===================================================== */
-
-.journey-report-page {
-  min-height: 100%;
-
-  padding: 18px 16px 35px;
-
-  background: #f7f9fc;
-}
-
-
-/* =====================================================
-   PAGE HEADER
-===================================================== */
-
-.journey-page-header {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 14px;
-
-  padding: 18px;
-
-  margin-bottom: 15px;
-
-  background: #ffffff;
-
-  border-radius: 19px;
+.parent-header ion-toolbar {
+  --background: var(--orange);
+  --color: #fff;
+  --border-width: 0;
+  --border-color: transparent;
+  --min-height: 58px;
+  --padding-start: 6px;
+  --padding-end: 8px;
 
   box-shadow:
-    0 7px 24px rgba(20, 30, 50, 0.06);
+    0 3px 12px rgba(23, 32, 51, .14);
 }
 
-
-.journey-header-content {
-  min-width: 0;
+.parent-header ion-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: .1px;
 }
 
-
-.journey-eyebrow {
-  display: block;
-
-  margin-bottom: 3px;
-
-  font-size: 10px;
-
-  font-weight: 800;
-
-  letter-spacing: 1px;
-
-  color: #f97316;
+.parent-header ion-buttons {
+  display: flex;
+  align-items: center;
 }
 
-
-.journey-page-header h1 {
-  margin: 0;
-
-  font-size: 21px;
-
-  font-weight: 800;
-
-  color: #172033;
-}
-
-
-.journey-page-header p {
-  margin: 4px 0 0;
-
-  font-size: 12px;
-
-  line-height: 1.45;
-
-  color: #6d7688;
-}
-
-
-/* =====================================================
-   CALENDAR ICON
-===================================================== */
-
-.journey-calendar-icon {
+.parent-header .back-button {
   width: 48px;
   height: 48px;
 
-  flex-shrink: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
 
-  display: flex;
+  --color: #fff;
+  --background: transparent;
+  --background-hover: rgba(255, 255, 255, .12);
+  --background-activated: rgba(255, 255, 255, .18);
+  --border-radius: 50%;
+}
 
-  align-items: center;
-  justify-content: center;
+.parent-header .back-button::part(native) {
+  border-radius: 50%;
+}
 
-  border-radius: 14px;
-
-  background: #fff3e6;
+.parent-header .back-button ion-icon {
+  display: block !important;
+  color: #fff !important;
+  font-size: 27px;
 }
 
 
-.journey-calendar-icon ion-icon {
-  font-size: 24px;
+/* =========================================================
+   PAGE
+   ========================================================= */
 
-  color: #f97316;
+ion-content {
+  --background: var(--page);
 }
 
-
-/* =====================================================
-   DATE CARD
-===================================================== */
-
-.journey-date-card {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 15px;
-
-  padding: 14px;
-
-  margin-bottom: 15px;
-
-  background: #ffffff;
-
-  border-radius: 16px;
-
-  box-shadow:
-    0 5px 18px rgba(20, 30, 50, 0.05);
-}
-
-
-.date-label {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 3px;
-
-  min-width: 0;
-}
-
-
-.date-label span {
-  font-size: 9px;
-
-  font-weight: 800;
-
-  letter-spacing: 0.8px;
-
-  color: #8791a5;
-}
-
-
-.date-label strong {
-  font-size: 13px;
-
-  color: #172033;
-}
-
-
-.journey-date-card input {
-  width: 155px;
-
-  height: 42px;
-
-  padding: 0 10px;
-
-  border: 1px solid #dfe5ee;
-
-  border-radius: 11px;
-
-  background: #f8fafc;
-
-  color: #172033;
-
-  font-size: 12px;
-
-  font-weight: 600;
-
-  outline: none;
-
+.journey-page {
+  width: min(100%, 940px);
+  margin: 0 auto;
+  padding: 18px 14px 34px;
   box-sizing: border-box;
 }
 
 
-.journey-date-card input:focus {
-  border-color: #f97316;
+/* =========================================================
+   HERO
+   ========================================================= */
 
-  background: #ffffff;
-}
-
-
-/* =====================================================
-   LOADING
-===================================================== */
-
-.journey-loading {
+.journey-hero {
   display: flex;
-
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 16px;
 
-  gap: 8px;
+  padding: 20px;
+  border: 1px solid #e7ebef;
+  border-radius: 22px;
 
-  min-height: 90px;
-
-  color: #64748b;
-
-  font-size: 12px;
-
-  font-weight: 600;
-}
-
-
-/* =====================================================
-   JOURNEY SECTION
-===================================================== */
-
-.journey-section {
-  padding: 16px;
-
-  margin-bottom: 14px;
-
-  border-radius: 18px;
-
-  background: #ffffff;
+  background: #fff;
 
   box-shadow:
-    0 6px 20px rgba(20, 30, 50, 0.05);
+    0 8px 26px rgba(23, 32, 51, .06);
 }
 
+.journey-hero-copy {
+  min-width: 0;
+}
+
+.journey-eyebrow,
+.journey-card-label,
+.journey-section-label {
+  display: block;
+  color: #8a96a8;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .8px;
+}
+
+.journey-hero h1 {
+  margin: 5px 0 5px;
+  color: var(--text);
+  font-size: 25px;
+  line-height: 1.08;
+  font-weight: 900;
+}
+
+.journey-hero p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.journey-hero-icon {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 15px;
+  background: #fff1d7;
+  color: var(--orange-dark);
+
+  font-size: 23px;
+}
+
+
+/* =========================================================
+   DATE CARD
+   ========================================================= */
+
+.journey-date-card {
+  margin-top: 12px;
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #fff;
+
+  box-shadow: var(--shadow);
+}
+
+.journey-date-label {
+  display: block;
+  margin: 4px 0 8px;
+
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.journey-date-input-wrap {
+  position: relative;
+}
+
+.journey-date-input-wrap input {
+  width: 100%;
+  height: 52px;
+
+  box-sizing: border-box;
+
+  padding: 0 44px 0 14px;
+
+  border: 1px solid #dce3ed;
+  border-radius: 14px;
+
+  outline: none;
+
+  background: #f8fafc;
+  color: var(--text);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 750;
+
+  -webkit-appearance: none;
+}
+
+.journey-date-input-wrap input:focus {
+  border-color: #aebcf2;
+  box-shadow: 0 0 0 3px rgba(65, 97, 209, .08);
+}
+
+.journey-date-input-wrap ion-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+
+  transform: translateY(-50%);
+
+  color: #5d6a7c;
+  font-size: 17px;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.journey-loading-card {
+  min-height: 100px;
+  margin-top: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #fff;
+
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.journey-loading-card ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+
+/* =========================================================
+   JOURNEY SECTION
+   ========================================================= */
+
+.journey-section {
+  margin-top: 12px;
+  padding: 17px;
+
+  border: 1px solid var(--border);
+  border-radius: 21px;
+
+  background: #fff;
+
+  box-shadow: var(--shadow);
+}
 
 .journey-section-header {
   display: flex;
-
   align-items: center;
-
-  gap: 11px;
-
-  margin-bottom: 17px;
+  gap: 12px;
 }
-
 
 .journey-section-icon {
-  width: 41px;
-  height: 41px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
 
-  flex-shrink: 0;
+  display: grid;
+  place-items: center;
 
-  border-radius: 12px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-}
-
-
-.morning-icon {
-  background: #dcfce7;
-}
-
-
-.morning-icon ion-icon {
-  color: #16a34a;
-
+  border-radius: 14px;
   font-size: 21px;
 }
 
+.journey-section-icon.morning {
+  background: #e2f8ed;
+  color: var(--green);
+}
 
-.evening-icon {
-  background: #ede9fe;
+.journey-section-icon.evening {
+  background: #eeeaff;
+  color: var(--purple);
+}
+
+.journey-section-heading {
+  min-width: 0;
+}
+
+.journey-section-heading h2 {
+  margin: 3px 0 0;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 900;
 }
 
 
-.evening-icon ion-icon {
-  color: #7c3aed;
-
-  font-size: 21px;
-}
-
-
-.journey-section-header h3 {
-  margin: 0;
-
-  font-size: 16px;
-
-  font-weight: 800;
-
-  color: #172033;
-}
-
-
-.journey-section-header span {
-  display: block;
-
-  margin-top: 3px;
-
-  font-size: 11px;
-
-  color: #64748b;
-}
-
-
-/* =====================================================
+/* =========================================================
    TIMELINE
-===================================================== */
+   ========================================================= */
 
 .journey-timeline {
-  display: flex;
-
-  flex-direction: column;
+  margin-top: 17px;
 }
-
 
 .journey-event {
-  display: flex;
-
-  min-height: 68px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  min-height: 70px;
 }
 
-
-.journey-event-line {
-  width: 24px;
-
+.journey-event-marker {
   position: relative;
-
-  flex-shrink: 0;
-
   display: flex;
-
   justify-content: center;
 }
-
-
-.journey-event-line::after {
-  content: '';
-
-  position: absolute;
-
-  top: 14px;
-
-  bottom: -3px;
-
-  width: 2px;
-
-  background: #dce2ea;
-}
-
-
-.journey-event:last-child
-.journey-event-line::after {
-  display: none;
-}
-
 
 .journey-dot {
   position: relative;
-
   z-index: 2;
 
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
 
-  margin-top: 5px;
-
+  border: 3px solid #d9f5e4;
   border-radius: 50%;
 
-  background: #16a34a;
-
-  box-shadow:
-    0 0 0 4px #dcfce7;
+  background: var(--green);
+  box-sizing: content-box;
 }
 
+.journey-line {
+  position: absolute;
+  top: 19px;
+  bottom: 0;
+
+  width: 2px;
+
+  background: #dce7df;
+}
 
 .journey-event-content {
-  flex: 1;
-
-  padding-left: 10px;
-
-  padding-bottom: 17px;
+  padding: 0 0 18px 9px;
 }
-
 
 .journey-event-label {
   display: block;
 
+  color: #52647e;
   font-size: 11px;
-
-  font-weight: 600;
-
-  color: #64748b;
+  font-weight: 750;
 }
-
 
 .journey-event-content strong {
   display: block;
-
   margin-top: 4px;
 
-  font-size: 16px;
-
-  font-weight: 800;
-
-  color: #172033;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
 }
-
 
 .not-recorded {
   display: block;
-
   margin-top: 4px;
 
-  font-size: 12px;
-
-  font-weight: 600;
-
-  color: #94a3b8;
+  color: #8b98aa;
+  font-size: 13px;
+  font-weight: 750;
 }
 
 
-/* =====================================================
-   EMPTY
-===================================================== */
+/* =========================================================
+   EMPTY / ERROR
+   ========================================================= */
 
 .journey-empty {
   display: flex;
-
   align-items: center;
-  justify-content: center;
+  gap: 11px;
 
-  gap: 8px;
+  margin-top: 12px;
+  padding: 14px;
 
-  min-height: 75px;
+  border: 1px solid #e4e9f0;
+  border-radius: 17px;
 
-  padding: 15px;
+  background: #fff;
+}
 
-  text-align: center;
+.journey-empty-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
 
-  border-radius: 15px;
+  display: grid;
+  place-items: center;
 
-  background: #ffffff;
+  border-radius: 12px;
+  background: #fff4d6;
+  color: #a16c00;
 
-  color: #64748b;
+  font-size: 19px;
+}
 
-  font-size: 12px;
+.journey-empty strong,
+.journey-empty span {
+  display: block;
+}
+
+.journey-empty strong {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.journey-empty span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.journey-error .journey-empty-icon {
+  background: #edf1f6;
+  color: #69778b;
+}
+
+.journey-bottom-space {
+  height: 28px;
 }
 
 
-.journey-empty ion-icon {
-  font-size: 18px;
-}
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
+@media (max-width: 520px) {
 
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 600px) {
-
-  .journey-report-page {
-    padding: 14px 13px 28px;
+  .journey-page {
+    padding: 14px 10px 28px;
   }
 
-
-  .journey-page-header {
-    padding: 15px;
+  .journey-hero {
+    padding: 17px;
+    border-radius: 19px;
   }
 
-
-  .journey-page-header h1 {
-    font-size: 19px;
+  .journey-hero h1 {
+    font-size: 22px;
   }
 
-
-  .journey-calendar-icon {
-    width: 43px;
-    height: 43px;
+  .journey-hero p {
+    font-size: 10px;
   }
 
-
-  .journey-date-card {
-    align-items: flex-start;
-
-    flex-direction: column;
-
-    gap: 9px;
+  .journey-hero-icon {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
   }
-
-
-  .journey-date-card input {
-    width: 100%;
-  }
-
 
   .journey-section {
     padding: 15px;
   }
 
+  .journey-section-icon {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+}
+
+@media (max-width: 390px) {
+
+  .journey-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .journey-hero h1 {
+    font-size: 21px;
+  }
+
+  .journey-date-card,
+  .journey-section {
+    border-radius: 18px;
+  }
 }
