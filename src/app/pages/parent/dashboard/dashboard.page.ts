@@ -233,6 +233,16 @@ export class DashboardPage
     | null = null;
 
 
+  /**
+   * True while the return ride has started but the student
+   * has NOT yet been picked up from school.
+   *
+   * During this period the parent dashboard must continue
+   * showing the completed morning journey.
+   */
+  private returnRideWaitingForStudentPickup = false;
+
+
 
   // =====================================================
   // IDENTIFIERS
@@ -641,9 +651,6 @@ export class DashboardPage
           /*
            * A valid ride-start event must carry the
            * persisted ride ID and started status.
-           *
-           * If an older/stale event arrives, reload
-           * the dashboard instead of trusting it.
            */
           if (
             !incomingRideType ||
@@ -654,10 +661,54 @@ export class DashboardPage
               'Ignoring unverified ride_started event.',
               data
             );
-
-            this.loadDashboard();
             return;
           }
+
+          /*
+           * =====================================================
+           * CRITICAL RETURN-RIDE RULE
+           * =====================================================
+           *
+           * Starting the evening/return ride does NOT mean the
+           * student's journey has changed.
+           *
+           * Until the driver actually performs:
+           *
+           *     Pick Student From School
+           *
+           * the parent must continue seeing the morning state:
+           *
+           *     Home -> On Route -> School
+           *
+           * We therefore DO NOT reload the dashboard for an
+           * evening ride-start event.
+           *
+           * The dashboard will be refreshed by the
+           * student-status event when the driver actually
+           * picks the student from school.
+           */
+          if (
+            incomingRideType === 'evening'
+          ) {
+            this.returnRideWaitingForStudentPickup = true;
+
+            console.log(
+              '⏸️ Return ride started. Parent dashboard remains unchanged until student pickup.',
+              {
+                rideId: data?.rideId,
+                rideType: incomingRideType,
+                status: data?.status
+              }
+            );
+
+            return;
+          }
+
+          /*
+           * Morning ride start is allowed to update the
+           * parent dashboard immediately.
+           */
+          this.returnRideWaitingForStudentPickup = false;
 
           this.loadDashboard();
         });
@@ -695,6 +746,25 @@ export class DashboardPage
           }
 
           /*
+           * A return ride ending before the student was picked
+           * must NOT change the parent dashboard.
+           *
+           * Once the student has been picked, the dashboard is
+           * already in the return journey and the ride-ended
+           * event can safely refresh it.
+           */
+          if (
+            endedRideType === 'evening' &&
+            !this.isReturnStudentJourneyStarted()
+          ) {
+            console.log(
+              '⏸️ Ignoring return ride ended event because student was never picked up.',
+              data
+            );
+            return;
+          }
+
+          /*
            * Do not locally manufacture the final state.
            * Reload after the DB transaction has completed.
            */
@@ -724,12 +794,122 @@ export class DashboardPage
           }
 
           /*
-           * Student status and ride status are separate
-           * concepts.
+           * The parent dashboard changes only for an actual
+           * student journey milestone.
            *
-           * The event tells us that something changed;
-           * the dashboard API tells us the authoritative
-           * current ride state.
+           * In particular, the return ride START event is NOT
+           * a student milestone.
+           *
+           * The important return-ride event is:
+           *
+           *     picked_from_school
+           *
+           * That is the exact moment when the parent dashboard
+           * is allowed to switch from:
+           *
+           *     Home -> On Route -> School
+           *
+           * to:
+           *
+           *     School -> On Route -> Home
+           */
+          const incomingStatus =
+            this.normalizeStudentStatus(
+              data?.studentStatus ??
+              data?.status
+            );
+
+          const isJourneyMilestone =
+            incomingStatus === 'picked_up' ||
+            incomingStatus === 'dropped_at_school' ||
+            incomingStatus === 'picked_from_school' ||
+            incomingStatus === 'dropped_at_home' ||
+            incomingStatus === 'dropped';
+
+          if (!isJourneyMilestone) {
+            console.log(
+              '⏸️ Ignoring non-student-milestone status event.',
+              {
+                status: incomingStatus,
+                data
+              }
+            );
+            return;
+          }
+
+          /*
+           * Capture the event time before the API refresh.
+           * This protects the dashboard from an older GET response
+           * arriving after the real-time event.
+           */
+          this.extractJourneyTimes(data);
+
+          this.studentStatus =
+            incomingStatus;
+
+          /*
+           * The student has now actually entered the return
+           * journey. From this point the evening dashboard is
+           * allowed to become visible.
+           */
+         if (
+  incomingStatus === 'picked_from_school'
+) {
+  this.returnRideWaitingForStudentPickup = false;
+}
+
+
+/*
+ * ==========================================================
+ * EVENING JOURNEY COMPLETED
+ * ==========================================================
+ *
+ * ONLY:
+ *
+ *     dropped_at_home
+ *
+ * should open the After Ride page.
+ *
+ * Do NOT navigate for:
+ *
+ *     evening ride started
+ *     picked_from_school
+ *     dropped_at_school
+ *     generic dropped
+ */
+if (
+  incomingStatus === 'dropped_at_home'
+) {
+
+  this.returnRideWaitingForStudentPickup = false;
+
+  /*
+   * Keep the local state correct before navigation.
+   */
+  this.completedRideType = 'evening';
+
+   console.log(
+    '🏠 Student dropped at home. Opening After Ride page.',
+    {
+      parentId: this.parentId,
+      driverId: this.driverId,
+      rideType: this.rideType,
+      completedRideType: this.completedRideType,
+      studentStatus: this.studentStatus,
+      homeDropTime: this.homeDropTime
+    }
+  );
+
+  /*
+   * Navigate only after the actual student milestone.
+   */
+  this.navigateToAfterRideAfterHomeDrop();
+  // return;
+}
+
+          /*
+           * MongoDB remains the source of truth for the complete
+           * dashboard state.
            */
           this.loadDashboard();
         });
@@ -776,6 +956,22 @@ export class DashboardPage
 
             return;
 
+          }
+
+          /*
+           * A generic dashboard_updated event can also be emitted
+           * when the driver merely starts the return ride.
+           *
+           * Do not let that event switch the parent's dashboard.
+           * Only the actual student pickup should do that.
+           */
+          if (
+            this.returnRideWaitingForStudentPickup
+          ) {
+            console.log(
+              '⏸️ Ignoring generic dashboard update while return ride waits for student pickup.'
+            );
+            return;
           }
 
           this.loadDashboard();
@@ -988,6 +1184,31 @@ export class DashboardPage
               res.lastCompletedRideType
             );
 
+
+          /*
+           * Synchronize the return-ride gate from the authoritative
+           * backend response as well.
+           *
+           * If the active ride is evening but the student has not
+           * been picked from school yet, keep the parent dashboard
+           * locked to the morning journey.
+           */
+          if (
+            this.rideType === 'evening' &&
+            !this.isReturnStudentJourneyStarted()
+          ) {
+
+            this.returnRideWaitingForStudentPickup =
+              true;
+
+          } else if (
+            this.isReturnStudentJourneyStarted()
+          ) {
+
+            this.returnRideWaitingForStudentPickup =
+              false;
+
+          }
 
 
           /*
@@ -1398,52 +1619,84 @@ export class DashboardPage
   }
 
 
-  /**
-   * Open the dedicated After Ride page.
-   */
-  openAfterRide(): void {
+/**
+ * Open the dedicated After Ride page.
+ *
+ * This method is intentionally NOT exposed in the menu.
+ * It is called only after the student's evening journey
+ * reaches dropped_at_home.
+ */
+openAfterRide(): void {
 
-    if (!this.parentId) {
+  if (!this.parentId) {
 
-      this.parentId =
-        localStorage.getItem(
-          'parentId'
-        );
+    this.parentId =
+      localStorage.getItem('parentId');
 
-    }
+  }
 
 
-    if (!this.parentId) {
-
-      this.router.navigateByUrl(
-        '/auth/login',
-        {
-          replaceUrl: true
-        }
-      );
-
-      return;
-
-    }
-
+  if (!this.parentId) {
 
     this.router.navigateByUrl(
-      '/parent/after-ride'
+      '/auth/login',
+      {
+        replaceUrl: true
+      }
     );
 
+    return;
   }
 
+
+  this.router.navigateByUrl(
+    '/after-ride-page'
+  );
+}
 
   /**
-   * Menu action for After Ride.
-   */
-  async openAfterRideFromMenu(): Promise<void> {
+ * Navigate to After Ride only when the student's
+ * evening journey has actually completed.
+ *
+ * IMPORTANT:
+ * - Return ride START does NOT trigger this.
+ * - Student pickup from school does NOT trigger this.
+ * - Only dropped_at_home triggers this.
+ */
+private navigateToAfterRideAfterHomeDrop(): void {
 
-    await this.closeParentMenu();
+  // Must be the evening/return journey.
+  if (this.rideType !== 'evening' &&
+      this.completedRideType !== 'evening') {
 
-    this.openAfterRide();
+    console.log(
+      '⏸️ After Ride navigation ignored: not an evening ride.'
+    );
 
+    return;
   }
+
+  // Student must actually be dropped at home.
+  if (this.studentStatus !== 'dropped_at_home') {
+
+    console.log(
+      '⏸️ After Ride navigation ignored: student is not dropped at home.'
+    );
+
+    return;
+  }
+
+  console.log(
+    '🏠 Student dropped at home. Navigating to After Ride page.'
+  );
+
+  this.router.navigateByUrl(
+    '/after-ride-page'
+  );
+}
+
+
+  
 
   // =====================================================
   // TOMORROW ATTENDANCE
@@ -1790,25 +2043,160 @@ export class DashboardPage
 
 
   /**
-   * Journey type used by the visual milestone tracker.
+   * ============================================================
+   * EFFECTIVE DASHBOARD JOURNEY TYPE
+   * ============================================================
    *
-   * Priority:
-   *   1. active ride
-   *   2. next ride waiting to start
-   *   3. explicitly completed ride
+   * The dashboard represents the STUDENT journey, not merely
+   * the driver's current Ride record.
+   *
+   * Morning:
+   *   Home -> On Route -> School
+   *
+   * Evening:
+   *   School -> On Route -> Home
+   *
+   * CRITICAL RULE:
+   *
+   *   evening ride started
+   *          +
+   *   student NOT picked from school
+   *          =
+   *   KEEP MORNING DASHBOARD
+   *
+   * Only the student pickup event changes the dashboard to
+   * the evening journey.
    */
   private get effectiveJourneyType():
     | 'morning'
     | 'evening'
     | null {
 
-    return (
-      this.rideType ||
-      this.nextRideType ||
-      this.completedRideType ||
-      null
-    );
+    const status =
+      this.studentStatus;
 
+
+    /*
+     * ----------------------------------------------------------
+     * 1. STUDENT IS ACTUALLY ON THE RETURN JOURNEY
+     * ----------------------------------------------------------
+     */
+    if (
+      status === 'picked_from_school' ||
+      status === 'dropped_at_home'
+    ) {
+      return 'evening';
+    }
+
+
+    /*
+     * Generic "dropped" is ambiguous.
+     * Only treat it as evening when the current/completed ride
+     * is explicitly evening.
+     */
+    if (
+      status === 'dropped' &&
+      (
+        this.rideType === 'evening' ||
+        this.completedRideType === 'evening'
+      )
+    ) {
+      return 'evening';
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * 2. STUDENT IS STILL AT SCHOOL AFTER MORNING RIDE
+     * ----------------------------------------------------------
+     */
+    if (
+      status === 'dropped_at_school'
+    ) {
+      return 'morning';
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * 3. STUDENT IS ON MORNING RIDE
+     * ----------------------------------------------------------
+     */
+    if (
+      status === 'picked_up' ||
+      this.rideType === 'morning'
+    ) {
+      return 'morning';
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * 4. MORNING RIDE HAS COMPLETED
+     *
+     * This is the key fallback while the return ride is merely
+     * waiting to pick the student up.
+     * ----------------------------------------------------------
+     */
+    if (
+      this.lastCompletedRideType === 'morning' ||
+      this.completedRideType === 'morning'
+    ) {
+      return 'morning';
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * 5. EVENING RIDE RECORD EXISTS BUT STUDENT IS NOT PICKED
+     *
+     * NEVER switch the UI to School -> Home here.
+     * ----------------------------------------------------------
+     */
+    if (
+      this.rideType === 'evening' &&
+      !this.isReturnStudentJourneyStarted()
+    ) {
+      return 'morning';
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * 6. NEXT RIDE
+     * ----------------------------------------------------------
+     *
+     * Do not allow nextRideType=evening to change the dashboard
+     * before the student is picked.
+     */
+    if (
+      this.nextRideType === 'morning'
+    ) {
+      return 'morning';
+    }
+
+
+    return null;
+  }
+
+
+  /**
+   * Returns true only after the student has actually entered
+   * the return journey.
+   */
+  private isReturnStudentJourneyStarted(): boolean {
+
+    return (
+      this.studentStatus === 'picked_from_school' ||
+      this.studentStatus === 'dropped_at_home' ||
+      (
+        this.studentStatus === 'dropped' &&
+        (
+          this.rideType === 'evening' ||
+          this.completedRideType === 'evening'
+        )
+      )
+    );
   }
 
 
@@ -1900,6 +2288,30 @@ export class DashboardPage
       return;
     }
 
+
+
+    /*
+     * ==========================================================
+     * RETURN RIDE STARTED BUT STUDENT NOT YET PICKED
+     * ==========================================================
+     *
+     * The driver can start the return ride while the student is
+     * still at school. That is a DRIVER state change only.
+     *
+     * The parent dashboard must remain unchanged until the
+     * student is actually picked from school.
+     */
+    if (
+      this.rideType === 'evening' &&
+      !this.isReturnStudentJourneyStarted()
+    ) {
+
+      this.returnRideWaitingForStudentPickup = true;
+
+      this.updateMorningCompletedWaitingForReturn();
+
+      return;
+    }
 
 
     // ===================================================
@@ -1996,6 +2408,46 @@ export class DashboardPage
 
   }
 
+
+
+  /**
+   * Keep the parent dashboard on the completed morning journey
+   * while the driver is travelling to school for the return pickup.
+   */
+  private updateMorningCompletedWaitingForReturn(): void {
+
+    this.trackingAvailable = false;
+
+    this.rideDirection =
+      'Home → School';
+
+    this.rideStatusClass =
+      'completed';
+
+    this.rideStatusTitle =
+      'Arrived at School';
+
+    this.rideStatusMessage =
+      this.schoolDropTime
+        ? `Student reached school at ${this.formatJourneyTime(this.schoolDropTime)}.`
+        : 'Student has reached school safely.';
+
+    this.notificationTitle =
+      'Arrived at School';
+
+    this.notificationMessage =
+      this.schoolDropTime
+        ? `Your student reached school at ${this.formatJourneyTime(this.schoolDropTime)}.`
+        : 'Your student has reached school safely.';
+
+    this.rideNotificationIcon =
+      'checkmark-circle-outline';
+
+    this.rideNotificationType =
+      'completed';
+
+    this.updateStudentDisplay();
+  }
 
 
   // =====================================================
@@ -2514,181 +2966,397 @@ export class DashboardPage
   // JOURNEY TIME HELPERS
   // =====================================================
 
+  /**
+   * Safely validate a journey timestamp.
+   */
+  private isValidJourneyTime(
+    value: string | Date | null | undefined
+  ): boolean {
+
+    if (!value) {
+      return false;
+    }
+
+    const date =
+      new Date(value);
+
+    return !Number.isNaN(
+      date.getTime()
+    );
+  }
+
+
+  /**
+   * Keep the newest timestamp.
+   *
+   * This is important because the parent can receive the same
+   * journey from:
+   *
+   *   1. Socket.IO
+   *   2. Dashboard API
+   *   3. A later dashboard refresh
+   *
+   * An older GET response must never overwrite a newer socket
+   * event.
+   */
+  private getLatestJourneyTime(
+    current: string | Date | null,
+    incoming: string | Date | null
+  ): string | Date | null {
+
+    if (
+      !this.isValidJourneyTime(incoming)
+    ) {
+      return current;
+    }
+
+    if (
+      !this.isValidJourneyTime(current)
+    ) {
+      return incoming;
+    }
+
+    const currentDate =
+      new Date(current as string | Date);
+
+    const incomingDate =
+      new Date(incoming as string | Date);
+
+    return incomingDate.getTime() >
+      currentDate.getTime()
+      ? incoming
+      : current;
+  }
+
+
+  /**
+   * Update one journey milestone only when the incoming event
+   * contains a newer timestamp.
+   */
+  private updateLatestJourneyTime(
+    field:
+      | 'pickupTime'
+      | 'schoolDropTime'
+      | 'schoolPickupTime'
+      | 'homeDropTime',
+    incoming: string | Date | null | undefined
+  ): void {
+
+    if (
+      !this.isValidJourneyTime(incoming)
+    ) {
+      return;
+    }
+
+    const latest =
+      this.getLatestJourneyTime(
+        this[field],
+        incoming as string | Date
+      );
+
+    if (latest) {
+      this[field] =
+        latest as string;
+    }
+  }
+
+
   private extractJourneyTimes(data: any): void {
 
-
     if (!data) {
-
       return;
-
     }
 
 
+    const firstValue =
+      (...values: any[]): any => {
+
+        for (
+          const value of values
+        ) {
+
+          if (
+            value !== undefined &&
+            value !== null &&
+            value !== ''
+          ) {
+            return value;
+          }
+
+        }
+
+        return null;
+      };
+
+
+    const ride =
+      data?.ride || {};
+
+    const student =
+      data?.student || {};
+
+    const journey =
+      data?.journey || {};
+
+    const nestedData =
+      data?.data || {};
+
+
+    /*
+     * Do NOT use updatedAt as the primary event time.
+     * updatedAt is a record modification timestamp, not
+     * necessarily the actual student milestone time.
+     */
     const eventTime =
+      firstValue(
+        data?.timestamp,
+        data?.eventTime,
+        data?.statusTime,
+        data?.time,
 
-      data.timestamp ||
+        ride?.timestamp,
+        ride?.eventTime,
+        ride?.statusTime,
 
-      data.time ||
+        student?.timestamp,
+        student?.eventTime,
+        student?.statusTime,
 
-      data.updatedAt ||
+        journey?.timestamp,
+        journey?.eventTime,
+        journey?.statusTime,
 
-      data.eventTime ||
-
-      data.statusTime ||
-
-      null;
-
+        nestedData?.timestamp,
+        nestedData?.eventTime,
+        nestedData?.statusTime
+      );
 
 
     const pickup =
+      firstValue(
+        data?.pickupTime,
+        data?.pickedUpAt,
+        data?.pickupAt,
+        data?.studentPickupTime,
 
-      data.pickupTime ||
+        student?.pickupTime,
+        student?.pickedUpAt,
+        student?.pickupAt,
+        student?.studentPickupTime,
 
-      data.pickedUpAt ||
+        ride?.pickupTime,
+        ride?.pickedUpAt,
+        ride?.pickupAt,
+        ride?.studentPickupTime,
 
-      data.pickupAt ||
+        journey?.pickupTime,
+        journey?.pickedUpAt,
+        journey?.pickupAt,
+        journey?.studentPickupTime,
 
-      data.studentPickupTime ||
-
-      null;
-
+        nestedData?.pickupTime,
+        nestedData?.pickedUpAt,
+        nestedData?.pickupAt,
+        nestedData?.studentPickupTime
+      );
 
 
     const schoolDrop =
+      firstValue(
+        data?.schoolDropTime,
+        data?.droppedAtSchoolAt,
+        data?.droppedAtSchoolTime,
+        data?.schoolDroppedAt,
 
-      data.schoolDropTime ||
+        student?.schoolDropTime,
+        student?.droppedAtSchoolAt,
+        student?.droppedAtSchoolTime,
+        student?.schoolDroppedAt,
 
-      data.droppedAtSchoolAt ||
+        ride?.schoolDropTime,
+        ride?.droppedAtSchoolAt,
+        ride?.droppedAtSchoolTime,
+        ride?.schoolDroppedAt,
 
-      data.droppedAtSchoolTime ||
+        journey?.schoolDropTime,
+        journey?.droppedAtSchoolAt,
+        journey?.droppedAtSchoolTime,
+        journey?.schoolDroppedAt,
 
-      data.schoolDroppedAt ||
-
-      null;
-
+        nestedData?.schoolDropTime,
+        nestedData?.droppedAtSchoolAt,
+        nestedData?.droppedAtSchoolTime,
+        nestedData?.schoolDroppedAt
+      );
 
 
     const schoolPickup =
+      firstValue(
+        data?.schoolPickupTime,
+        data?.pickedFromSchoolAt,
+        data?.pickedFromSchoolTime,
+        data?.schoolPickupAt,
 
-      data.schoolPickupTime ||
+        student?.schoolPickupTime,
+        student?.pickedFromSchoolAt,
+        student?.pickedFromSchoolTime,
+        student?.schoolPickupAt,
 
-      data.pickedFromSchoolAt ||
+        ride?.schoolPickupTime,
+        ride?.pickedFromSchoolAt,
+        ride?.pickedFromSchoolTime,
+        ride?.schoolPickupAt,
 
-      data.pickedFromSchoolTime ||
+        journey?.schoolPickupTime,
+        journey?.pickedFromSchoolAt,
+        journey?.pickedFromSchoolTime,
+        journey?.schoolPickupAt,
 
-      data.schoolPickupAt ||
-
-      null;
-
+        nestedData?.schoolPickupTime,
+        nestedData?.pickedFromSchoolAt,
+        nestedData?.pickedFromSchoolTime,
+        nestedData?.schoolPickupAt
+      );
 
 
     const homeDrop =
+      firstValue(
+        data?.homeDropTime,
+        data?.droppedAtHomeAt,
+        data?.droppedAtHomeTime,
+        data?.homeDroppedAt,
 
-      data.homeDropTime ||
+        student?.homeDropTime,
+        student?.droppedAtHomeAt,
+        student?.droppedAtHomeTime,
+        student?.homeDroppedAt,
 
-      data.droppedAtHomeAt ||
+        ride?.homeDropTime,
+        ride?.droppedAtHomeAt,
+        ride?.droppedAtHomeTime,
+        ride?.homeDroppedAt,
 
-      data.droppedAtHomeTime ||
+        journey?.homeDropTime,
+        journey?.droppedAtHomeAt,
+        journey?.droppedAtHomeTime,
+        journey?.homeDroppedAt,
 
-      data.homeDroppedAt ||
-
-      null;
-
-
-
-    if (pickup) {
-
-      this.pickupTime =
-        pickup;
-
-    }
-
-
-    if (schoolDrop) {
-
-      this.schoolDropTime =
-        schoolDrop;
-
-    }
-
-
-    if (schoolPickup) {
-
-      this.schoolPickupTime =
-        schoolPickup;
-
-    }
+        nestedData?.homeDropTime,
+        nestedData?.droppedAtHomeAt,
+        nestedData?.droppedAtHomeTime,
+        nestedData?.homeDroppedAt
+      );
 
 
-    if (homeDrop) {
+    /*
+     * Explicit timestamps always win, but only if the incoming
+     * value is newer than the timestamp already displayed.
+     */
+    this.updateLatestJourneyTime(
+      'pickupTime',
+      pickup
+    );
 
-      this.homeDropTime =
-        homeDrop;
+    this.updateLatestJourneyTime(
+      'schoolDropTime',
+      schoolDrop
+    );
 
-    }
+    this.updateLatestJourneyTime(
+      'schoolPickupTime',
+      schoolPickup
+    );
+
+    this.updateLatestJourneyTime(
+      'homeDropTime',
+      homeDrop
+    );
 
 
     if (!eventTime) {
-
       return;
-
     }
 
 
     const status =
-
       this.normalizeStudentStatus(
-        data.status
+        data?.studentStatus ??
+        data?.status
       );
 
 
-    if (
-      status === 'picked_up'
-    ) {
+    /*
+     * Socket event fallback.
+     *
+     * If the backend sends:
+     *
+     *   status: picked_from_school
+     *   timestamp: <actual pickup time>
+     *
+     * the timestamp is assigned to schoolPickupTime.
+     */
+    switch (status) {
 
-      this.pickupTime =
+      case 'picked_up':
 
-        this.pickupTime ||
-        eventTime;
+        this.updateLatestJourneyTime(
+          'pickupTime',
+          eventTime
+        );
+
+        break;
+
+
+      case 'dropped_at_school':
+
+        this.updateLatestJourneyTime(
+          'schoolDropTime',
+          eventTime
+        );
+
+        break;
+
+
+      case 'picked_from_school':
+
+        this.updateLatestJourneyTime(
+          'schoolPickupTime',
+          eventTime
+        );
+
+        break;
+
+
+      case 'dropped_at_home':
+
+        this.updateLatestJourneyTime(
+          'homeDropTime',
+          eventTime
+        );
+
+        break;
 
     }
 
 
-    if (
-      status === 'dropped_at_school'
-    ) {
+    console.log(
+      '🕒 Parent latest journey times:',
+      {
+        status,
 
-      this.schoolDropTime =
+        pickupTime:
+          this.pickupTime,
 
-        this.schoolDropTime ||
-        eventTime;
+        schoolDropTime:
+          this.schoolDropTime,
 
-    }
+        schoolPickupTime:
+          this.schoolPickupTime,
 
-
-    if (
-      status === 'picked_from_school'
-    ) {
-
-      this.schoolPickupTime =
-
-        this.schoolPickupTime ||
-        eventTime;
-
-    }
-
-
-    if (
-      status === 'dropped_at_home'
-    ) {
-
-      this.homeDropTime =
-
-        this.homeDropTime ||
-        eventTime;
-
-    }
-
+        homeDropTime:
+          this.homeDropTime
+      }
+    );
   }
 
 
@@ -3013,53 +3681,86 @@ export class DashboardPage
     return this.routeLastCompleted ? 'completed' : 'waiting';
   }
 
-  get routeFirstTimeLabel(): string {
-    if (this.effectiveJourneyType === 'evening') {
-      if (this.schoolPickupTime) {
-        return `Picked up ${this.formatJourneyTime(this.schoolPickupTime)}`;
-      }
+// =====================================================
+// MILESTONE TIME LABELS
+// =====================================================
 
-      return this.rideStarted ? 'Pickup in progress' : 'Pickup pending';
+/**
+ * Time shown ONLY under the first location.
+ *
+ * Morning:
+ *   Home -> actual pickup time
+ *
+ * Evening:
+ *   School -> actual pickup-from-school time
+ *
+ * IMPORTANT:
+ * Never show a time here unless that actual
+ * pickup milestone has happened.
+ */
+get routeFirstTimeLabel(): string {
+
+  // EVENING: School pickup time
+  if (this.effectiveJourneyType === 'evening') {
+
+    if (!this.schoolPickupTime) {
+      return '';
     }
 
-    if (this.pickupTime) {
-      return `Picked up ${this.formatJourneyTime(this.pickupTime)}`;
-    }
-
-    return this.rideStarted ? 'Pickup in progress' : 'Pickup pending';
+    return this.formatJourneyTime(this.schoolPickupTime);
   }
 
-  get routeMiddleTimeLabel(): string {
-    if (this.routeMiddleCompleted) {
-      return 'Journey complete';
-    }
-
-    if (this.routeMiddleStateClass === 'active') {
-      return this.trackingAvailable ? 'Live now' : 'On route';
-    }
-
-    if (this.rideStarted) {
-      return 'Van on the way';
-    }
-
-    return 'Waiting';
+  // MORNING: Home pickup time
+  if (!this.pickupTime) {
+    return '';
   }
 
-  get routeLastTimeLabel(): string {
-    if (this.effectiveJourneyType === 'evening') {
-      if (this.homeDropTime) {
-        return `Arrived ${this.formatJourneyTime(this.homeDropTime)}`;
-      }
+  return this.formatJourneyTime(this.pickupTime);
+}
 
-      return 'Arrival pending';
+
+/**
+ * ON ROUTE MUST NEVER DISPLAY TIME.
+ *
+ * Keep this permanently empty.
+ */
+get routeMiddleTimeLabel(): string {
+  return '';
+}
+
+
+/**
+ * Time shown ONLY under the final destination.
+ *
+ * Morning:
+ *   School -> actual school drop time
+ *
+ * Evening:
+ *   Home -> actual home drop time
+ *
+ * IMPORTANT:
+ * Never show a time until the actual destination
+ * milestone has happened.
+ */
+get routeLastTimeLabel(): string {
+
+  // EVENING: Home drop time
+  if (this.effectiveJourneyType === 'evening') {
+
+    if (!this.homeDropTime) {
+      return '';
     }
 
-    if (this.schoolDropTime) {
-      return `Arrived ${this.formatJourneyTime(this.schoolDropTime)}`;
-    }
-
-    return 'Arrival pending';
+    return this.formatJourneyTime(this.homeDropTime);
   }
+
+  // MORNING: School drop time
+  if (!this.schoolDropTime) {
+    return '';
+  }
+
+  return this.formatJourneyTime(this.schoolDropTime);
+}
 
   get routeFirstNotification(): string {
     if (this.routeFirstCompleted) {
@@ -3193,9 +3894,22 @@ export class DashboardPage
       : 'The morning ride has not started yet.';
   }
 
-  get routeProgressAriaLabel(): string {
-    return `${this.routeFirstLabel}: ${this.routeFirstTimeLabel}. On Route: ${this.routeMiddleTimeLabel}. ${this.routeLastLabel}: ${this.routeLastTimeLabel}.`;
-  }
+ get routeProgressAriaLabel(): string {
+
+  const firstTime = this.routeFirstTimeLabel
+    ? ` at ${this.routeFirstTimeLabel}`
+    : '';
+
+  const lastTime = this.routeLastTimeLabel
+    ? ` at ${this.routeLastTimeLabel}`
+    : '';
+
+  return (
+    `${this.routeFirstLabel}${firstTime}. ` +
+    `On Route. ` +
+    `${this.routeLastLabel}${lastTime}.`
+  );
+}
 
   // =====================================================
   // LIVE TRACKING
@@ -3547,6 +4261,9 @@ export class DashboardPage
     this.completedRideType = null;
     this.lastCompletedRideType = null;
     this.nextRideType = null;
+
+    this.returnRideWaitingForStudentPickup =
+      false;
 
     this.tomorrowAttendanceStatus = 'not_marked';
     this.tomorrowAttendanceLoading = false;

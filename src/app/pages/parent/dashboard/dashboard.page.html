@@ -12,21 +12,17 @@
         <ion-label>Dashboard</ion-label>
       </ion-item>
 
-      <ion-item button detail="false" (click)="openAfterRideFromMenu()">
+      <!-- <ion-item button detail="false" (click)="openAfterRideFromMenu()">
         <ion-icon slot="start" name="time-outline"></ion-icon>
         <ion-label>After Ride</ion-label>
-      </ion-item>
+      </ion-item> -->
 
       <ion-item button detail="false" (click)="openJourneyReport()">
         <ion-icon slot="start" name="calendar-outline"></ion-icon>
         <ion-label>Journey Report</ion-label>
       </ion-item>
 
-      <ion-item
-        button
-        detail="false"
-        [disabled]="!trackingAvailable"
-        (click)="openTrackingFromMenu()">
+      <ion-item button detail="false" [disabled]="!trackingAvailable" (click)="openTrackingFromMenu()">
         <ion-icon slot="start" name="location-outline"></ion-icon>
         <ion-label>Live Tracking</ion-label>
       </ion-item>
@@ -47,15 +43,9 @@
 <ion-header class="parent-header">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button
-        class="menu-button"
-        fill="clear"
-        type="button"
-        (click)="openParentMenu()"
+      <ion-button class="menu-button" fill="clear" type="button" (click)="openParentMenu()"
         aria-label="Open parent menu">
-        <ion-icon
-          slot="icon-only"
-          name="menu-outline">
+        <ion-icon slot="icon-only" name="menu-outline">
         </ion-icon>
       </ion-button>
     </ion-buttons>
@@ -63,18 +53,12 @@
     <ion-title>Dashboard</ion-title>
 
     <ion-buttons slot="end">
-      <ion-button
-        class="toolbar-action"
-        (click)="refreshDashboard()"
-        [disabled]="isLoading"
+      <ion-button class="toolbar-action" (click)="refreshDashboard()" [disabled]="isLoading"
         aria-label="Refresh dashboard">
         <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
       </ion-button>
 
-      <ion-button
-        class="toolbar-action"
-        (click)="logout()"
-        aria-label="Logout">
+      <ion-button class="toolbar-action" (click)="logout()" aria-label="Logout">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -97,14 +81,33 @@
         <p>Here’s your child’s school van update.</p>
       </div>
 
-      <button
-        type="button"
-        class="student-avatar"
-        (click)="openStudentProfile()"
-        aria-label="View student profile">
+      <button type="button" class="student-avatar" (click)="openStudentProfile()" aria-label="View student profile">
         <span>{{ parent.studentName ? parent.studentName.charAt(0).toUpperCase() : 'S' }}</span>
       </button>
     </section>
+
+    <!-- TOMORROW ATTENDANCE STATUS -->
+    <button type="button" class="tomorrow-status-card" (click)="openAttendance()"
+      aria-label="Open tomorrow's attendance calendar">
+
+      <div class="tomorrow-status-icon">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+
+      <div class="tomorrow-status-content">
+        <span class="tomorrow-status-eyebrow">
+          TOMORROW'S ATTENDANCE
+        </span>
+
+        <strong>
+          {{ tomorrowAttendanceLabel }}
+        </strong>
+      </div>
+
+      <ion-icon class="tomorrow-status-arrow" name="chevron-forward-outline">
+      </ion-icon>
+
+    </button>
 
     <!-- PRIMARY RIDE CARD -->
     <section class="ride-card">
@@ -134,91 +137,117 @@
         </span>
       </div>
 
-      <!--
-        LIVE JOURNEY MILESTONES
-
-        These are real status indicators, not decorative icons.
-
-        completed = green + check
-        active    = blue + pulse
-        waiting   = grey + pending
-
-        They are driven by the backend student/ride state.
-      -->
+      <!-- LIVE JOURNEY MILESTONES -->
       <div class="route-progress" [attr.aria-label]="routeProgressAriaLabel">
 
-        <!-- HOME / SCHOOL PICKUP -->
-        <div
-          class="progress-step"
-          [ngClass]="routeFirstStateClass"
-          [attr.title]="routeFirstNotification">
+        <!-- =====================================================
+     FIRST LOCATION
+     Morning = Home
+     Evening = School
+     ===================================================== -->
+
+        <div class="progress-step" [ngClass]="routeFirstStateClass" [attr.title]="routeFirstNotification">
 
           <div class="progress-marker">
+
             <ion-icon [name]="routeFirstIcon"></ion-icon>
 
-            <span
-              class="marker-badge"
-              *ngIf="routeFirstStateClass === 'completed'"
-              aria-hidden="true">
+            <span class="marker-badge" *ngIf="routeFirstStateClass === 'completed'" aria-hidden="true">
+
               <ion-icon name="checkmark-outline"></ion-icon>
+
             </span>
+
           </div>
 
           <strong>{{ routeFirstLabel }}</strong>
-          <span>{{ routeFirstTimeLabel }}</span>
+
+          <!-- TIME ONLY FOR HOME / SCHOOL FIRST MILESTONE -->
+          <span class="milestone-time" *ngIf="routeFirstTimeLabel">
+
+            {{ routeFirstTimeLabel }}
+
+          </span>
+
         </div>
 
-        <div
-          class="progress-line"
-          [class.completed]="routeFirstCompleted || routeMiddleCompleted">
-        </div>
 
-        <!-- ON ROUTE -->
-        <div
-          class="progress-step"
-          [ngClass]="routeMiddleStateClass"
-          [attr.title]="routeMiddleNotification">
+        <!-- Connector -->
+        <div class="progress-line" [class.completed]="
+      routeFirstCompleted || routeMiddleCompleted
+    "></div>
+
+        <!-- =====================================================
+     ON ROUTE
+     NO TIME
+     ===================================================== -->
+
+        <div class="progress-step" [ngClass]="routeMiddleStateClass" [attr.title]="routeMiddleNotification">
 
           <div class="progress-marker">
+
             <ion-icon [name]="routeMiddleIcon"></ion-icon>
 
-            <span
-              class="marker-badge"
-              *ngIf="routeMiddleStateClass === 'completed'"
-              aria-hidden="true">
+            <span class="marker-badge" *ngIf="routeMiddleStateClass === 'completed'" aria-hidden="true">
+
               <ion-icon name="checkmark-outline"></ion-icon>
+
             </span>
+
           </div>
 
           <strong>On Route</strong>
-          <span>{{ routeMiddleTimeLabel }}</span>
+
+          <!-- DO NOT ADD TIME HERE -->
+
         </div>
 
-        <div
-          class="progress-line"
-          [class.completed]="routeMiddleCompleted || routeLastCompleted">
-        </div>
 
-        <!-- SCHOOL / HOME ARRIVAL -->
-        <div
-          class="progress-step"
-          [ngClass]="routeLastStateClass"
-          [attr.title]="routeLastNotification">
+        <!-- Connector -->
+        <div class="progress-line" [class.completed]="
+      routeMiddleCompleted || routeLastCompleted
+    "></div>
 
-          <div class="progress-marker">
-            <ion-icon [name]="routeLastIcon"></ion-icon>
 
-            <span
-              class="marker-badge"
-              *ngIf="routeLastStateClass === 'completed'"
-              aria-hidden="true">
-              <ion-icon name="checkmark-outline"></ion-icon>
-            </span>
-          </div>
+      <!-- =====================================================
+     FINAL LOCATION
+     Morning = School
+     Evening = Home
+     ===================================================== -->
 
-          <strong>{{ routeLastLabel }}</strong>
-          <span>{{ routeLastTimeLabel }}</span>
-        </div>
+<div
+  class="progress-step"
+  [ngClass]="routeLastStateClass"
+  [attr.title]="routeLastNotification">
+
+  <div class="progress-marker">
+
+    <ion-icon [name]="routeLastIcon"></ion-icon>
+
+    <span
+      class="marker-badge"
+      *ngIf="routeLastStateClass === 'completed'"
+      aria-hidden="true">
+
+      <ion-icon name="checkmark-outline"></ion-icon>
+
+    </span>
+
+  </div>
+
+  <strong>{{ routeLastLabel }}</strong>
+
+  <!-- TIME ONLY FOR FINAL HOME / SCHOOL MILESTONE -->
+  <span
+    class="milestone-time"
+    *ngIf="routeLastTimeLabel">
+
+    {{ routeLastTimeLabel }}
+
+  </span>
+
+</div>
+
       </div>
 
       <!-- Human-readable notification below the milestone tracker -->
@@ -276,10 +305,7 @@
           </span>
         </button>
 
-        <a
-          *ngIf="driver.mobileNumber"
-          class="quick-card driver"
-          [href]="'tel:' + driver.mobileNumber">
+        <a *ngIf="driver.mobileNumber" class="quick-card driver" [href]="'tel:' + driver.mobileNumber">
           <span class="quick-icon"><ion-icon name="call-outline"></ion-icon></span>
           <span class="quick-copy">
             <strong>Contact Driver</strong>
@@ -310,8 +336,7 @@
         </div>
       </div>
 
-      <div class="tomorrow-current-status"
-        [class.present-state]="tomorrowAttendanceStatus === 'present'"
+      <div class="tomorrow-current-status" [class.present-state]="tomorrowAttendanceStatus === 'present'"
         [class.absent-state]="tomorrowAttendanceStatus === 'absent'">
         <ion-icon
           [name]="tomorrowAttendanceStatus === 'present' ? 'checkmark-circle-outline' : tomorrowAttendanceStatus === 'absent' ? 'close-outline' : 'help-outline'">
@@ -320,21 +345,15 @@
       </div>
 
       <div class="tomorrow-attendance-actions">
-        <button
-          type="button"
-          class="tomorrow-choice present-choice"
-          [class.selected]="tomorrowAttendanceStatus === 'present'"
-          [disabled]="tomorrowAttendanceLoading"
+        <button type="button" class="tomorrow-choice present-choice"
+          [class.selected]="tomorrowAttendanceStatus === 'present'" [disabled]="tomorrowAttendanceLoading"
           (click)="selectTomorrowAttendance('present')">
           <ion-icon name="checkmark-outline"></ion-icon>
           <span>Present</span>
         </button>
 
-        <button
-          type="button"
-          class="tomorrow-choice absent-choice"
-          [class.selected]="tomorrowAttendanceStatus === 'absent'"
-          [disabled]="tomorrowAttendanceLoading"
+        <button type="button" class="tomorrow-choice absent-choice"
+          [class.selected]="tomorrowAttendanceStatus === 'absent'" [disabled]="tomorrowAttendanceLoading"
           (click)="selectTomorrowAttendance('absent')">
           <ion-icon name="close-outline"></ion-icon>
           <span>Absent</span>
@@ -392,7 +411,8 @@
       </div>
 
       <div class="popup-detail-card popup-full-width">
-        <div class="popup-detail-icon" [class.ride-active]="rideStatusClass === 'active'" [class.ride-ended]="rideStatusClass !== 'active'">
+        <div class="popup-detail-icon" [class.ride-active]="rideStatusClass === 'active'"
+          [class.ride-ended]="rideStatusClass !== 'active'">
           <ion-icon [name]="rideNotificationIcon"></ion-icon>
         </div>
         <div>

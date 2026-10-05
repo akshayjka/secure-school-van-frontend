@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="parent-header">
 
   <ion-toolbar>
 
@@ -6,8 +6,10 @@
 
       <ion-button
         type="button"
+        class="back-button"
         (click)="goBack()"
-        aria-label="Back">
+        aria-label="Back"
+      >
 
         <ion-icon
           slot="icon-only"
@@ -18,7 +20,8 @@
 
     </ion-buttons>
 
-    <ion-title>
+
+    <ion-title class="after-ride-title">
       After Ride
     </ion-title>
 
@@ -31,19 +34,20 @@
 
   <main class="after-ride-page">
 
+
     <!-- =====================================================
-         PAGE INTRO
+         RIDE COMPLETED
     ====================================================== -->
 
     <section class="page-intro">
 
       <div class="intro-icon">
 
-        <ion-icon
-          name="checkmark-circle-outline">
+        <ion-icon name="checkmark-circle-outline">
         </ion-icon>
 
       </div>
+
 
       <div class="intro-content">
 
@@ -64,268 +68,10 @@
     </section>
 
 
-    <!-- =====================================================
-         MORNING JOURNEY
-    ====================================================== -->
-
-    <section class="journey-card">
-
-      <div class="section-heading">
-
-        <div class="heading-icon morning">
-
-          <ion-icon
-            name="home-outline">
-          </ion-icon>
-
-        </div>
-
-        <div class="heading-content">
-
-          <span>
-            MORNING JOURNEY
-          </span>
-
-          <h2>
-            Home → School
-          </h2>
-
-        </div>
-
-      </div>
-
-
-      <div class="journey-timeline">
-
-        <!-- PICKUP -->
-
-        <div class="journey-event">
-
-          <div class="timeline-column">
-
-            <div class="event-icon pickup">
-
-              <ion-icon
-                name="bus-outline">
-              </ion-icon>
-
-            </div>
-
-            <div class="timeline-line"></div>
-
-          </div>
-
-
-          <div class="event-content">
-
-            <span class="event-label">
-              Picked up from home
-            </span>
-
-            <strong>
-              {{ formatTime(morningPickedUpAt) }}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <!-- SCHOOL -->
-
-        <div class="journey-event">
-
-          <div class="timeline-column">
-
-            <div class="event-icon school">
-
-              <ion-icon
-                name="school-outline">
-              </ion-icon>
-
-            </div>
-
-          </div>
-
-
-          <div class="event-content">
-
-            <span class="event-label">
-              Arrived at school
-            </span>
-
-            <strong>
-              {{ formatTime(morningDroppedAtSchoolAt) }}
-            </strong>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- DURATION -->
-
-      <div class="duration-box">
-
-        <div class="duration-icon">
-
-          <ion-icon
-            name="time-outline">
-          </ion-icon>
-
-        </div>
-
-        <div class="duration-content">
-
-          <span>
-            Journey time
-          </span>
-
-          <strong>
-            {{ formatDuration(morningDurationMinutes) }}
-          </strong>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         EVENING JOURNEY
-    ====================================================== -->
-
-    <section class="journey-card">
-
-      <div class="section-heading">
-
-        <div class="heading-icon evening">
-
-          <ion-icon
-            name="school-outline">
-          </ion-icon>
-
-        </div>
-
-        <div class="heading-content">
-
-          <span>
-            EVENING JOURNEY
-          </span>
-
-          <h2>
-            School → Home
-          </h2>
-
-        </div>
-
-      </div>
-
-
-      <div class="journey-timeline">
-
-        <!-- SCHOOL PICKUP -->
-
-        <div class="journey-event">
-
-          <div class="timeline-column">
-
-            <div class="event-icon school">
-
-              <ion-icon
-                name="school-outline">
-              </ion-icon>
-
-            </div>
-
-            <div class="timeline-line"></div>
-
-          </div>
-
-
-          <div class="event-content">
-
-            <span class="event-label">
-              Picked up from school
-            </span>
-
-            <strong>
-              {{ formatTime(eveningPickedFromSchoolAt) }}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <!-- HOME -->
-
-        <div class="journey-event">
-
-          <div class="timeline-column">
-
-            <div class="event-icon home">
-
-              <ion-icon
-                name="home-outline">
-              </ion-icon>
-
-            </div>
-
-          </div>
-
-
-          <div class="event-content">
-
-            <span class="event-label">
-              Arrived home
-            </span>
-
-            <strong>
-              {{ formatTime(eveningDroppedAtHomeAt) }}
-            </strong>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- DURATION -->
-
-      <div class="duration-box">
-
-        <div class="duration-icon">
-
-          <ion-icon
-            name="time-outline">
-          </ion-icon>
-
-        </div>
-
-        <div class="duration-content">
-
-          <span>
-            Journey time
-          </span>
-
-          <strong>
-            {{ formatDuration(eveningDurationMinutes) }}
-          </strong>
-
-        </div>
-
-      </div>
-
-    </section>
-
 
     <!-- =====================================================
          TOMORROW ATTENDANCE
+         DIRECTLY BELOW RIDE COMPLETED
     ====================================================== -->
 
     <section class="tomorrow-card">
@@ -334,11 +80,11 @@
 
         <div class="tomorrow-icon">
 
-          <ion-icon
-            name="calendar-outline">
+          <ion-icon name="calendar-outline">
           </ion-icon>
 
         </div>
+
 
         <div class="tomorrow-header-content">
 
@@ -379,26 +125,18 @@
 
         <div class="attendance-buttons">
 
+
           <!-- PRESENT -->
 
-          <button
-            type="button"
-            class="attendance-button present"
-
-            [class.selected]="
+          <button type="button" class="attendance-button present" [class.selected]="
               tomorrowAttendanceStatus === 'present'
-            "
-
-            [disabled]="
+            " [disabled]="
               tomorrowAttendanceLoading
-            "
-
-            (click)="
+            " (click)="
               selectTomorrowAttendance('present')
             ">
 
-            <ion-icon
-              name="checkmark-outline">
+            <ion-icon name="checkmark-outline">
             </ion-icon>
 
             <span>
@@ -410,24 +148,15 @@
 
           <!-- ABSENT -->
 
-          <button
-            type="button"
-            class="attendance-button absent"
-
-            [class.selected]="
+          <button type="button" class="attendance-button absent" [class.selected]="
               tomorrowAttendanceStatus === 'absent'
-            "
-
-            [disabled]="
+            " [disabled]="
               tomorrowAttendanceLoading
-            "
-
-            (click)="
+            " (click)="
               selectTomorrowAttendance('absent')
             ">
 
-            <ion-icon
-              name="close-outline">
+            <ion-icon name="close-outline">
             </ion-icon>
 
             <span>
@@ -441,22 +170,18 @@
       </div>
 
 
-      <!-- SAVED STATE -->
+      <div class="attendance-status" *ngIf="
+    tomorrowAttendanceStatus !== 'not_marked' &&
+    !tomorrowAttendanceLoading
+  ">
 
-      <div
-        class="attendance-status"
-        *ngIf="
-          tomorrowAttendanceStatus !== 'not_marked'
-        ">
-
-        <ion-icon
-          name="checkmark-circle-outline">
+        <ion-icon name="checkmark-circle-outline">
         </ion-icon>
 
         <span>
 
           Tomorrow:
-          
+
           <strong>
             {{ tomorrowAttendanceLabel }}
           </strong>
@@ -466,14 +191,11 @@
       </div>
 
 
-      <!-- LOADING -->
+      <!-- SAVING -->
 
-      <div
-        class="attendance-saving"
-        *ngIf="tomorrowAttendanceLoading">
+      <div class="attendance-saving" *ngIf="tomorrowAttendanceLoading">
 
-        <ion-spinner
-          name="crescent">
+        <ion-spinner name="crescent">
         </ion-spinner>
 
         <span>
@@ -485,14 +207,270 @@
     </section>
 
 
+
+    <!-- =====================================================
+         MORNING JOURNEY
+    ====================================================== -->
+
+    <section class="journey-card">
+
+      <div class="section-heading">
+
+        <div class="heading-icon morning">
+
+          <ion-icon name="home-outline">
+          </ion-icon>
+
+        </div>
+
+
+        <div class="heading-content">
+
+          <span>
+            MORNING JOURNEY
+          </span>
+
+          <h2>
+            Home → School
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="journey-timeline">
+
+
+        <!-- HOME -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon pickup">
+
+              <ion-icon name="bus-outline">
+              </ion-icon>
+
+            </div>
+
+            <div class="timeline-line"></div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Picked up from home
+            </span>
+
+            <strong>
+              {{ formatTime(morningPickedUpAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- SCHOOL -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon school">
+
+              <ion-icon name="school-outline">
+              </ion-icon>
+
+            </div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Arrived at school
+            </span>
+
+            <strong>
+              {{ formatTime(morningDroppedAtSchoolAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="duration-box">
+
+        <div class="duration-icon">
+
+          <ion-icon name="time-outline">
+          </ion-icon>
+
+        </div>
+
+
+        <div class="duration-content">
+
+          <span>
+            Journey time
+          </span>
+
+          <strong>
+            {{ formatDuration(morningDurationMinutes) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         EVENING JOURNEY
+    ====================================================== -->
+
+    <section class="journey-card">
+
+      <div class="section-heading">
+
+        <div class="heading-icon evening">
+
+          <ion-icon name="school-outline">
+          </ion-icon>
+
+        </div>
+
+
+        <div class="heading-content">
+
+          <span>
+            EVENING JOURNEY
+          </span>
+
+          <h2>
+            School → Home
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="journey-timeline">
+
+
+        <!-- SCHOOL -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon school">
+
+              <ion-icon name="school-outline">
+              </ion-icon>
+
+            </div>
+
+            <div class="timeline-line"></div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Picked up from school
+            </span>
+
+            <strong>
+              {{ formatTime(eveningPickedFromSchoolAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- HOME -->
+
+        <div class="journey-event">
+
+          <div class="timeline-column">
+
+            <div class="event-icon home">
+
+              <ion-icon name="home-outline">
+              </ion-icon>
+
+            </div>
+
+          </div>
+
+
+          <div class="event-content">
+
+            <span class="event-label">
+              Arrived home
+            </span>
+
+            <strong>
+              {{ formatTime(eveningDroppedAtHomeAt) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="duration-box">
+
+        <div class="duration-icon">
+
+          <ion-icon name="time-outline">
+          </ion-icon>
+
+        </div>
+
+
+        <div class="duration-content">
+
+          <span>
+            Journey time
+          </span>
+
+          <strong>
+            {{ formatDuration(eveningDurationMinutes) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
     <!-- =====================================================
          FOOTER
     ====================================================== -->
 
     <section class="footer-message">
 
-      <ion-icon
-        name="checkmark-circle-outline">
+      <ion-icon name="checkmark-circle-outline">
       </ion-icon>
 
       <p>
@@ -500,6 +478,31 @@
       </p>
 
     </section>
+
+
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+
+    <div class="after-ride-actions">
+
+      <button type="button" class="go-dashboard-button" (click)="goToDashboard()">
+
+        <ion-icon name="home-outline">
+        </ion-icon>
+
+        <span>
+          Go to Dashboard
+        </span>
+
+        <ion-icon name="arrow-forward-outline">
+        </ion-icon>
+
+      </button>
+
+    </div>
+
 
   </main>
 

@@ -378,6 +378,174 @@ ion-menu ion-item ion-icon {
 
 }
 
+/* =====================================================
+   TOMORROW ATTENDANCE STATUS
+   ===================================================== */
+
+.tomorrow-status-card {
+  position: relative;
+  z-index: 3;
+
+  width: 100%;
+  min-height: 68px;
+
+  margin: -34px 0 14px;
+  padding: 12px 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  border: 1px solid #e7ebf3;
+  border-radius: 17px;
+
+  background: #ffffff;
+  color: var(--text);
+
+  text-align: left;
+
+  box-shadow:
+    0 8px 24px rgba(23, 32, 51, .09);
+
+  cursor: pointer;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
+}
+
+.tomorrow-status-card:hover {
+  border-color: #d8def0;
+
+  box-shadow:
+    0 10px 28px rgba(23, 32, 51, .12);
+}
+
+.tomorrow-status-card:active {
+  transform: scale(.985);
+}
+
+.tomorrow-status-card:focus-visible {
+  outline: 3px solid rgba(65, 97, 209, .22);
+  outline-offset: 2px;
+}
+
+
+/* Icon */
+
+.tomorrow-status-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background: #eeeaff;
+  color: var(--purple);
+
+  font-size: 20px;
+}
+
+.tomorrow-status-icon ion-icon {
+  font-size: 20px;
+}
+
+
+/* Text */
+
+.tomorrow-status-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.tomorrow-status-eyebrow {
+  display: block;
+
+  color: #8a96a8;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: .75px;
+}
+
+.tomorrow-status-content strong {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--text);
+
+  font-size: 13px;
+  font-weight: 900;
+
+  line-height: 1.2;
+}
+
+
+/* Arrow */
+
+.tomorrow-status-arrow {
+  flex: 0 0 auto;
+
+  color: #8c98aa;
+
+  font-size: 19px;
+}
+
+
+/* Present */
+
+.tomorrow-status-card:has(.tomorrow-status-content strong) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* Mobile */
+
+@media (max-width: 520px) {
+
+  .tomorrow-status-card {
+    min-height: 64px;
+
+    margin-top: -30px;
+
+    padding: 11px 12px;
+
+    border-radius: 15px;
+  }
+
+  .tomorrow-status-icon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+
+    border-radius: 11px;
+
+    font-size: 18px;
+  }
+
+  .tomorrow-status-icon ion-icon {
+    font-size: 18px;
+  }
+
+  .tomorrow-status-eyebrow {
+    font-size: 7px;
+  }
+
+  .tomorrow-status-content strong {
+    font-size: 12px;
+  }
+
+  .tomorrow-status-arrow {
+    font-size: 18px;
+  }
+}
 
  .ride-card {
 
@@ -385,7 +553,7 @@ ion-menu ion-item ion-icon {
 
   z-index: 2;
 
-  margin-top: -52px;
+  margin-top: 0;
 
   overflow: hidden;
 
@@ -699,18 +867,23 @@ ion-menu ion-item ion-icon {
 
 
 
-.progress-step span {
+.progress-step strong {
+  display: block;
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.2;
+}
 
-  min-height: 18px;
-
-  margin-top: 2px;
-
+.milestone-time {
+  display: block;
+  min-height: 0 !important;
+  margin-top: 3px;
   color: var(--muted);
-
   font-size: 8px;
-
-  line-height: 1.25;
-
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 
@@ -1596,7 +1769,7 @@ a:focus-visible {
   }
 
   .ride-card {
-    margin-top: -48px;
+    margin-top: 0;
   }
 
 }
@@ -1639,9 +1812,10 @@ a:focus-visible {
     font-size: 9px;
   }
 
-  .progress-step span {
-    font-size: 7px;
-  }
+.milestone-time {
+  font-size: 7px;
+  margin-top: 3px;
+}
 
   .quick-grid {
     grid-template-columns: 1fr 1fr;
@@ -1706,7 +1880,7 @@ a:focus-visible {
   }
 
   .ride-card {
-    margin-top: -44px;
+    margin-top: 0;
   }
 
   .route-progress {

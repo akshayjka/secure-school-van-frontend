@@ -1,103 +1,68 @@
 <ion-header>
-
   <ion-toolbar color="primary">
-
     <ion-buttons slot="start">
-
-      <ion-back-button
-        defaultHref="/parent/dashboard">
-      </ion-back-button>
-
+      <ion-back-button defaultHref="/parent/dashboard"></ion-back-button>
     </ion-buttons>
 
-    <ion-title>
-      Live Tracking
-    </ion-title>
-
+    <ion-title>Live Tracking</ion-title>
   </ion-toolbar>
-
 </ion-header>
 
-
-<ion-content
-  [fullscreen]="true"
-  class="live-tracking-content">
-
+<ion-content [fullscreen]="true" class="live-tracking-content">
 
   <!-- =====================================================
        TRACKING HEADER
   ====================================================== -->
-
   <div class="tracking-header">
-
     <div class="tracking-header-content">
-
       <div class="tracking-icon">
-
-        <ion-icon
-          name="location-outline">
-        </ion-icon>
-
+        <ion-icon name="location-outline"></ion-icon>
       </div>
 
-
       <div>
-
-        <h2>
-          School Van
-        </h2>
+        <h2>School Van</h2>
 
         <p>
-
           {{
             rideType === 'evening'
               ? 'School → Home'
               : 'Home → School'
           }}
-
         </p>
+      </div>
+    </div>
 
+    <!-- LIVE STATUS + ETA -->
+    <div class="tracking-status-block">
+
+      <div
+        class="live-status"
+        [class.live]="trackingStarted"
+        [class.offline]="!trackingStarted">
+
+        <span class="status-dot"></span>
+
+        <span>
+          {{ rideStatusText }}
+        </span>
+      </div>
+
+      <div class="eta-status">
+        <span class="eta-label">ETA</span>
+        <strong>{{ etaText }}</strong>
       </div>
 
     </div>
-
-
-    <!-- LIVE STATUS -->
-
-    <div
-      class="live-status"
-      [class.live]="trackingStarted"
-      [class.offline]="!trackingStarted">
-
-      <span class="status-dot"></span>
-
-      <span>
-
-        {{
-          trackingStarted
-            ? 'LIVE'
-            : 'WAITING'
-        }}
-
-      </span>
-
-    </div>
-
   </div>
-
 
 
   <!-- =====================================================
        ROUTE SUMMARY
   ====================================================== -->
-
   <div class="school-card">
 
-
     <!-- START -->
-
     <div class="route-row">
-
       <div
         class="route-icon"
         [class.school]="rideType === 'evening'"
@@ -110,43 +75,26 @@
               : 'home-outline'
           ">
         </ion-icon>
-
       </div>
 
-
       <div class="route-content">
-
-        <span class="route-label">
-          Ride Starts From
-        </span>
-
+        <span class="route-label">Ride Starts From</span>
 
         <strong>
-
           {{
             rideType === 'evening'
               ? 'Lisieux Matriculation School'
               : 'Home / Pickup Location'
           }}
-
         </strong>
-
       </div>
-
     </div>
 
-
-
     <!-- ROUTE LINE -->
-
     <div class="route-line"></div>
 
-
-
     <!-- END -->
-
     <div class="route-row">
-
       <div
         class="route-icon"
         [class.home]="rideType === 'evening'"
@@ -159,35 +107,22 @@
               : 'school-outline'
           ">
         </ion-icon>
-
       </div>
 
-
       <div class="route-content">
-
-        <span class="route-label">
-          Ride Ends At
-        </span>
-
+        <span class="route-label">Ride Ends At</span>
 
         <strong>
-
           {{
             rideType === 'evening'
               ? 'Home / Pickup Location'
               : 'Lisieux Matriculation School'
           }}
-
         </strong>
-
       </div>
-
     </div>
 
-
-
     <!-- ROUTE STATUS -->
-
     <div
       class="route-status"
       *ngIf="routeMessage">
@@ -197,75 +132,37 @@
         [class.ready]="routeLoaded">
       </span>
 
-      <span>
-        {{ routeMessage }}
-      </span>
-
+      <span>{{ routeMessage }}</span>
     </div>
 
   </div>
 
 
-
   <!-- =====================================================
        GOOGLE MAP
   ====================================================== -->
-
   <div class="map-wrapper">
 
+    <div id="map" class="google-map"></div>
 
-    <!-- MAP -->
+    <!-- MAP LOADING -->
+    <div class="map-loading" *ngIf="mapLoading">
+      <ion-spinner name="crescent"></ion-spinner>
 
-    <div
-      id="map"
-      class="google-map">
+      <span>Loading Google Maps...</span>
     </div>
 
+    <!-- MAP ERROR -->
+    <div class="map-error" *ngIf="mapError">
 
+      <ion-icon name="warning-outline"></ion-icon>
 
-    <!-- =================================================
-         MAP LOADING
-    ================================================== -->
-
-    <div
-      class="map-loading"
-      *ngIf="mapLoading">
-
-      <ion-spinner
-        name="crescent">
-      </ion-spinner>
-
-      <span>
-        Loading Google Maps...
-      </span>
-
-    </div>
-
-
-
-    <!-- =================================================
-         MAP ERROR
-    ================================================== -->
-
-    <div
-      class="map-error"
-      *ngIf="mapError">
-
-      <ion-icon
-        name="warning-outline">
-      </ion-icon>
-
-
-      <strong>
-        Unable to load map
-      </strong>
-
+      <strong>Unable to load map</strong>
 
       <span>
         Please check your internet connection
         and Google Maps configuration.
       </span>
-
 
       <ion-button
         size="small"
@@ -278,158 +175,51 @@
         </ion-icon>
 
         Retry
-
       </ion-button>
 
     </div>
 
-
-
-    <!-- =================================================
-         LIVE BADGE
-    ================================================== -->
-
-    <div class="map-live-badge">
-
-      <span
-        class="status-dot"
-        [class.active]="trackingStarted">
-      </span>
-
-
-      <span>
-
-        {{
-          trackingStarted
-            ? 'Van location updating'
-            : 'Waiting for van location'
-        }}
-
-      </span>
-
-    </div>
-
-
-
-    <!-- =================================================
-         ROUTE BADGE
-    ================================================== -->
-
+    <!-- ROUTE BADGE -->
     <div
       class="route-badge"
       *ngIf="routeLoaded">
 
       <span class="route-blue-line"></span>
 
-
       <span>
-
         {{
           rideType === 'evening'
             ? 'School → Home'
             : 'Home → School'
         }}
-
       </span>
-
     </div>
 
-
-
-    <!-- =================================================
-         VAN LIVE INDICATOR
-    ================================================== -->
-
+    <!-- VAN LIVE INDICATOR -->
     <div
       class="van-live-indicator"
       *ngIf="trackingStarted">
 
       <span class="van-live-pulse"></span>
 
-      <span>
-        LIVE
-      </span>
-
+      <span>LIVE</span>
     </div>
 
   </div>
-
 
 
   <!-- =====================================================
        CURRENT VAN LOCATION
   ====================================================== -->
-
-  <div class="location-card">
-
-
-    <div class="location-card-icon">
-
-      <ion-icon
-        name="navigate-outline">
-      </ion-icon>
-
-    </div>
-
-
-    <div class="location-card-content">
-
-      <span>
-        Current Van Location
-      </span>
-
-
-      <!-- LOCATION AVAILABLE -->
-
-      <strong
-        *ngIf="
-          lastLatitude !== null &&
-          lastLongitude !== null
-        ">
-
-        {{ lastLatitude | number:'1.5-5' }},
-        {{ lastLongitude | number:'1.5-5' }}
-
-      </strong>
-
-
-      <!-- LOCATION WAITING -->
-
-      <strong
-        *ngIf="
-          lastLatitude === null ||
-          lastLongitude === null
-        ">
-
-        Waiting for van location...
-
-      </strong>
-
-
-      <!-- LAST UPDATE -->
-
-      <small
-        *ngIf="lastLocationTime">
-
-        Updated
-        {{ lastLocationTime | date:'shortTime' }}
-
-      </small>
-
-    </div>
-
-  </div>
-
+ 
 
 
   <!-- =====================================================
        RIDE DIRECTION CARD
   ====================================================== -->
-
-  <div class="direction-card">
+  <!-- <div class="direction-card">
 
     <div class="direction-icon">
-
       <ion-icon
         [name]="
           rideType === 'evening'
@@ -437,82 +227,87 @@
             : 'home-outline'
         ">
       </ion-icon>
-
     </div>
-
 
     <div class="direction-content">
 
-      <span>
-        Current Ride
-      </span>
-
+      <span>Current Ride</span>
 
       <strong>
-
         {{
           rideType === 'evening'
             ? 'School → Home'
             : 'Home → School'
         }}
-
       </strong>
 
-
       <small>
-
         {{
           rideType === 'evening'
             ? 'Van is travelling from school to home'
             : 'Van is travelling from home to school'
         }}
-
       </small>
 
     </div>
-
-  </div>
-
+  </div> -->
 
 
   <!-- =====================================================
-       TRACKING INFORMATION
+       ETA CARD
+       Replaces the old "Live Road Tracking" information card
   ====================================================== -->
+  <!-- =====================================================
+     ETA CARD
+====================================================== -->
 
-  <div class="tracking-info-card">
+<div class="eta-card">
+
+  <div class="eta-card-icon">
 
     <ion-icon
-      name="information-circle-outline">
+      name="time-outline">
     </ion-icon>
-
-
-    <div>
-
-      <strong>
-        Live Road Tracking
-      </strong>
-
-
-      <p>
-
-        The blue line shows the Google road route
-        for this ride. The van marker shows the
-        driver's latest GPS location and moves
-        automatically as new locations are received.
-
-      </p>
-
-    </div>
 
   </div>
 
+
+  <div class="eta-card-content">
+
+    <span>
+      Estimated Arrival
+    </span>
+
+
+    <strong>
+
+      {{
+        etaText !== '--'
+          ? etaText
+          : 'Calculating...'
+      }}
+
+    </strong>
+
+
+    <small>
+
+      {{
+        rideType === 'evening'
+          ? 'Estimated time to reach home'
+          : 'Estimated time to reach school'
+      }}
+
+    </small>
+
+  </div>
+
+</div>
 
 
   <!-- =====================================================
        BOTTOM SPACE
   ====================================================== -->
-
   <div class="bottom-space"></div>
-
 
 </ion-content>
