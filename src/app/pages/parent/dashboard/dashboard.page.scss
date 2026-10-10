@@ -710,18 +710,23 @@ ion-menu ion-item ion-icon {
 
 
 
+// .progress-step {
+
+//   position: relative;
+
+//   min-width: 0;
+
+//   text-align: center;
+
+//   transition: transform .18s ease;
+
+// }
 .progress-step {
-
-  position: relative;
-
-  min-width: 0;
-
-  text-align: center;
-
-  transition: transform .18s ease;
-
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
-
 
 
 .progress-marker {
@@ -877,12 +882,11 @@ ion-menu ion-item ion-icon {
 
 .milestone-time {
   display: block;
-  min-height: 0 !important;
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 8px;
-  font-weight: 700;
+  margin-top: 5px;
+  font-size: 12px;
   line-height: 1.2;
+  font-weight: 600;
+  text-align: center;
   white-space: nowrap;
 }
 
@@ -2109,4 +2113,56 @@ ion-menu::part(backdrop) {
 
   font-size: 27px !important;
 
+}
+
+/* =========================================================
+   MILESTONE TIME FIX
+   Only Home/School show time.
+   On Route never shows time.
+   ========================================================= */
+
+.route-progress .progress-step {
+  position: relative;
+}
+
+/* Time below Home / School */
+.route-progress .progress-step .milestone-time {
+  display: block !important;
+
+  margin-top: 5px;
+
+  width: 100%;
+
+  text-align: center;
+
+  font-size: 10px;
+  line-height: 14px;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  color: #64748b;
+}
+
+/* Completed destination time */
+.route-progress
+  .progress-step.completed
+  .milestone-time {
+  color: #15803d;
+}
+
+/* Active destination time */
+.route-progress
+  .progress-step.active
+  .milestone-time {
+  color: #475569;
+}
+
+/* Waiting destination should not visually reserve
+   a time line when there is no actual time */
+.route-progress
+  .progress-step.waiting
+  .milestone-time {
+  display: none !important;
 }

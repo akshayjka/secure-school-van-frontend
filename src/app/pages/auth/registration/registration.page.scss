@@ -1,25 +1,20 @@
 /* ============================================================
-   SECURE SCHOOL VAN
-   REGISTRATION
-   PREMIUM SAFETY DESIGN
-   CSS ONLY
+   SECURE SCHOOL VAN
+   REGISTRATION
+   PREMIUM SAFETY DESIGN
+   CSS ONLY
 ============================================================ */
-
-
 /* ============================================================
-   ROOT PAGE
+   ROOT PAGE
 ============================================================ */
-
 ion-content {
   --background: #eef4fb;
   --padding-bottom: 30px;
 }
 
-
 /* ============================================================
-   TOP BAR
+   TOP BAR
 ============================================================ */
-
 ion-header {
   background: #ffffff;
 }
@@ -27,319 +22,199 @@ ion-header {
 ion-toolbar {
   --background: #ffffff;
   --color: #13233f;
-
   --border-width: 0;
-
   height: 62px;
   min-height: 62px;
-
   padding: 0 14px;
-
   box-shadow:
     0 2px 14px rgba(19, 35, 63, 0.06);
-
   position: relative;
   z-index: 10;
 }
 
 ion-toolbar::after {
   content: '';
-
   position: absolute;
-
   left: 0;
   right: 0;
   bottom: 0;
-
   height: 2px;
-
   background: #1b7df0;
 }
 
-
 /* ============================================================
-   TOOLBAR BRAND
+   TOOLBAR BRAND
 ============================================================ */
-
 ion-title {
   height: 62px;
-
   display: flex;
-
   align-items: center;
-
   padding: 0 !important;
-
   font-size: 0 !important;
-
   text-align: left;
 }
 
 ion-title::before {
   content: '🚐';
-
   width: 37px;
   height: 37px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   margin-right: 10px;
-
   border-radius: 12px;
-
   background: #e8f2ff;
-
   font-size: 19px;
 }
 
 ion-title::after {
   content: 'Secure School Van';
-
   color: #17243d;
-
   font-size: 16px;
-
   font-weight: 800;
-
   letter-spacing: -0.3px;
 }
 
-
 /* ============================================================
-   MAIN CONTAINER
+   MAIN CONTAINER
 ============================================================ */
-
 .container {
   width: 100%;
   max-width: 600px;
-
   margin: 0 auto;
-
   padding:
-    20px
-    15px
-    40px;
-
+    20px 15px 40px;
   box-sizing: border-box;
 }
 
-
 /* ============================================================
-   WELCOME / HERO
+   WELCOME / HERO
 ============================================================ */
-
 .logo {
   width: 72px;
   height: 72px;
-
   margin:
-    2px
-    auto
-    14px;
-
+    2px auto 14px;
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 24px;
-
   background:
-    linear-gradient(
-      145deg,
+    linear-gradient(145deg,
       #dcecff 0%,
-      #eef6ff 100%
-    );
-
+      #eef6ff 100%);
   border: 1px solid #cfe3fb;
-
   box-shadow:
     0 12px 30px rgba(29, 111, 210, 0.12);
-
   font-size: 34px;
-
   position: relative;
 }
 
-
 /* Decorative circle */
-
 .logo::before {
   content: '';
-
   position: absolute;
-
   width: 10px;
   height: 10px;
-
   right: 5px;
   top: 5px;
-
   border-radius: 50%;
-
   background: #20a064;
-
   border: 3px solid #ffffff;
 }
 
-
-.container > h2 {
+.container>h2 {
   margin: 0;
-
   text-align: center;
-
   color: #13213a;
-
   font-size: 29px;
-
   line-height: 1.1;
-
   font-weight: 850;
-
   letter-spacing: -1px;
 }
 
 .subtitle {
   margin:
-    7px
-    0
-    22px;
-
+    7px 0 22px;
   text-align: center;
-
   color: #718096;
-
   font-size: 13px;
-
   line-height: 1.45;
 }
 
-
 /* ============================================================
-   ROLE TITLE
-   Generated without changing HTML
+   ROLE TITLE
+   Generated without changing HTML
 ============================================================ */
-
 ion-segment::before {
   content: 'I am registering as';
-
   position: absolute;
-
   top: -25px;
   left: 2px;
-
   color: #34435b;
-
   font-size: 11px;
-
   font-weight: 750;
 }
 
 ion-segment {
   position: relative;
-
   width: 100%;
-
   margin:
-    0
-    0
-    25px;
-
+    0 0 25px;
   padding: 5px;
-
   min-height: 60px;
-
   border-radius: 18px;
-
   --background: #dfe8f4;
-
   border: 1px solid #d5dfeb;
-
   box-shadow:
     inset 0 1px 3px rgba(20, 40, 70, 0.05);
 }
 
 ion-segment-button {
   min-height: 49px;
-
   border-radius: 14px;
-
   --indicator-color: #ffffff;
-
   --indicator-box-shadow:
     0 5px 14px rgba(19, 52, 91, 0.10);
-
   --color: #627087;
-
   --color-checked: #1269d3;
-
   font-size: 13px;
-
   font-weight: 850;
-
   letter-spacing: 0.3px;
 }
 
-
 /* ============================================================
-   DRIVER REGISTRATION
+   DRIVER REGISTRATION
 ============================================================ */
-
 .driver-registration {
   width: 100%;
-
   box-sizing: border-box;
-
   padding:
-    0
-    0
-    20px;
-
+    0 0 20px;
   background: transparent;
-
   position: relative;
 }
 
-
 /* ============================================================
-   DRIVER INTRO
+   DRIVER INTRO
 ============================================================ */
-
 .driver-registration::before {
   content:
-    '🚐  DRIVER ACCOUNT';
-
+    '🚐  DRIVER ACCOUNT';
   display: block;
-
   padding:
-    17px
-    18px;
-
+    17px 18px;
   margin:
-    0
-    0
-    13px;
-
+    0 0 13px;
   border-radius: 18px;
-
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #116bd7,
-      #2186ed
-    );
-
+      #2186ed);
   color: #ffffff;
-
   font-size: 14px;
-
   font-weight: 850;
-
   letter-spacing: 0.5px;
-
   box-shadow:
     0 10px 22px rgba(17, 107, 215, 0.18);
 }
@@ -347,681 +222,449 @@ ion-segment-button {
 .driver-registration::after {
   content:
     'Register your driver details to manage safe school journeys.';
-
   display: block;
-
   margin:
-    -3px
-    4px
-    15px;
-
+    -3px 4px 15px;
   color: #6b7890;
-
   font-size: 11px;
-
   line-height: 1.45;
 }
 
-
 /* ============================================================
-   PARENT ONBOARDING
+   PARENT ONBOARDING
 ============================================================ */
-
 .parent-onboarding {
   width: 100%;
 }
 
-
 /* ============================================================
-   PROGRESS
+   PROGRESS
 ============================================================ */
-
 .progress-section {
   width: 100%;
-
   box-sizing: border-box;
-
   margin:
-    0
-    0
-    15px;
-
+    0 0 15px;
   padding:
-    13px
-    15px;
-
+    13px 15px;
   border-radius: 16px;
-
   background: #ffffff;
-
   border: 1px solid #dde6f0;
-
   box-shadow:
     0 4px 15px rgba(20, 45, 80, 0.045);
 }
 
 .progress-top {
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   margin-bottom: 9px;
-
   color: #65748b;
-
   font-size: 11px;
-
   font-weight: 750;
 }
 
 .progress-top span:last-child {
   color: #1372df;
-
   font-weight: 850;
 }
 
 .progress-track {
   width: 100%;
-
   height: 6px;
-
   border-radius: 20px;
-
   overflow: hidden;
-
   background: #e5ebf3;
 }
 
 .progress-value {
   height: 100%;
-
   border-radius: inherit;
-
   background:
-    linear-gradient(
-      90deg,
+    linear-gradient(90deg,
       #1373df,
-      #4aa0f6
-    );
-
+      #4aa0f6);
   transition:
     width 0.3s ease;
 }
 
-
 /* ============================================================
-   MAIN REGISTRATION CARD
+   MAIN REGISTRATION CARD
 ============================================================ */
-
 .onboarding-card {
   width: 100%;
-
   box-sizing: border-box;
-
   padding:
-    24px
-    17px
-    20px;
-
+    24px 17px 20px;
   margin-bottom: 15px;
-
   border-radius: 24px;
-
   background: #ffffff;
-
   border: 1px solid #dfe7f0;
-
   box-shadow:
     0 14px 35px rgba(19, 42, 72, 0.075);
-
   position: relative;
-
   overflow: hidden;
 }
 
-
 /* top blue edge */
-
 .onboarding-card::before {
   content: '';
-
   position: absolute;
-
   top: 0;
   left: 0;
   right: 0;
-
   height: 4px;
-
   background:
-    linear-gradient(
-      90deg,
+    linear-gradient(90deg,
       #126ee0,
-      #58a9f7
-    );
+      #58a9f7);
 }
 
-
 /* ============================================================
-   STEP ICON
+   STEP ICON
 ============================================================ */
-
 .step-icon {
   width: 54px;
   height: 54px;
-
   margin:
-    0
-    0
-    16px;
-
+    0 0 16px;
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 17px;
-
   background: #edf5ff;
-
   border: 1px solid #d6e8ff;
-
   font-size: 25px;
-
   box-shadow:
     0 6px 16px rgba(28, 107, 211, 0.07);
 }
 
-
 /* ============================================================
-   CARD TITLE
+   CARD TITLE
 ============================================================ */
-
 .onboarding-card h3 {
   margin: 0;
-
   color: #14223b;
-
   font-size: 22px;
-
   line-height: 1.2;
-
   font-weight: 850;
-
   letter-spacing: -0.6px;
 }
 
-.onboarding-card > p {
+.onboarding-card>p {
   margin:
-    7px
-    0
-    21px;
-
+    7px 0 21px;
   color: #748096;
-
   font-size: 12px;
-
   line-height: 1.55;
 }
 
-
 /* ============================================================
-   FORM
+   FORM
 ============================================================ */
-
 form {
   width: 100%;
 }
 
-
 /* ============================================================
-   INPUT DESIGN
+   INPUT DESIGN
 ============================================================ */
-
 ion-item {
   --background: #ffffff;
-
   --border-color: #dce5ef;
-
   --highlight-height: 2px;
-
   --padding-start: 14px;
-
   --padding-end: 12px;
-
   --inner-padding-end: 0;
-
   width: 100%;
-
   min-height: 60px;
-
   margin:
-    0
-    0
-    10px;
-
+    0 0 10px;
   box-sizing: border-box;
-
   border-radius: 15px;
-
   border: 1px solid #dce5ef;
-
   box-shadow:
     0 3px 10px rgba(21, 48, 82, 0.025);
-
   transition:
     border-color .2s ease,
     box-shadow .2s ease,
     background .2s ease;
 }
 
-
 /* focused */
-
 ion-item:focus-within {
   --background: #fafdff;
-
   border-color: #4e9aeb;
-
   box-shadow:
     0 0 0 3px rgba(20, 111, 224, 0.07);
 }
 
 ion-input {
   --padding-top: 9px;
-
   --padding-bottom: 9px;
-
   --placeholder-color: #8b97a9;
-
   --placeholder-opacity: 1;
-
   color: #17243b;
-
   font-size: 14px;
-
   font-weight: 500;
 }
 
-
 /* ============================================================
-   ERROR
+   ERROR
 ============================================================ */
-
 small {
   display: block;
-
   margin:
-    -3px
-    0
-    10px
-    7px;
-
+    -3px 0 10px 7px;
   color: #d92d20;
-
   font-size: 10px;
-
   line-height: 1.4;
-
   font-weight: 600;
 }
 
-
 /* ============================================================
-   PRIMARY BUTTON
+   PRIMARY BUTTON
 ============================================================ */
-
 .register-btn,
 .continue-btn {
   --border-radius: 15px;
-
   --box-shadow:
     0 9px 20px rgba(18, 110, 224, 0.20);
-
   height: 51px;
-
   margin-top: 16px;
-
   font-size: 14px;
-
   font-weight: 850;
 }
 
-
 /* ============================================================
-   NAVIGATION
+   NAVIGATION
 ============================================================ */
-
 .parent-navigation {
   display: flex;
-
   align-items: center;
-
   gap: 9px;
-
   width: 100%;
-
   margin-top: 4px;
 }
 
 .parent-navigation ion-button:first-child {
   --color: #607087;
-
   min-width: 68px;
-
   font-size: 12px;
-
   font-weight: 750;
 }
 
 .parent-navigation .continue-btn {
   flex: 1;
-
   margin-top: 0;
 }
 
-
 /* ============================================================
-   LOCATION BUTTONS
+   LOCATION BUTTONS
 ============================================================ */
-
 .location-btn {
   --border-radius: 14px;
-
   height: 48px;
-
   font-size: 12px;
-
   font-weight: 800;
 }
 
-
 /* ============================================================
-   OR
+   OR
 ============================================================ */
-
 .or-divider {
   display: flex;
-
   align-items: center;
-
   gap: 12px;
-
   margin:
-    17px
-    0;
-
+    17px 0;
   color: #9aa5b5;
-
   font-size: 9px;
-
   font-weight: 800;
 }
 
 .or-divider::before,
 .or-divider::after {
   content: '';
-
   height: 1px;
-
   flex: 1;
-
   background: #e2e7ee;
 }
 
-
 /* ============================================================
-   LOCATION NOTE
+   LOCATION NOTE
 ============================================================ */
-
 .location-note {
   display: flex;
-
   align-items: flex-start;
-
   gap: 9px;
-
   margin-top: 16px;
-
   padding: 13px;
-
   border-radius: 14px;
-
   background: #f4f8fc;
-
   border: 1px solid #e1e9f2;
 }
 
 .location-note p {
   margin: 0;
-
   color: #68758a;
-
   font-size: 10px;
-
   line-height: 1.55;
 }
 
-
 /* ============================================================
-   GOOGLE MAP
+   GOOGLE MAP
 ============================================================ */
-
 .map-container {
   width: 100%;
   height: 350px;
   min-height: 350px;
-
   display: block;
   position: relative;
-
   margin: 14px 0 15px;
   padding: 0;
-
   box-sizing: border-box;
   overflow: hidden;
-
   border-radius: 18px;
   border: 1px solid #dce5ee;
-
   background: #e5e7eb;
-
   box-shadow:
     0 8px 22px rgba(18, 40, 70, 0.08);
-
   isolation: isolate;
 }
 
 /*
- * Google Maps owns everything inside this element.
- * Do not allow application styles to collapse the map.
- */
-.map-container > div {
+ * Google Maps owns everything inside this element.
+ * Do not allow application styles to collapse the map.
+ */
+.map-container>div {
   width: 100% !important;
   height: 100% !important;
   min-height: 100% !important;
 }
 
 /*
- * Google Maps internal root.
- */
+ * Google Maps internal root.
+ */
 .map-container .gm-style {
   width: 100% !important;
   height: 100% !important;
 }
 
 /*
- * Prevent global Ionic/app image rules from
- * breaking Google Maps tiles and controls.
- */
+ * Prevent global Ionic/app image rules from
+ * breaking Google Maps tiles and controls.
+ */
 .map-container img {
   max-width: none !important;
 }
-/* ============================================================
-   SELECTED LOCATION
-============================================================ */
 
+/* ============================================================
+   SELECTED LOCATION
+============================================================ */
 .selected-location {
   display: flex;
-
   gap: 10px;
-
   padding: 13px;
-
   border-radius: 14px;
-
   background: #f4f8ff;
-
   border: 1px solid #dbe9fb;
 }
 
 .location-pin {
   width: 36px;
   height: 36px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 11px;
-
   background: #e4f0ff;
-
   font-size: 18px;
 }
 
 .selected-location strong {
   display: block;
-
   color: #17243b;
-
   font-size: 12px;
 }
 
 .selected-location p {
   margin:
-    4px
-    0
-    0;
-
+    4px 0 0;
   color: #6d7a8d;
-
   font-size: 10px;
-
   line-height: 1.45;
 }
 
-
 /* ============================================================
-   COORDINATES
+   COORDINATES
 ============================================================ */
-
 .coordinates {
   display: flex;
-
   justify-content: space-between;
-
   gap: 8px;
-
   margin-top: 8px;
-
   padding:
-    8px
-    10px;
-
+    8px 10px;
   border-radius: 9px;
-
   background: #f1f4f8;
-
   color: #6e7b8d;
-
   font-size: 9px;
 }
 
-
 /* ============================================================
-   SCHOOL SEARCH
+   SCHOOL SEARCH
 ============================================================ */
-
 .school-search-wrapper {
   position: relative;
-
   width: 100%;
 }
 
 .location-hint {
   display: block;
-
   margin: 6px 12px;
-
   color: #718078;
-
   font-size: 12px;
 }
 
 .school-search-loading,
 .school-search-status {
   display: flex;
-
   align-items: center;
-
   gap: 8px;
-
   padding:
-    11px
-    13px;
-
+    11px 13px;
   border-radius: 12px;
-
   background: #f6f9fc;
-
   color: #6d7a8d;
-
   font-size: 11px;
 }
 
-
 /* ============================================================
-   SCHOOL RESULTS
+   SCHOOL RESULTS
 ============================================================ */
-
 .school-results {
   margin:
-    4px
-    0
-    12px;
-
+    4px 0 12px;
   overflow: hidden;
-
   background: #ffffff;
-
   border-radius: 16px;
-
   border: 1px solid #dfe6ef;
-
   box-shadow:
     0 12px 27px rgba(20, 42, 72, 0.10);
 }
 
 .school-result {
   display: flex;
-
   align-items: center;
-
   gap: 11px;
-
   padding:
     13px;
-
   cursor: pointer;
 }
 
-.school-result + .school-result {
+.school-result+.school-result {
   border-top:
     1px solid #edf0f4;
 }
@@ -1034,92 +677,61 @@ small {
 .school-icon {
   width: 39px;
   height: 39px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 11px;
-
   background: #eaf3ff;
-
   border: 1px solid #dceaff;
-
   font-size: 17px;
 }
 
 .school-result-info,
 .school-result-content {
   display: flex;
-
   flex-direction: column;
-
   gap: 3px;
-
   min-width: 0;
-
   flex: 1;
 }
 
 .school-result-info strong,
 .school-result-content strong {
   color: #17243b;
-
   font-size: 12px;
-
   font-weight: 750;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
-
   white-space: nowrap;
 }
 
 .school-result-info span,
 .school-result-content span {
   color: #7b8798;
-
   font-size: 9px;
-
   line-height: 1.4;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
 .school-arrow {
   color: #77859a;
-
   font-size: 22px;
 }
 
-
 /* ============================================================
-   SELECTED SCHOOL
+   SELECTED SCHOOL
 ============================================================ */
-
 .selected-school {
   display: flex;
-
   align-items: center;
-
   gap: 10px;
-
   margin:
-    10px
-    0;
-
+    10px 0;
   padding: 13px;
-
   border-radius: 15px;
-
   background: #f0faf4;
-
   border: 1px solid #ccebd9;
 }
 
@@ -1127,161 +739,109 @@ small {
 .selected-school-icon {
   width: 38px;
   height: 38px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 11px;
-
   background: #ddf5e6;
-
   color: #16804a;
-
   font-size: 16px;
-
   font-weight: 850;
 }
 
 .selected-school-info {
   display: flex;
-
   flex-direction: column;
-
   gap: 3px;
-
   min-width: 0;
 }
 
 .selected-school strong {
   color: #17623e;
-
   font-size: 12px;
 }
 
 .selected-school span {
   color: #718078;
-
   font-size: 9px;
-
   line-height: 1.4;
 }
 
 .change-school-btn {
   margin-left: auto;
-
   border: none;
-
   background: transparent;
-
   color: #1671db;
-
   font-size: 10px;
-
   font-weight: 800;
 }
 
-
 /* ============================================================
-   DRIVER FOUND
+   DRIVER FOUND
 ============================================================ */
-
 .driver-card {
   display: flex;
-
   align-items: center;
-
   gap: 12px;
-
   margin-top: 16px;
-
   padding: 15px;
-
   border-radius: 17px;
-
   background: #f3f8ff;
-
   border: 1px solid #d5e6fb;
 }
 
 .driver-avatar {
   width: 52px;
   height: 52px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 15px;
-
   background: #e5efff;
-
   font-size: 24px;
 }
 
 .driver-info {
   display: flex;
-
   flex-direction: column;
-
   gap: 3px;
-
   min-width: 0;
 }
 
 .driver-info strong {
   color: #17243b;
-
   font-size: 14px;
-
   font-weight: 800;
 }
 
 .driver-info span {
   color: #6d7a8d;
-
   font-size: 9px;
 }
 
 .driver-info small {
   margin:
-    4px
-    0
-    0;
-
+    4px 0 0;
   color: #16804a;
-
   font-size: 9px;
-
   font-weight: 800;
 }
 
-
 /* ============================================================
-   REVIEW
+   REVIEW
 ============================================================ */
-
 .review-card {
   padding-bottom: 20px;
 }
 
 .review-item {
   display: flex;
-
   align-items: flex-start;
-
   gap: 11px;
-
   padding:
-    13px
-    0;
-
+    13px 0;
   border-bottom:
     1px solid #edf0f4;
 }
@@ -1293,108 +853,69 @@ small {
 .review-icon {
   width: 40px;
   height: 40px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 12px;
-
   background: #edf4fc;
-
   border: 1px solid #dfe8f2;
-
   font-size: 16px;
 }
 
-.review-item > div {
+.review-item>div {
   display: flex;
-
   flex-direction: column;
-
   min-width: 0;
 }
 
 .review-item label {
   color: #8b96a7;
-
   font-size: 8px;
-
   font-weight: 800;
-
   text-transform: uppercase;
-
   letter-spacing: 0.4px;
 }
 
 .review-item strong {
   margin-top: 3px;
-
   color: #17243b;
-
   font-size: 12px;
-
   font-weight: 750;
 }
 
 .review-item small {
   margin:
-    3px
-    0
-    0;
-
+    3px 0 0;
   color: #6c798c;
-
   font-size: 9px;
-
   line-height: 1.4;
-
   overflow-wrap: anywhere;
 }
 
-
 /* ============================================================
-   COMPLETE
+   COMPLETE
 ============================================================ */
-
 .complete-card {
   text-align: center;
-
   padding:
-    40px
-    20px
-    25px;
+    40px 20px 25px;
 }
 
 .success-icon {
   width: 78px;
   height: 78px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   margin:
-    0
-    auto
-    18px;
-
+    0 auto 18px;
   border-radius: 50%;
-
   background: #e3f8eb;
-
   border: 1px solid #c8edd7;
-
   color: #16804a;
-
   font-size: 38px;
-
   font-weight: 850;
-
   box-shadow:
     0 10px 25px rgba(22, 128, 74, 0.10);
 }
@@ -1405,41 +926,29 @@ small {
 
 .complete-details {
   display: flex;
-
   flex-direction: column;
-
   gap: 5px;
-
   margin-top: 20px;
-
   padding: 15px;
-
   border-radius: 14px;
-
   background: #f5f8fb;
-
   border: 1px solid #e4eaf1;
 }
 
 .complete-details strong {
   color: #17243b;
-
   font-size: 14px;
 }
 
 .complete-details span {
   color: #6c798c;
-
   font-size: 10px;
 }
 
-
 /* ============================================================
-   MOBILE
+   MOBILE
 ============================================================ */
-
 @media (max-width: 480px) {
-
   ion-toolbar {
     height: 56px;
     min-height: 56px;
@@ -1452,7 +961,6 @@ small {
   ion-title::before {
     width: 33px;
     height: 33px;
-
     font-size: 17px;
   }
 
@@ -1462,52 +970,40 @@ small {
 
   .container {
     padding:
-      17px
-      11px
-      35px;
+      17px 11px 35px;
   }
 
   .logo {
     width: 63px;
     height: 63px;
-
     margin-bottom: 11px;
-
     border-radius: 21px;
-
     font-size: 30px;
   }
 
-  .container > h2 {
+  .container>h2 {
     font-size: 26px;
   }
 
   .subtitle {
     margin-bottom: 21px;
-
     font-size: 12px;
   }
 
   ion-segment {
     min-height: 56px;
-
     margin-bottom: 25px;
-
     border-radius: 17px;
   }
 
   ion-segment-button {
     min-height: 46px;
-
     font-size: 12px;
   }
 
   .onboarding-card {
     padding:
-      23px
-      14px
-      18px;
-
+      23px 14px 18px;
     border-radius: 21px;
   }
 
@@ -1516,7 +1012,6 @@ small {
     padding-right: 0;
   }
 
-  
   ion-item {
     min-height: 57px;
     border-radius: 14px;
@@ -1532,19 +1027,16 @@ small {
   }
 }
 
-
 /* ============================================================
-   SMALL DEVICES
+   SMALL DEVICES
 ============================================================ */
-
 @media (max-width: 360px) {
-
   .container {
     padding-left: 9px;
     padding-right: 9px;
   }
 
-  .container > h2 {
+  .container>h2 {
     font-size: 24px;
   }
 
@@ -1556,39 +1048,30 @@ small {
   .onboarding-card h3 {
     font-size: 20px;
   }
-
 }
 
-
 /* ============================================================
-   GOOGLE MAP - SMALL DEVICES
+   GOOGLE MAP - SMALL DEVICES
 ============================================================ */
-
 @media (max-width: 360px) {
-
   .map-container {
     height: 300px;
     min-height: 300px;
   }
-
 }
 
-
 /* ============================================================
-   REDUCED MOTION
+   REDUCED MOTION
 ============================================================ */
-
 @media (prefers-reduced-motion: reduce) {
-
   * {
     transition: none !important;
   }
-
 }
-/* =========================================================
-   STEP 3 - STUDENT DETAILS
-   ========================================================= */
 
+/* =========================================================
+   STEP 3 - STUDENT DETAILS
+   ========================================================= */
 .student-details-card {
   position: relative;
   overflow: visible !important;
@@ -1596,662 +1079,439 @@ small {
   box-sizing: border-box;
 }
 
-
 /* =========================================================
-   FORM FIELD
-   ========================================================= */
-
+   FORM FIELD
+   ========================================================= */
 .form-field {
   width: 100%;
   margin-bottom: 18px;
   position: relative;
 }
 
-
 /* =========================================================
-   IONIC INPUT
-   ========================================================= */
-
+   IONIC INPUT
+   ========================================================= */
 .custom-input-item {
   --background: #ffffff;
   --border-color: #d8e2ef;
   --border-width: 1px;
   --border-style: solid;
-
   --highlight-color-focused: #2878e8;
   --highlight-color-valid: #2878e8;
-
   --padding-start: 18px;
   --padding-end: 18px;
-
   width: 100%;
   min-height: 72px;
-
   margin: 0;
-
   border: 1px solid #d8e2ef;
   border-radius: 17px;
-
   box-shadow: none;
-
   overflow: hidden;
-
   box-sizing: border-box;
 }
 
-
 /*
- * Ionic internally adds borders/backgrounds to ion-item.
- * Remove them so our custom card remains consistent.
- */
-
+ * Ionic internally adds borders/backgrounds to ion-item.
+ * Remove them so our custom card remains consistent.
+ */
 .custom-input-item::part(native) {
   background: transparent;
   border: 0;
 }
 
-
 /* =========================================================
-   SCHOOL SECTION
-   ========================================================= */
-
+   SCHOOL SECTION
+   ========================================================= */
 .school-section {
   width: 100%;
   margin: 4px 0 20px;
   position: relative;
-
   overflow: visible !important;
-
   z-index: 20;
 }
 
-
 /* =========================================================
-   SCHOOL HEADER
-   ========================================================= */
-
+   SCHOOL HEADER
+   ========================================================= */
 .school-section-header {
   width: 100%;
   margin-bottom: 10px;
 }
 
-
 .school-section-header h4 {
   margin: 0;
-
   font-size: 17px;
   line-height: 22px;
-
   font-weight: 800;
-
   color: #17233c;
 }
-
 
 .school-location-text {
   display: flex;
   align-items: center;
-
   gap: 5px;
-
   margin: 3px 0 0;
-
   font-size: 12px;
   line-height: 18px;
-
   font-weight: 600;
-
   color: #ef4444;
 }
-
 
 .location-dot {
   font-size: 13px;
 }
 
-
 /* =========================================================
-   SCHOOL SEARCH BOX
-   ========================================================= */
-
+   SCHOOL SEARCH BOX
+   ========================================================= */
 .school-search-box {
   width: 100%;
   margin-bottom: 10px;
-
   position: relative;
-
   z-index: 30;
 }
 
-
 .school-input-item {
   min-height: 72px !important;
-
   display: flex !important;
-
   visibility: visible !important;
   opacity: 1 !important;
-
   transform: none !important;
 }
 
-
 /* Force Ionic input itself to remain visible */
-
 .school-input-item ion-input {
   display: block !important;
-
   width: 100%;
-
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-
 /* =========================================================
-   SCHOOL STATUS
-   ========================================================= */
-
+   SCHOOL STATUS
+   ========================================================= */
 .school-status {
   width: 100%;
-
   min-height: 44px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   gap: 9px;
-
   margin: 8px 0;
-
   padding: 10px 14px;
-
   border-radius: 12px;
-
   background: #f5f9ff;
-
   border: 1px solid #dceaff;
-
   color: #49709f;
-
   font-size: 13px;
-
   box-sizing: border-box;
 }
-
 
 .school-status ion-spinner {
   width: 20px;
   height: 20px;
 }
 
-
 /* =========================================================
-   SCHOOL RESULTS
-   ========================================================= */
-
+   SCHOOL RESULTS
+   ========================================================= */
 .school-results {
   width: 100%;
-
   max-height: 260px;
-
   overflow-y: auto;
   overflow-x: hidden;
-
   margin-top: 8px;
-
   padding: 4px;
-
   background: #ffffff;
-
   border: 1px solid #dce5f0;
-
   border-radius: 16px;
-
   box-shadow:
     0 10px 28px rgba(24, 55, 95, 0.12);
-
   box-sizing: border-box;
-
   position: relative;
-
   z-index: 100;
 }
 
-
 /* =========================================================
-   SCHOOL RESULT
-   ========================================================= */
-
+   SCHOOL RESULT
+   ========================================================= */
 .school-result {
   width: 100%;
-
   display: flex;
-
   align-items: center;
-
   gap: 12px;
-
   padding: 13px 12px;
-
   margin: 0;
-
   border: 0;
-
   border-bottom: 1px solid #edf1f6;
-
   background: #ffffff;
-
   color: #17233c;
-
   text-align: left;
-
   font-family: inherit;
-
   cursor: pointer;
-
   appearance: none;
-
   -webkit-appearance: none;
-
   box-sizing: border-box;
 }
-
 
 .school-result:last-child {
   border-bottom: 0;
 }
 
-
 .school-result:hover {
   background: #f6faff;
 }
-
 
 .school-result:active {
   background: #edf5ff;
 }
 
-
 /* =========================================================
-   SCHOOL ICON
-   ========================================================= */
-
+   SCHOOL ICON
+   ========================================================= */
 .school-result-icon {
   width: 42px;
   height: 42px;
-
   flex: 0 0 42px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 12px;
-
   background: #eef5ff;
-
   font-size: 21px;
 }
 
-
 /* =========================================================
-   SCHOOL RESULT CONTENT
-   ========================================================= */
-
+   SCHOOL RESULT CONTENT
+   ========================================================= */
 .school-result-content {
   min-width: 0;
-
   flex: 1;
-
   display: flex;
-
   flex-direction: column;
-
   gap: 3px;
 }
 
-
 .school-result-content strong {
   display: block;
-
   width: 100%;
-
   color: #17233c;
-
   font-size: 14px;
   line-height: 19px;
-
   font-weight: 800;
-
   white-space: normal;
-
   overflow-wrap: anywhere;
 }
-
 
 .school-result-content span {
   display: block;
-
   color: #65748b;
-
   font-size: 11px;
   line-height: 16px;
-
   white-space: normal;
-
   overflow-wrap: anywhere;
 }
 
-
 .school-result-content small {
   display: block;
-
   color: #2878e8;
-
   font-size: 10px;
-
   font-weight: 700;
 }
 
-
 /* =========================================================
-   ARROW
-   ========================================================= */
-
+   ARROW
+   ========================================================= */
 .school-result-arrow {
   flex: 0 0 auto;
-
   font-size: 25px;
-
   line-height: 1;
-
   color: #9aa8bb;
 }
 
-
 /* =========================================================
-   NO RESULTS
-   ========================================================= */
-
+   NO RESULTS
+   ========================================================= */
 .school-no-results {
   width: 100%;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   justify-content: center;
-
   gap: 4px;
-
   padding: 22px 14px;
-
   margin-top: 8px;
-
   background: #f8fafc;
-
   border: 1px solid #e3eaf2;
-
   border-radius: 15px;
-
   box-sizing: border-box;
 }
-
 
 .no-school-icon {
   font-size: 25px;
-
   margin-bottom: 3px;
 }
 
-
 .school-no-results strong {
   font-size: 14px;
-
   color: #24334d;
 }
 
-
 .school-no-results span {
   font-size: 11px;
-
   color: #748197;
-
   text-align: center;
 }
 
-
 /* =========================================================
-   SELECTED SCHOOL
-   ========================================================= */
-
+   SELECTED SCHOOL
+   ========================================================= */
 .selected-school-card {
   width: 100%;
-
   display: flex;
-
   align-items: center;
-
   gap: 12px;
-
   padding: 14px;
-
   margin-top: 8px;
-
   background: #f2f8ff;
-
   border: 1px solid #bcd9ff;
-
   border-radius: 16px;
-
   box-sizing: border-box;
 }
-
 
 .selected-school-icon {
   width: 38px;
   height: 38px;
-
   flex: 0 0 38px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
   background: #2878e8;
-
   color: #ffffff;
-
   font-size: 20px;
-
   font-weight: 800;
 }
-
 
 .selected-school-info {
   min-width: 0;
-
   flex: 1;
-
   display: flex;
-
   flex-direction: column;
-
   gap: 3px;
 }
 
-
 .selected-label {
   font-size: 10px;
-
   text-transform: uppercase;
-
   letter-spacing: 0.5px;
-
   font-weight: 800;
-
   color: #2878e8;
 }
-
 
 .selected-school-info strong {
   color: #17233c;
-
   font-size: 14px;
-
   line-height: 19px;
-
   overflow-wrap: anywhere;
 }
-
 
 .selected-address {
   color: #687890;
-
   font-size: 11px;
-
   line-height: 16px;
-
   overflow-wrap: anywhere;
 }
 
-
 .change-school-btn {
   flex: 0 0 auto;
-
   border: 0;
-
   background: transparent;
-
   color: #2878e8;
-
   font-size: 12px;
-
   font-weight: 800;
-
   cursor: pointer;
-
   padding: 8px 4px;
 }
 
-
 /* =========================================================
-   VALIDATION
-   ========================================================= */
-
+   VALIDATION
+   ========================================================= */
 .field-error {
   display: block;
-
   margin: 5px 4px 0;
-
   color: #ef4444;
-
   font-size: 11px;
-
   line-height: 16px;
-
   font-weight: 600;
 }
-
 
 .school-error {
   margin-top: 7px;
 }
 
-
 /* =========================================================
-   MOBILE
-   ========================================================= */
-
+   MOBILE
+   ========================================================= */
 @media (max-width: 480px) {
-
   .student-details-card {
     padding-left: 16px;
     padding-right: 16px;
   }
 
-
   .school-results {
     max-height: 240px;
   }
 
-
   .school-result {
     padding: 12px 9px;
-
     gap: 9px;
   }
-
 
   .school-result-icon {
     width: 38px;
     height: 38px;
-
     flex-basis: 38px;
-
     font-size: 19px;
   }
-
 
   .school-result-content strong {
     font-size: 13px;
   }
 
-
   .school-result-content span {
     font-size: 10px;
   }
 
-
   .selected-school-card {
     padding: 12px;
   }
-
 }
-/* =========================================================
-   PICKUP POINT CONFIRMATION DIALOG
-   ========================================================= */
 
+/* =========================================================
+   PICKUP POINT CONFIRMATION DIALOG
+   ========================================================= */
 .pickup-confirm-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 24px;
-
   background: rgba(15, 23, 42, 0.55);
-
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
 
 .pickup-confirm-dialog {
   width: min(420px, 100%);
-
   padding: 24px 20px 20px;
-
   border-radius: 24px;
-
   background: #ffffff;
-
   box-shadow:
     0 24px 70px rgba(15, 23, 42, 0.25);
-
   text-align: center;
-
   animation:
     pickupDialogIn 180ms ease-out;
 }
@@ -2259,36 +1519,26 @@ small {
 .pickup-confirm-icon {
   width: 58px;
   height: 58px;
-
   margin: 0 auto 12px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
   background: #eaf2ff;
-
   font-size: 28px;
 }
 
 .pickup-confirm-dialog h4 {
   margin: 0 0 8px;
-
   color: #17213b;
-
   font-size: 21px;
   font-weight: 800;
 }
 
-.pickup-confirm-dialog > p {
+.pickup-confirm-dialog>p {
   margin: 0 auto 18px;
-
   max-width: 340px;
-
   color: #667085;
-
   font-size: 14px;
   line-height: 1.55;
 }
@@ -2296,39 +1546,29 @@ small {
 .pickup-confirm-tips {
   display: grid;
   gap: 9px;
-
   margin-bottom: 20px;
-
   text-align: left;
 }
 
-.pickup-confirm-tips > div {
+.pickup-confirm-tips>div {
   display: flex;
   align-items: center;
   gap: 10px;
-
   padding: 10px 12px;
-
   border-radius: 12px;
-
   background: #f6f8fc;
 }
 
 .pickup-confirm-tips span {
   width: 24px;
   height: 24px;
-
   flex: 0 0 24px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
   background: #e8f0ff;
   color: #246bce;
-
   font-size: 12px;
   font-weight: 800;
 }
@@ -2339,23 +1579,16 @@ small {
 }
 
 .pickup-confirm-btn {
-  --background: linear-gradient(
-    135deg,
-    #ffad00,
-    #ff7118
-  );
-
+  --background: linear-gradient(135deg,
+      #ffad00,
+      #ff7118);
   --background-activated: #f57c00;
-
   --border-radius: 14px;
-
   min-height: 50px;
-
   font-weight: 800;
 }
 
 @keyframes pickupDialogIn {
-
   from {
     opacity: 0;
     transform: translateY(10px) scale(0.97);
@@ -2365,8 +1598,8 @@ small {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-
 }
+
 .school-location-header {
   margin: 8px 0 14px;
 }
@@ -2375,7 +1608,6 @@ small {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-
   color: #ff3b4a;
   font-size: 15px;
   font-weight: 600;
@@ -2388,7 +1620,6 @@ small {
 
 .detected-location {
   margin-top: 4px;
-
   color: #64748b;
   font-size: 12px;
   font-weight: 500;
@@ -2407,9 +1638,8 @@ small {
 }
 
 /* ============================================================
-   PARENT REGISTRATION - NEW FLOW
+   PARENT REGISTRATION - NEW FLOW
 ============================================================ */
-
 .autosave-note {
   margin: 12px 0 16px;
   padding: 10px 12px;
@@ -2458,7 +1688,7 @@ small {
   --padding-end: 8px;
 }
 
-.pickup-confirm-dialog ion-button + ion-button {
+.pickup-confirm-dialog ion-button+ion-button {
   margin-top: 8px;
 }
 
@@ -2472,9 +1702,8 @@ small {
   }
 }
 
-
 /* ============================================================
-   DETECTED AREA / CITY
+   DETECTED AREA / CITY
 ============================================================ */
 .detected-location-card {
   display: flex;
@@ -2536,11 +1765,9 @@ small {
   font-weight: 700;
 }
 
-
 /* ============================================================
-   LOCATION + PASSWORD FIXES
+   LOCATION + PASSWORD FIXES
 ============================================================ */
-
 .password-toggle {
   appearance: none;
   border: 0;
@@ -2573,7 +1800,6 @@ small {
   line-height: 1.4;
 }
 
-
 /* New driver parent-onboarding guidance */
 .new-driver-helper {
   display: flex;
@@ -2595,10 +1821,10 @@ small {
   line-height: 1.45;
   opacity: 0.78;
 }
-/* =========================================================
-   TERMS & CONDITIONS CONSENT
-========================================================= */
 
+/* =========================================================
+   TERMS & CONDITIONS CONSENT
+========================================================= */
 .terms-consent-section {
   margin-top: 20px;
   padding: 16px;

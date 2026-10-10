@@ -140,6 +140,19 @@ export class DashboardPage
 
   rideStarted = false;
 
+  // =====================================================
+  // TODAY'S COMPLETE RIDE TRACKING
+  // =====================================================
+
+  private morningRideCompletedToday = false;
+
+  private eveningRideCompletedToday = false;
+
+  private readonly rideCompletionStorageKey =
+    'school_van_ride_completion';
+
+  private readonly journeyTimesStorageKey =
+    'school_van_journey_times';
   /**
    * Authoritative backend ride identity/state.
    *
@@ -264,7 +277,7 @@ export class DashboardPage
 
   studentStatus = 'waiting';
 
-
+  private afterRideNavigationInProgress = false;
 
   // =====================================================
   // UI
@@ -426,7 +439,10 @@ export class DashboardPage
     this.parentId =
       localStorage.getItem('parentId');
 
-
+    this.loadTodayRideCompletion();
+    if (this.parentId) {
+      this.loadJourneyTimes();
+    }
     if (!this.parentId) {
 
       this.router.navigateByUrl(
@@ -471,30 +487,332 @@ export class DashboardPage
 
 
 
-  /**
-   * Ionic keeps this dashboard page alive when navigating to
-   * Attendance. When the user comes back, ngOnInit() does NOT
-   * run again. Always re-read the backend here so tomorrow
-   * attendance cannot remain as the old Present value.
-   */
   ionViewWillEnter(): void {
 
     const storedParentId =
       localStorage.getItem('parentId');
 
     if (storedParentId) {
+
       this.parentId =
         storedParentId;
+
     }
 
     if (!this.parentId) {
       return;
     }
 
-    this.loadDashboard();
+    /*
+     * Restore persisted milestone times BEFORE
+     * requesting the dashboard.
+     *
+     * This prevents the UI from temporarily losing
+     * the timestamps while the API request is running.
+     */
+    this.loadJourneyTimes();
 
+    this.loadDashboard();
   }
 
+
+  // =====================================================
+  // TODAY RIDE COMPLETION
+  // =====================================================
+
+  private getTodayDateKey(): string {
+
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(
+      now.getMonth() + 1
+    ).padStart(2, '0');
+
+    const day = String(
+      now.getDate()
+    ).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+
+  private loadTodayRideCompletion(): void {
+
+    try {
+
+      const raw =
+        localStorage.getItem(
+          this.rideCompletionStorageKey
+        );
+
+      if (!raw) {
+        this.morningRideCompletedToday = false;
+        this.eveningRideCompletedToday = false;
+        return;
+      }
+
+      const saved = JSON.parse(raw);
+
+      // New day = automatically reset.
+      if (
+        saved?.date !==
+        this.getTodayDateKey()
+      ) {
+
+        this.morningRideCompletedToday = false;
+        this.eveningRideCompletedToday = false;
+
+        localStorage.removeItem(
+          this.rideCompletionStorageKey
+        );
+
+        return;
+      }
+
+      this.morningRideCompletedToday =
+        saved?.morning === true;
+
+      this.eveningRideCompletedToday =
+        saved?.evening === true;
+
+    } catch (error) {
+
+      console.warn(
+        'Unable to load ride completion state:',
+        error
+      );
+
+      this.morningRideCompletedToday = false;
+      this.eveningRideCompletedToday = false;
+    }
+  }
+
+
+  private saveTodayRideCompletion(): void {
+
+    localStorage.setItem(
+
+      this.rideCompletionStorageKey,
+
+      JSON.stringify({
+
+        date:
+          this.getTodayDateKey(),
+
+        morning:
+          this.morningRideCompletedToday,
+
+        evening:
+          this.eveningRideCompletedToday
+
+      })
+
+    );
+  }
+  /**
+   * =====================================================
+   * JOURNEY TIME STORAGE KEY
+   * =====================================================
+   *
+   * One key per parent + day.
+   *
+   * This prevents:
+   * - yesterday's time appearing today
+   * - another parent on the same device seeing old data
+   */
+  private getJourneyTimesStorageKey(): string {
+
+    const parentId =
+      this.parentId ||
+      localStorage.getItem('parentId') ||
+      'unknown';
+
+    return `${this.journeyTimesStorageKey}_${parentId}_${this.getTodayDateKey()}`;
+  }
+
+
+  /**
+   * =====================================================
+   * SAVE TODAY'S MILESTONE TIMES
+   * =====================================================
+   */
+  private saveJourneyTimes(): void {
+
+    try {
+
+      const payload = {
+        date: this.getTodayDateKey(),
+
+        pickupTime:
+          this.pickupTime,
+
+        schoolDropTime:
+          this.schoolDropTime,
+
+        schoolPickupTime:
+          this.schoolPickupTime,
+
+        homeDropTime:
+          this.homeDropTime
+      };
+
+      localStorage.setItem(
+        this.getJourneyTimesStorageKey(),
+        JSON.stringify(payload)
+      );
+
+    } catch (error) {
+
+      console.warn(
+        'Unable to persist journey milestone times:',
+        error
+      );
+
+    }
+  }
+
+
+  /**
+   * =====================================================
+   * RESTORE TODAY'S MILESTONE TIMES
+   * =====================================================
+   */
+  private loadJourneyTimes(): void {
+
+    try {
+
+      const raw =
+        localStorage.getItem(
+          this.getJourneyTimesStorageKey()
+        );
+
+      if (!raw) {
+        return;
+      }
+
+      const saved =
+        JSON.parse(raw);
+
+      /*
+       * Never restore another day's timestamps.
+       */
+      if (
+        saved?.date !==
+        this.getTodayDateKey()
+      ) {
+
+        localStorage.removeItem(
+          this.getJourneyTimesStorageKey()
+        );
+
+        return;
+      }
+
+      /*
+       * IMPORTANT:
+       * Restore only if the saved value is valid.
+       */
+      if (
+        this.isValidJourneyTime(
+          saved?.pickupTime
+        )
+      ) {
+
+        this.pickupTime =
+          saved.pickupTime;
+
+      }
+
+      if (
+        this.isValidJourneyTime(
+          saved?.schoolDropTime
+        )
+      ) {
+
+        this.schoolDropTime =
+          saved.schoolDropTime;
+
+      }
+
+      if (
+        this.isValidJourneyTime(
+          saved?.schoolPickupTime
+        )
+      ) {
+
+        this.schoolPickupTime =
+          saved.schoolPickupTime;
+
+      }
+
+      if (
+        this.isValidJourneyTime(
+          saved?.homeDropTime
+        )
+      ) {
+
+        this.homeDropTime =
+          saved.homeDropTime;
+
+      }
+
+      console.log("🕒 Restored today's journey times: ",{
+          pickupTime:
+            this.pickupTime,
+
+          schoolDropTime:
+            this.schoolDropTime,
+
+          schoolPickupTime:
+            this.schoolPickupTime,
+
+          homeDropTime:
+            this.homeDropTime
+        }
+      );
+
+    } catch (error) {
+
+      console.warn(
+        'Unable to restore journey milestone times:',
+        error
+      );
+
+    }
+  }
+
+  private markMorningRideCompleted(): void {
+
+    this.morningRideCompletedToday = true;
+
+    this.saveTodayRideCompletion();
+
+    console.log(
+      '✅ Morning ride completed for today.'
+    );
+  }
+
+
+  private markEveningRideCompleted(): void {
+
+    this.eveningRideCompletedToday = true;
+
+    this.saveTodayRideCompletion();
+
+    console.log(
+      '✅ Evening ride completed for today.'
+    );
+  }
+
+
+  private areBothRidesCompletedToday(): boolean {
+
+    return (
+      this.morningRideCompletedToday &&
+      this.eveningRideCompletedToday
+    );
+  }
 
   // =====================================================
   // SOCKET LISTENERS
@@ -852,65 +1170,115 @@ export class DashboardPage
            * journey. From this point the evening dashboard is
            * allowed to become visible.
            */
-         if (
-  incomingStatus === 'picked_from_school'
-) {
-  this.returnRideWaitingForStudentPickup = false;
-}
+          if (
+            incomingStatus === 'picked_from_school'
+          ) {
+            this.returnRideWaitingForStudentPickup = false;
+          }
 
+          if (
+            incomingStatus === 'dropped_at_school' &&
+            (
+              this.rideType === 'morning' ||
+              this.completedRideType === 'morning'
+            )
+          ) {
 
-/*
- * ==========================================================
- * EVENING JOURNEY COMPLETED
- * ==========================================================
- *
- * ONLY:
- *
- *     dropped_at_home
- *
- * should open the After Ride page.
- *
- * Do NOT navigate for:
- *
- *     evening ride started
- *     picked_from_school
- *     dropped_at_school
- *     generic dropped
- */
-if (
-  incomingStatus === 'dropped_at_home'
-) {
+            this.markMorningRideCompleted();
 
-  this.returnRideWaitingForStudentPickup = false;
+          }
+          if (incomingStatus === 'dropped_at_home') {
 
-  /*
-   * Keep the local state correct before navigation.
-   */
-  this.completedRideType = 'evening';
+            /*
+             * =====================================================
+             * FINAL EVENING MILESTONE
+             * =====================================================
+             *
+             * VERY IMPORTANT:
+             *
+             * We must update the local state FIRST.
+             *
+             * The previous implementation attempted navigation
+             * before:
+             *
+             *   1. studentStatus = dropped_at_home
+             *   2. evening ride = completed
+             *
+             * Therefore the navigation guard rejected the navigation.
+             */
 
-   console.log(
-    '🏠 Student dropped at home. Opening After Ride page.',
-    {
-      parentId: this.parentId,
-      driverId: this.driverId,
-      rideType: this.rideType,
-      completedRideType: this.completedRideType,
-      studentStatus: this.studentStatus,
-      homeDropTime: this.homeDropTime
-    }
-  );
+            this.returnRideWaitingForStudentPickup =
+              false;
 
-  /*
-   * Navigate only after the actual student milestone.
-   */
-  this.navigateToAfterRideAfterHomeDrop();
-  // return;
-}
+            /*
+             * 1. Capture the final home-drop timestamp first.
+             */
+            this.extractJourneyTimes(data);
 
-          /*
-           * MongoDB remains the source of truth for the complete
-           * dashboard state.
-           */
+            /*
+             * 2. Mark the student's actual state.
+             */
+            this.studentStatus =
+              'dropped_at_home';
+
+            /*
+             * 3. Mark evening ride as completed.
+             */
+            this.completedRideType =
+              'evening';
+
+            this.markEveningRideCompleted();
+
+            /*
+             * 4. Update the visible dashboard state.
+             */
+            this.updateStudentDisplay();
+
+            /*
+             * 5. NOW the navigation guard has the correct state:
+             *
+             * studentStatus = dropped_at_home
+             * eveningRideCompletedToday = true
+             * morningRideCompletedToday = true
+             *
+             * if morning ride is already completed.
+             */
+            console.log(
+              '🏠 Student dropped at home. Evening ride completed.',
+              {
+                parentId:
+                  this.parentId,
+
+                driverId:
+                  this.driverId,
+
+                rideType:
+                  this.rideType,
+
+                completedRideType:
+                  this.completedRideType,
+
+                studentStatus:
+                  this.studentStatus,
+
+                homeDropTime:
+                  this.homeDropTime,
+
+                morningCompleted:
+                  this.morningRideCompletedToday,
+
+                eveningCompleted:
+                  this.eveningRideCompletedToday
+              }
+            );
+
+            /*
+             * 6. Navigate ONLY after both rides are complete.
+             */
+            this.navigateToAfterRideAfterBothRides();
+
+            return;
+          }
           this.loadDashboard();
         });
 
@@ -979,6 +1347,12 @@ if (
         });
 
   }
+
+
+  // =====================================================
+  // AFTER RIDE NAVIGATION
+  // ONLY AFTER BOTH MORNING + EVENING ARE COMPLETE
+  // =====================================================
 
 
 
@@ -1184,6 +1558,37 @@ if (
               res.lastCompletedRideType
             );
 
+          // =====================================================
+          // RESTORE TODAY'S RIDE COMPLETION
+          // =====================================================
+
+          const backendCompletedRide =
+            this.normalizeRideType(
+              res.completedRideType ??
+              res.lastCompletedRideType
+            );
+
+          if (
+            backendCompletedRide === 'morning'
+          ) {
+
+            this.morningRideCompletedToday =
+              true;
+
+            this.saveTodayRideCompletion();
+
+          }
+
+          if (
+            backendCompletedRide === 'evening'
+          ) {
+
+            this.eveningRideCompletedToday =
+              true;
+
+            this.saveTodayRideCompletion();
+
+          }
 
           /*
            * Synchronize the return-ride gate from the authoritative
@@ -1342,7 +1747,7 @@ if (
   get tomorrowAttendanceLabel(): string {
 
     switch (
-      this.tomorrowAttendanceStatus
+    this.tomorrowAttendanceStatus
     ) {
 
       case 'present':
@@ -1362,7 +1767,7 @@ if (
   get tomorrowAttendanceMessage(): string {
 
     switch (
-      this.tomorrowAttendanceStatus
+    this.tomorrowAttendanceStatus
     ) {
 
       case 'present':
@@ -1445,7 +1850,7 @@ if (
   }
 
 
-    // =====================================================
+  // =====================================================
   // AFTER RIDE PAGE
   // =====================================================
 
@@ -1619,84 +2024,157 @@ if (
   }
 
 
-/**
- * Open the dedicated After Ride page.
- *
- * This method is intentionally NOT exposed in the menu.
- * It is called only after the student's evening journey
- * reaches dropped_at_home.
- */
-openAfterRide(): void {
+  /**
+   * Open the dedicated After Ride page.
+   *
+   * This method is intentionally NOT exposed in the menu.
+   * It is called only after the student's evening journey
+   * reaches dropped_at_home.
+   */
+  openAfterRide(): void {
 
-  if (!this.parentId) {
+    if (!this.parentId) {
 
-    this.parentId =
-      localStorage.getItem('parentId');
+      this.parentId =
+        localStorage.getItem('parentId');
 
-  }
+    }
 
 
-  if (!this.parentId) {
+    if (!this.parentId) {
+
+      this.router.navigateByUrl(
+        '/auth/login',
+        {
+          replaceUrl: true
+        }
+      );
+
+      return;
+    }
+
 
     this.router.navigateByUrl(
-      '/auth/login',
+      '/after-ride-page'
+    );
+  }
+
+  // =====================================================
+  // AFTER RIDE NAVIGATION
+  // ONLY AFTER BOTH MORNING + EVENING ARE COMPLETE
+  // =====================================================
+  private navigateToAfterRideAfterBothRides(): void {
+
+    if (
+      this.afterRideNavigationInProgress
+    ) {
+
+      return;
+    }
+
+    if (
+      this.router.url.includes(
+        '/after-ride-page'
+      )
+    ) {
+
+      return;
+    }
+
+    if (
+      this.studentStatus !==
+      'dropped_at_home'
+    ) {
+
+      console.log(
+        '⏸️ After Ride ignored: student is not dropped at home.',
+        {
+          studentStatus:
+            this.studentStatus
+        }
+      );
+
+      return;
+    }
+
+
+    /*
+     * =====================================================
+     * SAFETY CHECK 2
+     * =====================================================
+     */
+    if (
+      !this.eveningRideCompletedToday
+    ) {
+
+      console.log(
+        '⏸️ After Ride ignored: evening ride is not completed.'
+      );
+
+      return;
+    }
+
+
+    /*
+     * =====================================================
+     * SAFETY CHECK 3
+     * =====================================================
+     *
+     * The requirement is:
+     *
+     * Morning + Evening must both be completed.
+     */
+    if (
+      !this.morningRideCompletedToday
+    ) {
+
+      console.log(
+        '⏸️ After Ride ignored: morning ride is not completed.'
+      );
+
+      return;
+    }
+
+
+    /*
+     * =====================================================
+     * FINAL CHECK
+     * =====================================================
+     */
+    if (
+      !this.areBothRidesCompletedToday()
+    ) {
+
+      console.log(
+        '⏸️ After Ride ignored: both rides are not completed.'
+      );
+
+      return;
+    }
+
+
+    /*
+     * =====================================================
+     * NAVIGATE
+     * =====================================================
+     */
+    console.log(
+      '✅ BOTH MORNING AND EVENING RIDES COMPLETED.'
+    );
+
+    console.log(
+      '➡️ Navigating to After Ride page.'
+    );
+
+    this.router.navigateByUrl(
+      '/after-ride-page',
       {
         replaceUrl: true
       }
     );
-
-    return;
   }
 
 
-  this.router.navigateByUrl(
-    '/after-ride-page'
-  );
-}
-
-  /**
- * Navigate to After Ride only when the student's
- * evening journey has actually completed.
- *
- * IMPORTANT:
- * - Return ride START does NOT trigger this.
- * - Student pickup from school does NOT trigger this.
- * - Only dropped_at_home triggers this.
- */
-private navigateToAfterRideAfterHomeDrop(): void {
-
-  // Must be the evening/return journey.
-  if (this.rideType !== 'evening' &&
-      this.completedRideType !== 'evening') {
-
-    console.log(
-      '⏸️ After Ride navigation ignored: not an evening ride.'
-    );
-
-    return;
-  }
-
-  // Student must actually be dropped at home.
-  if (this.studentStatus !== 'dropped_at_home') {
-
-    console.log(
-      '⏸️ After Ride navigation ignored: student is not dropped at home.'
-    );
-
-    return;
-  }
-
-  console.log(
-    '🏠 Student dropped at home. Navigating to After Ride page.'
-  );
-
-  this.router.navigateByUrl(
-    '/after-ride-page'
-  );
-}
-
-
-  
 
   // =====================================================
   // TOMORROW ATTENDANCE
@@ -3029,22 +3507,21 @@ private navigateToAfterRideAfterHomeDrop(): void {
   }
 
 
-  /**
-   * Update one journey milestone only when the incoming event
-   * contains a newer timestamp.
-   */
   private updateLatestJourneyTime(
     field:
       | 'pickupTime'
       | 'schoolDropTime'
       | 'schoolPickupTime'
       | 'homeDropTime',
-    incoming: string | Date | null | undefined
+
+    incoming:
+      string | Date | null | undefined
   ): void {
 
     if (
       !this.isValidJourneyTime(incoming)
     ) {
+
       return;
     }
 
@@ -3054,10 +3531,25 @@ private navigateToAfterRideAfterHomeDrop(): void {
         incoming as string | Date
       );
 
-    if (latest) {
-      this[field] =
-        latest as string;
+    if (!latest) {
+      return;
     }
+
+    this[field] =
+      latest as string;
+
+    /*
+     * IMPORTANT:
+     * Persist immediately.
+     *
+     * This makes the milestone survive:
+     * - dashboard refresh
+     * - socket refresh
+     * - ionViewWillEnter
+     * - temporary API errors
+     * - component recreation
+     */
+    this.saveJourneyTimes();
   }
 
 
@@ -3088,7 +3580,6 @@ private navigateToAfterRideAfterHomeDrop(): void {
         return null;
       };
 
-
     const ride =
       data?.ride || {};
 
@@ -3097,6 +3588,12 @@ private navigateToAfterRideAfterHomeDrop(): void {
 
     const journey =
       data?.journey || {};
+
+    const journeyReport =
+      data?.journeyReport ||
+      data?.report ||
+      data?.journey_report ||
+      {};
 
     const nestedData =
       data?.data || {};
@@ -3157,7 +3654,12 @@ private navigateToAfterRideAfterHomeDrop(): void {
         nestedData?.pickupTime,
         nestedData?.pickedUpAt,
         nestedData?.pickupAt,
-        nestedData?.studentPickupTime
+        nestedData?.studentPickupTime,
+
+        journeyReport?.pickupTime,
+        journeyReport?.pickedUpAt,
+        journeyReport?.pickupAt,
+        journeyReport?.studentPickupTime,
       );
 
 
@@ -3186,7 +3688,12 @@ private navigateToAfterRideAfterHomeDrop(): void {
         nestedData?.schoolDropTime,
         nestedData?.droppedAtSchoolAt,
         nestedData?.droppedAtSchoolTime,
-        nestedData?.schoolDroppedAt
+        nestedData?.schoolDroppedAt,
+
+        journeyReport?.schoolDropTime,
+        journeyReport?.droppedAtSchoolAt,
+        journeyReport?.droppedAtSchoolTime,
+        journeyReport?.schoolDroppedAt,
       );
 
 
@@ -3215,7 +3722,12 @@ private navigateToAfterRideAfterHomeDrop(): void {
         nestedData?.schoolPickupTime,
         nestedData?.pickedFromSchoolAt,
         nestedData?.pickedFromSchoolTime,
-        nestedData?.schoolPickupAt
+        nestedData?.schoolPickupAt,
+
+        journeyReport?.schoolPickupTime,
+        journeyReport?.pickedFromSchoolAt,
+        journeyReport?.pickedFromSchoolTime,
+        journeyReport?.schoolPickupAt,
       );
 
 
@@ -3244,7 +3756,12 @@ private navigateToAfterRideAfterHomeDrop(): void {
         nestedData?.homeDropTime,
         nestedData?.droppedAtHomeAt,
         nestedData?.droppedAtHomeTime,
-        nestedData?.homeDroppedAt
+        nestedData?.homeDroppedAt,
+
+        journeyReport?.homeDropTime,
+        journeyReport?.droppedAtHomeAt,
+        journeyReport?.droppedAtHomeTime,
+        journeyReport?.homeDroppedAt,
       );
 
 
@@ -3681,86 +4198,82 @@ private navigateToAfterRideAfterHomeDrop(): void {
     return this.routeLastCompleted ? 'completed' : 'waiting';
   }
 
-// =====================================================
-// MILESTONE TIME LABELS
-// =====================================================
+  // =====================================================
+  // MILESTONE TIME LABELS
+  // =====================================================
 
-/**
- * Time shown ONLY under the first location.
- *
- * Morning:
- *   Home -> actual pickup time
- *
- * Evening:
- *   School -> actual pickup-from-school time
- *
- * IMPORTANT:
- * Never show a time here unless that actual
- * pickup milestone has happened.
- */
-get routeFirstTimeLabel(): string {
+  /**
+   * Time shown ONLY under the first location.
+   *
+   * Morning:
+   *   Home -> actual pickup time
+   *
+   * Evening:
+   *   School -> actual pickup-from-school time
+   *
+   * IMPORTANT:
+   * Never show a time here unless that actual
+   * pickup milestone has happened.
+   */
+  get routeFirstTimeLabel(): string {
 
-  // EVENING: School pickup time
-  if (this.effectiveJourneyType === 'evening') {
+    // EVENING:
+    // School milestone = actual student pickup from school
+    if (this.effectiveJourneyType === 'evening') {
 
-    if (!this.schoolPickupTime) {
-      return '';
+      return this.schoolPickupTime
+        ? this.formatJourneyTime(this.schoolPickupTime)
+        : '';
     }
 
-    return this.formatJourneyTime(this.schoolPickupTime);
+    // MORNING:
+    // Home milestone = actual student pickup from home
+    return this.pickupTime
+      ? this.formatJourneyTime(this.pickupTime)
+      : '';
   }
 
-  // MORNING: Home pickup time
-  if (!this.pickupTime) {
+
+  /**
+   * ON ROUTE MUST NEVER DISPLAY TIME.
+   *
+   * Keep this permanently empty.
+   */
+  get routeMiddleTimeLabel(): string {
     return '';
   }
 
-  return this.formatJourneyTime(this.pickupTime);
-}
 
+  /**
+   * Time shown ONLY under the final destination.
+   *
+   * Morning:
+   *   School -> actual school drop time
+   *
+   * Evening:
+   *   Home -> actual home drop time
+   *
+   * IMPORTANT:
+   * Never show a time until the actual destination
+   * milestone has happened.
+   */
+  get routeLastTimeLabel(): string {
 
-/**
- * ON ROUTE MUST NEVER DISPLAY TIME.
- *
- * Keep this permanently empty.
- */
-get routeMiddleTimeLabel(): string {
-  return '';
-}
+    // EVENING:
+    // Home milestone = actual student drop at home
+    if (this.effectiveJourneyType === 'evening') {
 
-
-/**
- * Time shown ONLY under the final destination.
- *
- * Morning:
- *   School -> actual school drop time
- *
- * Evening:
- *   Home -> actual home drop time
- *
- * IMPORTANT:
- * Never show a time until the actual destination
- * milestone has happened.
- */
-get routeLastTimeLabel(): string {
-
-  // EVENING: Home drop time
-  if (this.effectiveJourneyType === 'evening') {
-
-    if (!this.homeDropTime) {
-      return '';
+      return this.homeDropTime
+        ? this.formatJourneyTime(this.homeDropTime)
+        : '';
     }
 
-    return this.formatJourneyTime(this.homeDropTime);
+    // MORNING:
+    // School milestone = actual student drop at school
+    return this.schoolDropTime
+      ? this.formatJourneyTime(this.schoolDropTime)
+      : '';
   }
-
-  // MORNING: School drop time
-  if (!this.schoolDropTime) {
-    return '';
-  }
-
-  return this.formatJourneyTime(this.schoolDropTime);
-}
 
   get routeFirstNotification(): string {
     if (this.routeFirstCompleted) {
@@ -3866,15 +4379,15 @@ get routeLastTimeLabel(): string {
     if (this.routeLastCompleted) {
       return this.effectiveJourneyType === 'evening'
         ? (
-            this.homeDropTime
-              ? `Your child reached home at ${this.formatJourneyTime(this.homeDropTime)}.`
-              : 'Your child reached home safely.'
-          )
+          this.homeDropTime
+            ? `Your child reached home at ${this.formatJourneyTime(this.homeDropTime)}.`
+            : 'Your child reached home safely.'
+        )
         : (
-            this.schoolDropTime
-              ? `Your child reached school at ${this.formatJourneyTime(this.schoolDropTime)}.`
-              : 'Your child reached school safely.'
-          );
+          this.schoolDropTime
+            ? `Your child reached school at ${this.formatJourneyTime(this.schoolDropTime)}.`
+            : 'Your child reached school safely.'
+        );
     }
 
     if (this.routeMiddleStateClass === 'active') {
@@ -3894,22 +4407,22 @@ get routeLastTimeLabel(): string {
       : 'The morning ride has not started yet.';
   }
 
- get routeProgressAriaLabel(): string {
+  get routeProgressAriaLabel(): string {
 
-  const firstTime = this.routeFirstTimeLabel
-    ? ` at ${this.routeFirstTimeLabel}`
-    : '';
+    const firstTime = this.routeFirstTimeLabel
+      ? ` at ${this.routeFirstTimeLabel}`
+      : '';
 
-  const lastTime = this.routeLastTimeLabel
-    ? ` at ${this.routeLastTimeLabel}`
-    : '';
+    const lastTime = this.routeLastTimeLabel
+      ? ` at ${this.routeLastTimeLabel}`
+      : '';
 
-  return (
-    `${this.routeFirstLabel}${firstTime}. ` +
-    `On Route. ` +
-    `${this.routeLastLabel}${lastTime}.`
-  );
-}
+    return (
+      `${this.routeFirstLabel}${firstTime}. ` +
+      `On Route. ` +
+      `${this.routeLastLabel}${lastTime}.`
+    );
+  }
 
   // =====================================================
   // LIVE TRACKING
@@ -4252,6 +4765,8 @@ get routeLastTimeLabel(): string {
 
     this.rideStarted = false;
 
+
+
     this.activeRideId = null;
     this.activeRideStatus = null;
     this.activeRideStartTime = null;
@@ -4267,14 +4782,7 @@ get routeLastTimeLabel(): string {
 
     this.tomorrowAttendanceStatus = 'not_marked';
     this.tomorrowAttendanceLoading = false;
-
-    this.pickupTime = null;
-
-    this.schoolDropTime = null;
-
-    this.schoolPickupTime = null;
-
-    this.homeDropTime = null;
+    this.loadJourneyTimes();
 
     this.studentStatus = 'waiting';
 
