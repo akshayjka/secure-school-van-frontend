@@ -1943,3 +1943,103 @@ small {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+
+/* Driver 3-step registration */
+.driver-step-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  color: #718096;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.driver-step-labels span.active {
+  color: #1269d3;
+}
+
+.driver-parent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.driver-parent-entry {
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid #dce5ef;
+  border-radius: 16px;
+  background: #f8fbff;
+}
+
+.driver-parent-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #17243b;
+}
+
+.remove-parent-btn {
+  border: 0;
+  background: transparent;
+  color: #d92d20;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.driver-navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.driver-navigation .continue-btn {
+  flex: 1;
+}
+
+.driver-registration .review-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.driver-registration .review-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.driver-registration .review-content strong,
+.driver-registration .review-content small {
+  overflow-wrap: anywhere;
+}
+
+.driver-registration .register-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .driver-navigation {
+    align-items: stretch;
+  }
+
+  .driver-navigation ion-button {
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  .driver-parent-entry {
+    padding: 11px;
+  }
+}

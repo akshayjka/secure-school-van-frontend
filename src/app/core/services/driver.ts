@@ -70,7 +70,7 @@ export class Driver {
 
   constructor(
     private readonly http: HttpClient
-  ) {}
+  ) { }
 
   /* ==========================================================
    * DRIVER REGISTRATION
@@ -78,8 +78,11 @@ export class Driver {
 
   register(payload: any): Observable<any> {
     return this.http.post(
-      `${environment.apiUrl}/drivers/register`,
-      payload
+      `${environment.apiUrl}/auth/register`,
+      {
+        ...payload,
+        role: 'driver'
+      }
     );
   }
 

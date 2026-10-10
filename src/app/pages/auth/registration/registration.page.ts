@@ -45,6 +45,14 @@ import {
 import { environment } from 'src/environments/environment';
 
 
+interface DriverParentContact {
+  name: string;
+  mobileNumber: string;
+  submitted: boolean;
+}
+
+
+
 @Component({
   selector: 'app-registration',
 
@@ -245,6 +253,8 @@ export class RegistrationPage
   // This avoids Places Autocomplete 403 errors caused by API/billing restrictions.
   private schoolAutocompleteRequestId = 0;
 
+  
+
   private readonly overpassEndpoints = [
     'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter'
@@ -286,6 +296,28 @@ export class RegistrationPage
 
   // Location source used only for UI/debugging.
   parentLocationSource: 'gps' | 'network' | 'approximate' | '' = '';
+
+  
+driverStep = 1;
+driverTermsAccepted = false;
+driverSubmitted = false;
+
+driverParents: DriverParentContact[] = [
+  { name: '', mobileNumber: '', submitted: false }
+];
+
+get driverProgress(): number {
+  return Math.round(((this.driverStep - 1) / 2) * 100);
+}
+
+getSavedDriverParents(): DriverParentContact[] {
+  return this.driverParents.filter(
+    parent =>
+      parent.name.trim().length > 0 &&
+      /^[6-9][0-9]{9}$/.test(parent.mobileNumber)
+  );
+}
+
 
 
   // =========================================================
@@ -389,6 +421,107 @@ export class RegistrationPage
     this.destroyMaps();
 
   }
+
+  
+nextDriverStep(): void {
+  this.submitted = true;
+
+  if (this.registrationForm.invalid) {
+    this.registrationForm.markAllAsTouched();
+    return;
+  }
+
+  this.driverStep = 2;
+  this.driverSubmitted = false;
+}
+
+previousDriverStep(): void {
+  if (this.driverStep > 1 && !this.isLoading) {
+    this.driverStep--;
+  }
+}
+
+editDriverStep(step: number): void {
+  if (step === 1 || step === 2) {
+    this.driverStep = step;
+    this.driverSubmitted = false;
+  }
+}
+
+addDriverParent(): void {
+  this.driverParents.push({
+    name: '',
+    mobileNumber: '',
+    submitted: false
+  });
+}
+
+removeDriverParent(index: number): void {
+  if (this.driverParents.length > 1) {
+    this.driverParents.splice(index, 1);
+  }
+}
+
+isDriverParentValid(parent: DriverParentContact): boolean {
+  return (
+    parent.name.trim().length >= 2 &&
+    /^[6-9][0-9]{9}$/.test(parent.mobileNumber)
+  );
+}
+
+saveDriverParents(): void {
+  this.driverParents.forEach(parent => {
+    parent.submitted = true;
+  });
+
+  const hasIncompleteEntry = this.driverParents.some(parent => {
+    const name = parent.name.trim();
+    const mobile = parent.mobileNumber.trim();
+
+    // An entirely empty row is optional.
+    if (!name && !mobile) {
+      return false;
+    }
+
+    return !this.isDriverParentValid(parent);
+  });
+
+  if (hasIncompleteEntry) {
+    this.toastService.showToast(
+      'Complete each parent name and valid 10-digit mobile number, or remove the empty entry.',
+      'warning'
+    );
+    return;
+  }
+
+  this.driverParents = this.getSavedDriverParents().map(parent => ({
+    ...parent,
+    submitted: false
+  }));
+
+  if (!this.driverParents.length) {
+    this.driverParents = [
+      { name: '', mobileNumber: '', submitted: false }
+    ];
+  }
+
+  this.driverStep = 3;
+}
+
+skipDriverParents(): void {
+  this.driverParents = [
+    { name: '', mobileNumber: '', submitted: false }
+  ];
+  this.driverStep = 3;
+}
+
+onDriverTermsChange(event: any): void {
+  this.driverTermsAccepted = event?.detail?.checked === true;
+  if (this.driverTermsAccepted) {
+    this.driverSubmitted = false;
+  }
+}
+
 
 
   // =========================================================
@@ -973,84 +1106,67 @@ export class RegistrationPage
   // DRIVER REGISTRATION
   // =========================================================
 
-  register(): void {
+register(): void {
+  this.nextDriverStep();
+}
 
-    this.submitted = true;
+registerDriverFinal(): void {
+  this.driverSubmitted = true;
 
-
-    if (
-      this.registrationForm.invalid
-    ) {
-
-      this.registrationForm.markAllAsTouched();
-
-      return;
-
-    }
-
-
-    const payload = {
-
-      role: 'driver',
-
-      ...this.registrationForm.value
-
-    };
-
-
-    console.log(
-      'Driver Registration:',
-      payload
+  if (!this.driverTermsAccepted) {
+    this.toastService.showToast(
+      'Please accept the Terms & Conditions.',
+      'warning'
     );
-
-
-    this.driverService
-      .register(payload)
-      .subscribe({
-
-        next: response => {
-
-          console.log(response);
-
-
-          this.toastService.showToast(
-
-            'Driver added successfully',
-
-            'success'
-
-          );
-
-
-          this.router.navigateByUrl(
-            '/auth/login'
-          );
-
-        },
-
-
-        error: error => {
-
-          console.error(
-            'Driver registration error:',
-            error
-          );
-
-
-          this.toastService.showToast(
-
-            error?.error?.message ||
-            'Driver registration failed',
-
-            'danger'
-
-          );
-
-        }
-
-      });
-
+    return;
   }
+
+  if (this.registrationForm.invalid) {
+    this.driverStep = 1;
+    this.submitted = true;
+    this.registrationForm.markAllAsTouched();
+    return;
+  }
+
+  const parents = this.getSavedDriverParents();
+
+  const payload = {
+    role: 'driver',
+    ...this.registrationForm.getRawValue(),
+    parents: parents.map(parent => ({
+      name: parent.name.trim(),
+      mobileNumber: parent.mobileNumber
+    })),
+    termsAccepted: true
+  };
+
+  this.isLoading = true;
+
+  this.driverService.register(payload).subscribe({
+    next: (response: any) => {
+      this.isLoading = false;
+
+      this.toastService.showToast(
+        'Driver registered successfully. Please log in with your registration mobile number and password.',
+        'success'
+      );
+
+      this.router.navigateByUrl('/auth/login', {
+        state: {
+          mobileNumber: payload.mobileNumber
+        }
+      });
+    },
+    error: (error: any) => {
+      this.isLoading = false;
+
+      this.toastService.showToast(
+        error?.error?.message || 'Driver registration failed.',
+        'danger'
+      );
+    }
+  });
+}
 
 
   // =========================================================
@@ -5538,5 +5654,6 @@ export class RegistrationPage
     this.destroySchoolMap();
 
   }
+  
 
 }
