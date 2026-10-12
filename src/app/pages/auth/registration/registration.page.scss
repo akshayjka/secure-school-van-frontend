@@ -1,1024 +1,4703 @@
 /* ============================================================
-   SECURE SCHOOL VAN
-   REGISTRATION
-   PREMIUM SAFETY DESIGN
-   CSS ONLY
+
+   SECURE SCHOOL VAN
+
+   REGISTRATION
+
+   PREMIUM SAFETY DESIGN
+
+   CSS ONLY
+
 ============================================================ */
+
 /* ============================================================
-   ROOT PAGE
+
+   ROOT PAGE
+
 ============================================================ */
+
 ion-content {
+
   --background: #eef4fb;
+
   --padding-bottom: 30px;
+
 }
 
 /* ============================================================
-   TOP BAR
+
+   TOP BAR
+
 ============================================================ */
+
 ion-header {
+
   background: #ffffff;
+
 }
 
 ion-toolbar {
+
   --background: #ffffff;
+
   --color: #13233f;
+
   --border-width: 0;
+
   height: 62px;
+
   min-height: 62px;
+
   padding: 0 14px;
+
   box-shadow:
+
     0 2px 14px rgba(19, 35, 63, 0.06);
+
   position: relative;
+
   z-index: 10;
+
 }
 
 ion-toolbar::after {
+
   content: '';
+
   position: absolute;
+
   left: 0;
+
   right: 0;
+
   bottom: 0;
+
   height: 2px;
+
   background: #1b7df0;
+
 }
 
 /* ============================================================
-   TOOLBAR BRAND
+
+   TOOLBAR BRAND
+
 ============================================================ */
+
 ion-title {
+
   height: 62px;
+
   display: flex;
+
   align-items: center;
+
   padding: 0 !important;
+
   font-size: 0 !important;
+
   text-align: left;
+
 }
 
 ion-title::before {
+
   content: '🚐';
+
   width: 37px;
+
   height: 37px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   margin-right: 10px;
+
   border-radius: 12px;
+
   background: #e8f2ff;
+
   font-size: 19px;
+
 }
 
 ion-title::after {
+
   content: 'Secure School Van';
+
   color: #17243d;
+
   font-size: 16px;
+
   font-weight: 800;
+
   letter-spacing: -0.3px;
+
 }
 
 /* ============================================================
-   MAIN CONTAINER
+
+   MAIN CONTAINER
+
 ============================================================ */
+
 .container {
+
   width: 100%;
+
   max-width: 600px;
+
   margin: 0 auto;
+
   padding:
+
     20px 15px 40px;
+
   box-sizing: border-box;
+
 }
 
 /* ============================================================
-   WELCOME / HERO
+
+   WELCOME / HERO
+
 ============================================================ */
+
 .logo {
+
   width: 72px;
+
   height: 72px;
+
   margin:
+
     2px auto 14px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   border-radius: 24px;
+
   background:
+
     linear-gradient(145deg,
+
       #dcecff 0%,
+
       #eef6ff 100%);
+
   border: 1px solid #cfe3fb;
+
   box-shadow:
+
     0 12px 30px rgba(29, 111, 210, 0.12);
+
   font-size: 34px;
+
   position: relative;
+
 }
 
 /* Decorative circle */
+
 .logo::before {
+
   content: '';
+
   position: absolute;
+
   width: 10px;
+
   height: 10px;
+
   right: 5px;
+
   top: 5px;
+
   border-radius: 50%;
+
   background: #20a064;
+
   border: 3px solid #ffffff;
+
 }
 
 .container>h2 {
+
   margin: 0;
+
   text-align: center;
+
   color: #13213a;
+
   font-size: 29px;
+
   line-height: 1.1;
+
   font-weight: 850;
+
   letter-spacing: -1px;
+
 }
 
 .subtitle {
+
   margin:
+
     7px 0 22px;
+
   text-align: center;
+
   color: #718096;
+
   font-size: 13px;
+
   line-height: 1.45;
+
 }
 
 /* ============================================================
-   ROLE TITLE
-   Generated without changing HTML
+
+   ROLE TITLE
+
+   Generated without changing HTML
+
 ============================================================ */
+
 ion-segment::before {
+
   content: 'I am registering as';
+
   position: absolute;
+
   top: -25px;
+
   left: 2px;
+
   color: #34435b;
+
   font-size: 11px;
+
   font-weight: 750;
+
 }
 
 ion-segment {
+
   position: relative;
+
   width: 100%;
+
   margin:
+
     0 0 25px;
+
   padding: 5px;
+
   min-height: 60px;
+
   border-radius: 18px;
+
   --background: #dfe8f4;
+
   border: 1px solid #d5dfeb;
+
   box-shadow:
+
     inset 0 1px 3px rgba(20, 40, 70, 0.05);
+
 }
 
 ion-segment-button {
+
   min-height: 49px;
+
   border-radius: 14px;
+
   --indicator-color: #ffffff;
+
   --indicator-box-shadow:
+
     0 5px 14px rgba(19, 52, 91, 0.10);
+
   --color: #627087;
+
   --color-checked: #1269d3;
+
   font-size: 13px;
+
   font-weight: 850;
+
   letter-spacing: 0.3px;
+
 }
 
 /* ============================================================
-   DRIVER REGISTRATION
+
+   DRIVER REGISTRATION
+
 ============================================================ */
+
 .driver-registration {
+
   width: 100%;
+
   box-sizing: border-box;
+
   padding:
+
     0 0 20px;
+
   background: transparent;
+
   position: relative;
+
 }
 
 /* ============================================================
-   DRIVER INTRO
+
+   DRIVER INTRO
+
 ============================================================ */
+
 .driver-registration::before {
+
   content:
-    '🚐  DRIVER ACCOUNT';
+
+    '🚐  DRIVER ACCOUNT';
+
   display: block;
+
   padding:
+
     17px 18px;
+
   margin:
+
     0 0 13px;
+
   border-radius: 18px;
+
   background:
+
     linear-gradient(135deg,
+
       #116bd7,
+
       #2186ed);
+
   color: #ffffff;
+
   font-size: 14px;
+
   font-weight: 850;
+
   letter-spacing: 0.5px;
+
   box-shadow:
+
     0 10px 22px rgba(17, 107, 215, 0.18);
+
 }
 
 .driver-registration::after {
+
   content:
+
     'Register your driver details to manage safe school journeys.';
+
   display: block;
+
   margin:
+
     -3px 4px 15px;
+
   color: #6b7890;
+
   font-size: 11px;
+
   line-height: 1.45;
+
 }
 
 /* ============================================================
-   PARENT ONBOARDING
+
+   PARENT ONBOARDING
+
 ============================================================ */
+
 .parent-onboarding {
+
   width: 100%;
+
 }
 
 /* ============================================================
-   PROGRESS
+
+   PROGRESS
+
 ============================================================ */
+
 .progress-section {
+
   width: 100%;
+
   box-sizing: border-box;
+
   margin:
+
     0 0 15px;
+
   padding:
+
     13px 15px;
+
   border-radius: 16px;
+
   background: #ffffff;
+
   border: 1px solid #dde6f0;
+
   box-shadow:
+
     0 4px 15px rgba(20, 45, 80, 0.045);
+
 }
 
 .progress-top {
+
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
+
   margin-bottom: 9px;
+
   color: #65748b;
+
   font-size: 11px;
+
   font-weight: 750;
+
 }
 
 .progress-top span:last-child {
+
   color: #1372df;
+
   font-weight: 850;
+
 }
 
 .progress-track {
+
   width: 100%;
+
   height: 6px;
+
   border-radius: 20px;
+
   overflow: hidden;
+
   background: #e5ebf3;
+
 }
 
 .progress-value {
+
   height: 100%;
+
   border-radius: inherit;
+
   background:
+
     linear-gradient(90deg,
+
       #1373df,
+
       #4aa0f6);
+
   transition:
+
     width 0.3s ease;
+
 }
 
 /* ============================================================
-   MAIN REGISTRATION CARD
+
+   MAIN REGISTRATION CARD
+
 ============================================================ */
+
 .onboarding-card {
+
   width: 100%;
+
   box-sizing: border-box;
+
   padding:
+
     24px 17px 20px;
+
   margin-bottom: 15px;
+
   border-radius: 24px;
+
   background: #ffffff;
+
   border: 1px solid #dfe7f0;
+
   box-shadow:
+
     0 14px 35px rgba(19, 42, 72, 0.075);
+
   position: relative;
+
   overflow: hidden;
+
 }
 
 /* top blue edge */
+
 .onboarding-card::before {
+
   content: '';
+
   position: absolute;
+
   top: 0;
+
   left: 0;
+
   right: 0;
+
   height: 4px;
+
   background:
+
     linear-gradient(90deg,
+
       #126ee0,
+
       #58a9f7);
+
 }
 
 /* ============================================================
-   STEP ICON
+
+   STEP ICON
+
 ============================================================ */
+
 .step-icon {
+
   width: 54px;
+
   height: 54px;
+
   margin:
+
     0 0 16px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   border-radius: 17px;
+
   background: #edf5ff;
+
   border: 1px solid #d6e8ff;
+
   font-size: 25px;
+
   box-shadow:
+
     0 6px 16px rgba(28, 107, 211, 0.07);
+
 }
 
 /* ============================================================
-   CARD TITLE
+
+   CARD TITLE
+
 ============================================================ */
+
 .onboarding-card h3 {
+
   margin: 0;
+
   color: #14223b;
+
   font-size: 22px;
+
   line-height: 1.2;
+
   font-weight: 850;
+
   letter-spacing: -0.6px;
+
 }
 
 .onboarding-card>p {
+
   margin:
+
     7px 0 21px;
+
   color: #748096;
+
   font-size: 12px;
+
   line-height: 1.55;
+
 }
 
 /* ============================================================
-   FORM
+
+   FORM
+
 ============================================================ */
+
 form {
+
   width: 100%;
+
 }
 
 /* ============================================================
-   INPUT DESIGN
+
+   INPUT DESIGN
+
 ============================================================ */
+
 ion-item {
+
   --background: #ffffff;
+
   --border-color: #dce5ef;
+
   --highlight-height: 2px;
+
   --padding-start: 14px;
+
   --padding-end: 12px;
+
   --inner-padding-end: 0;
+
   width: 100%;
+
   min-height: 60px;
+
   margin:
+
     0 0 10px;
+
   box-sizing: border-box;
+
   border-radius: 15px;
+
   border: 1px solid #dce5ef;
+
   box-shadow:
+
     0 3px 10px rgba(21, 48, 82, 0.025);
+
   transition:
+
     border-color .2s ease,
+
     box-shadow .2s ease,
+
     background .2s ease;
+
 }
 
 /* focused */
+
 ion-item:focus-within {
+
   --background: #fafdff;
+
   border-color: #4e9aeb;
+
   box-shadow:
+
     0 0 0 3px rgba(20, 111, 224, 0.07);
+
 }
 
 ion-input {
+
   --padding-top: 9px;
+
   --padding-bottom: 9px;
+
   --placeholder-color: #8b97a9;
+
   --placeholder-opacity: 1;
+
   color: #17243b;
+
   font-size: 14px;
+
   font-weight: 500;
+
 }
 
 /* ============================================================
-   ERROR
+
+   ERROR
+
 ============================================================ */
+
 small {
+
   display: block;
+
   margin:
+
     -3px 0 10px 7px;
+
   color: #d92d20;
+
   font-size: 10px;
+
   line-height: 1.4;
+
   font-weight: 600;
+
 }
 
 /* ============================================================
-   PRIMARY BUTTON
+
+   PRIMARY BUTTON
+
 ============================================================ */
+
 .register-btn,
+
 .continue-btn {
+
   --border-radius: 15px;
+
   --box-shadow:
+
     0 9px 20px rgba(18, 110, 224, 0.20);
+
   height: 51px;
+
   margin-top: 16px;
+
   font-size: 14px;
+
   font-weight: 850;
+
 }
 
 /* ============================================================
-   NAVIGATION
+
+   NAVIGATION
+
 ============================================================ */
+
 .parent-navigation {
+
   display: flex;
+
   align-items: center;
+
   gap: 9px;
+
   width: 100%;
+
   margin-top: 4px;
+
 }
 
 .parent-navigation ion-button:first-child {
+
   --color: #607087;
+
   min-width: 68px;
+
   font-size: 12px;
+
   font-weight: 750;
+
 }
 
 .parent-navigation .continue-btn {
+
   flex: 1;
+
   margin-top: 0;
+
 }
 
 /* ============================================================
-   LOCATION BUTTONS
+
+   LOCATION BUTTONS
+
 ============================================================ */
+
 .location-btn {
+
   --border-radius: 14px;
+
   height: 48px;
+
   font-size: 12px;
+
   font-weight: 800;
+
 }
 
 /* ============================================================
-   OR
+
+   OR
+
 ============================================================ */
+
 .or-divider {
+
   display: flex;
+
   align-items: center;
+
   gap: 12px;
+
   margin:
+
     17px 0;
+
   color: #9aa5b5;
+
   font-size: 9px;
+
   font-weight: 800;
+
 }
 
 .or-divider::before,
+
 .or-divider::after {
+
   content: '';
+
   height: 1px;
+
   flex: 1;
+
   background: #e2e7ee;
+
 }
 
 /* ============================================================
-   LOCATION NOTE
+
+   LOCATION NOTE
+
 ============================================================ */
+
 .location-note {
+
   display: flex;
+
   align-items: flex-start;
+
   gap: 9px;
+
   margin-top: 16px;
+
   padding: 13px;
+
   border-radius: 14px;
+
   background: #f4f8fc;
+
   border: 1px solid #e1e9f2;
+
 }
 
 .location-note p {
+
   margin: 0;
+
   color: #68758a;
+
   font-size: 10px;
+
   line-height: 1.55;
+
 }
 
 /* ============================================================
-   GOOGLE MAP
+
+   GOOGLE MAP
+
 ============================================================ */
+
 .map-container {
+
   width: 100%;
+
   height: 350px;
+
   min-height: 350px;
+
   display: block;
+
   position: relative;
+
   margin: 14px 0 15px;
+
   padding: 0;
+
   box-sizing: border-box;
+
   overflow: hidden;
+
   border-radius: 18px;
+
   border: 1px solid #dce5ee;
+
   background: #e5e7eb;
+
   box-shadow:
+
     0 8px 22px rgba(18, 40, 70, 0.08);
+
   isolation: isolate;
+
 }
 
 /*
- * Google Maps owns everything inside this element.
- * Do not allow application styles to collapse the map.
- */
+
+ * Google Maps owns everything inside this element.
+
+ * Do not allow application styles to collapse the map.
+
+ */
+
 .map-container>div {
+
   width: 100% !important;
+
   height: 100% !important;
+
   min-height: 100% !important;
+
 }
 
 /*
- * Google Maps internal root.
- */
+
+ * Google Maps internal root.
+
+ */
+
 .map-container .gm-style {
+
   width: 100% !important;
+
   height: 100% !important;
+
 }
 
 /*
- * Prevent global Ionic/app image rules from
- * breaking Google Maps tiles and controls.
- */
+
+ * Prevent global Ionic/app image rules from
+
+ * breaking Google Maps tiles and controls.
+
+ */
+
 .map-container img {
+
   max-width: none !important;
+
 }
 
 /* ============================================================
-   SELECTED LOCATION
+
+   SELECTED LOCATION
+
 ============================================================ */
+
 .selected-location {
+
   display: flex;
+
   gap: 10px;
+
   padding: 13px;
+
   border-radius: 14px;
+
   background: #f4f8ff;
+
   border: 1px solid #dbe9fb;
+
 }
 
 .location-pin {
+
   width: 36px;
+
   height: 36px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   flex-shrink: 0;
+
   border-radius: 11px;
+
   background: #e4f0ff;
+
   font-size: 18px;
+
 }
 
 .selected-location strong {
+
   display: block;
+
   color: #17243b;
+
   font-size: 12px;
+
 }
 
 .selected-location p {
+
   margin:
+
     4px 0 0;
+
   color: #6d7a8d;
+
   font-size: 10px;
+
   line-height: 1.45;
+
 }
 
 /* ============================================================
-   COORDINATES
+
+   COORDINATES
+
 ============================================================ */
+
 .coordinates {
+
   display: flex;
+
   justify-content: space-between;
+
   gap: 8px;
+
   margin-top: 8px;
+
   padding:
+
     8px 10px;
+
   border-radius: 9px;
+
   background: #f1f4f8;
+
   color: #6e7b8d;
+
   font-size: 9px;
+
 }
 
 /* ============================================================
-   SCHOOL SEARCH
+
+   SCHOOL SEARCH
+
 ============================================================ */
+
 .school-search-wrapper {
+
   position: relative;
+
   width: 100%;
+
 }
 
 .location-hint {
+
   display: block;
+
   margin: 6px 12px;
+
   color: #718078;
+
   font-size: 12px;
+
 }
 
 .school-search-loading,
+
 .school-search-status {
+
   display: flex;
+
   align-items: center;
+
   gap: 8px;
+
   padding:
+
     11px 13px;
+
   border-radius: 12px;
+
   background: #f6f9fc;
+
   color: #6d7a8d;
+
   font-size: 11px;
+
 }
 
 /* ============================================================
-   SCHOOL RESULTS
+
+   SCHOOL RESULTS
+
 ============================================================ */
+
 .school-results {
+
   margin:
+
     4px 0 12px;
+
   overflow: hidden;
+
   background: #ffffff;
+
   border-radius: 16px;
+
   border: 1px solid #dfe6ef;
+
   box-shadow:
+
     0 12px 27px rgba(20, 42, 72, 0.10);
+
 }
 
 .school-result {
+
   display: flex;
+
   align-items: center;
+
   gap: 11px;
+
   padding:
+
     13px;
+
   cursor: pointer;
+
 }
 
 .school-result+.school-result {
+
   border-top:
+
     1px solid #edf0f4;
+
 }
 
 .school-result:active {
+
   background: #f3f8ff;
+
 }
 
 .school-result-icon,
+
 .school-icon {
+
   width: 39px;
+
   height: 39px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   flex-shrink: 0;
+
   border-radius: 11px;
+
   background: #eaf3ff;
+
   border: 1px solid #dceaff;
+
   font-size: 17px;
+
 }
 
 .school-result-info,
+
 .school-result-content {
+
   display: flex;
+
   flex-direction: column;
+
   gap: 3px;
+
   min-width: 0;
+
   flex: 1;
+
 }
 
 .school-result-info strong,
+
 .school-result-content strong {
+
   color: #17243b;
+
   font-size: 12px;
+
   font-weight: 750;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
+
 }
 
 .school-result-info span,
+
 .school-result-content span {
+
   color: #7b8798;
+
   font-size: 9px;
+
   line-height: 1.4;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
+
 }
 
 .school-arrow {
+
   color: #77859a;
+
   font-size: 22px;
+
 }
 
 /* ============================================================
-   SELECTED SCHOOL
+
+   SELECTED SCHOOL
+
 ============================================================ */
+
 .selected-school {
+
   display: flex;
+
   align-items: center;
+
   gap: 10px;
+
   margin:
+
     10px 0;
+
   padding: 13px;
+
   border-radius: 15px;
+
   background: #f0faf4;
+
   border: 1px solid #ccebd9;
+
 }
 
 .selected-school-check,
+
 .selected-school-icon {
+
   width: 38px;
+
   height: 38px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   flex-shrink: 0;
+
   border-radius: 11px;
+
   background: #ddf5e6;
+
   color: #16804a;
+
   font-size: 16px;
+
   font-weight: 850;
+
 }
 
 .selected-school-info {
+
   display: flex;
+
   flex-direction: column;
+
   gap: 3px;
+
   min-width: 0;
+
 }
 
 .selected-school strong {
+
   color: #17623e;
+
   font-size: 12px;
+
 }
 
 .selected-school span {
+
   color: #718078;
+
   font-size: 9px;
+
   line-height: 1.4;
+
 }
 
 .change-school-btn {
+
   margin-left: auto;
+
   border: none;
+
   background: transparent;
+
   color: #1671db;
+
   font-size: 10px;
+
   font-weight: 800;
+
 }
 
 /* ============================================================
-   DRIVER FOUND
+
+   DRIVER FOUND
+
 ============================================================ */
+
 .driver-card {
+
   display: flex;
+
   align-items: center;
+
   gap: 12px;
+
   margin-top: 16px;
+
   padding: 15px;
+
   border-radius: 17px;
+
   background: #f3f8ff;
+
   border: 1px solid #d5e6fb;
+
 }
 
 .driver-avatar {
+
   width: 52px;
+
   height: 52px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   flex-shrink: 0;
+
   border-radius: 15px;
+
   background: #e5efff;
+
   font-size: 24px;
+
 }
 
 .driver-info {
+
   display: flex;
+
   flex-direction: column;
+
   gap: 3px;
+
   min-width: 0;
+
 }
 
 .driver-info strong {
+
   color: #17243b;
+
   font-size: 14px;
+
   font-weight: 800;
+
 }
 
 .driver-info span {
+
   color: #6d7a8d;
+
   font-size: 9px;
+
 }
 
 .driver-info small {
+
   margin:
+
     4px 0 0;
+
   color: #16804a;
+
   font-size: 9px;
+
   font-weight: 800;
+
 }
 
 /* ============================================================
-   REVIEW
+
+   REVIEW
+
 ============================================================ */
+
 .review-card {
+
   padding-bottom: 20px;
+
 }
 
 .review-item {
+
   display: flex;
+
   align-items: flex-start;
+
   gap: 11px;
+
   padding:
+
     13px 0;
+
   border-bottom:
+
     1px solid #edf0f4;
+
 }
 
 .review-item:last-of-type {
+
   border-bottom: none;
+
 }
 
 .review-icon {
+
   width: 40px;
+
   height: 40px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   flex-shrink: 0;
+
   border-radius: 12px;
+
   background: #edf4fc;
+
   border: 1px solid #dfe8f2;
+
   font-size: 16px;
+
 }
 
 .review-item>div {
+
   display: flex;
+
   flex-direction: column;
+
   min-width: 0;
+
 }
 
 .review-item label {
+
   color: #8b96a7;
+
   font-size: 8px;
+
   font-weight: 800;
+
   text-transform: uppercase;
+
   letter-spacing: 0.4px;
+
 }
 
 .review-item strong {
+
   margin-top: 3px;
+
   color: #17243b;
+
   font-size: 12px;
+
   font-weight: 750;
+
 }
 
 .review-item small {
+
   margin:
+
     3px 0 0;
+
   color: #6c798c;
+
   font-size: 9px;
+
   line-height: 1.4;
+
   overflow-wrap: anywhere;
+
 }
 
 /* ============================================================
-   COMPLETE
+
+   COMPLETE
+
 ============================================================ */
+
 .complete-card {
+
   text-align: center;
+
   padding:
+
     40px 20px 25px;
+
 }
 
 .success-icon {
+
   width: 78px;
+
   height: 78px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   margin:
+
     0 auto 18px;
+
   border-radius: 50%;
+
   background: #e3f8eb;
+
   border: 1px solid #c8edd7;
+
   color: #16804a;
+
   font-size: 38px;
+
   font-weight: 850;
+
   box-shadow:
+
     0 10px 25px rgba(22, 128, 74, 0.10);
+
 }
 
 .complete-card h3 {
+
   font-size: 25px;
+
 }
 
 .complete-details {
+
   display: flex;
+
   flex-direction: column;
+
   gap: 5px;
+
   margin-top: 20px;
+
   padding: 15px;
+
   border-radius: 14px;
+
   background: #f5f8fb;
+
   border: 1px solid #e4eaf1;
+
 }
 
 .complete-details strong {
+
   color: #17243b;
+
   font-size: 14px;
+
 }
 
 .complete-details span {
+
   color: #6c798c;
+
   font-size: 10px;
+
 }
 
 /* ============================================================
-   MOBILE
+
+   MOBILE
+
 ============================================================ */
+
 @media (max-width: 480px) {
+
   ion-toolbar {
+
     height: 56px;
+
     min-height: 56px;
+
   }
 
   ion-title {
+
     height: 56px;
+
   }
 
   ion-title::before {
+
     width: 33px;
+
     height: 33px;
+
     font-size: 17px;
+
   }
 
   ion-title::after {
+
     font-size: 15px;
+
   }
 
   .container {
+
     padding:
+
       17px 11px 35px;
+
   }
 
   .logo {
+
     width: 63px;
+
     height: 63px;
+
     margin-bottom: 11px;
+
     border-radius: 21px;
+
     font-size: 30px;
+
   }
 
   .container>h2 {
+
     font-size: 26px;
+
   }
 
   .subtitle {
+
     margin-bottom: 21px;
+
     font-size: 12px;
+
   }
 
   ion-segment {
+
     min-height: 56px;
+
     margin-bottom: 25px;
+
     border-radius: 17px;
+
   }
 
   ion-segment-button {
+
     min-height: 46px;
+
     font-size: 12px;
+
   }
 
   .onboarding-card {
+
     padding:
+
       23px 14px 18px;
+
     border-radius: 21px;
+
   }
 
   .driver-registration {
+
     padding-left: 0;
+
     padding-right: 0;
+
   }
 
   ion-item {
+
     min-height: 57px;
+
     border-radius: 14px;
+
   }
 
   ion-input {
+
     font-size: 13px;
+
+  }
+
+  .map-container {
+
+    height: 320px;
+
+    min-height: 320px;
+
+  }
+
+}
+
+/* ============================================================
+
+   SMALL DEVICES
+
+============================================================ */
+
+@media (max-width: 360px) {
+
+  .container {
+
+    padding-left: 9px;
+
+    padding-right: 9px;
+
+  }
+
+  .container>h2 {
+
+    font-size: 24px;
+
+  }
+
+  .onboarding-card {
+
+    padding-left: 12px;
+
+    padding-right: 12px;
+
+  }
+
+  .onboarding-card h3 {
+
+    font-size: 20px;
+
+  }
+
+}
+
+/* ============================================================
+
+   GOOGLE MAP - SMALL DEVICES
+
+============================================================ */
+
+@media (max-width: 360px) {
+
+  .map-container {
+
+    height: 300px;
+
+    min-height: 300px;
+
+  }
+
+}
+
+/* ============================================================
+
+   REDUCED MOTION
+
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  * {
+
+    transition: none !important;
+
+  }
+
+}
+
+/* =========================================================
+
+   STEP 3 - STUDENT DETAILS
+
+   ========================================================= */
+
+.student-details-card {
+
+  position: relative;
+
+  overflow: visible !important;
+
+  width: 100%;
+
+  box-sizing: border-box;
+
+}
+
+/* =========================================================
+
+   FORM FIELD
+
+   ========================================================= */
+
+.form-field {
+
+  width: 100%;
+
+  margin-bottom: 18px;
+
+  position: relative;
+
+}
+
+/* =========================================================
+
+   IONIC INPUT
+
+   ========================================================= */
+
+.custom-input-item {
+
+  --background: #ffffff;
+
+  --border-color: #d8e2ef;
+
+  --border-width: 1px;
+
+  --border-style: solid;
+
+  --highlight-color-focused: #2878e8;
+
+  --highlight-color-valid: #2878e8;
+
+  --padding-start: 18px;
+
+  --padding-end: 18px;
+
+  width: 100%;
+
+  min-height: 72px;
+
+  margin: 0;
+
+  border: 1px solid #d8e2ef;
+
+  border-radius: 17px;
+
+  box-shadow: none;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+}
+
+/*
+
+ * Ionic internally adds borders/backgrounds to ion-item.
+
+ * Remove them so our custom card remains consistent.
+
+ */
+
+.custom-input-item::part(native) {
+
+  background: transparent;
+
+  border: 0;
+
+}
+
+/* =========================================================
+
+   SCHOOL SECTION
+
+   ========================================================= */
+
+.school-section {
+
+  width: 100%;
+
+  margin: 4px 0 20px;
+
+  position: relative;
+
+  overflow: visible !important;
+
+  z-index: 20;
+
+}
+
+/* =========================================================
+
+   SCHOOL HEADER
+
+   ========================================================= */
+
+.school-section-header {
+
+  width: 100%;
+
+  margin-bottom: 10px;
+
+}
+
+.school-section-header h4 {
+
+  margin: 0;
+
+  font-size: 17px;
+
+  line-height: 22px;
+
+  font-weight: 800;
+
+  color: #17233c;
+
+}
+
+.school-location-text {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  margin: 3px 0 0;
+
+  font-size: 12px;
+
+  line-height: 18px;
+
+  font-weight: 600;
+
+  color: #ef4444;
+
+}
+
+.location-dot {
+
+  font-size: 13px;
+
+}
+
+/* =========================================================
+
+   SCHOOL SEARCH BOX
+
+   ========================================================= */
+
+.school-search-box {
+
+  width: 100%;
+
+  margin-bottom: 10px;
+
+  position: relative;
+
+  z-index: 30;
+
+}
+
+.school-input-item {
+
+  min-height: 72px !important;
+
+  display: flex !important;
+
+  visibility: visible !important;
+
+  opacity: 1 !important;
+
+  transform: none !important;
+
+}
+
+/* Force Ionic input itself to remain visible */
+
+.school-input-item ion-input {
+
+  display: block !important;
+
+  width: 100%;
+
+  visibility: visible !important;
+
+  opacity: 1 !important;
+
+}
+
+/* =========================================================
+
+   SCHOOL STATUS
+
+   ========================================================= */
+
+.school-status {
+
+  width: 100%;
+
+  min-height: 44px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 9px;
+
+  margin: 8px 0;
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  background: #f5f9ff;
+
+  border: 1px solid #dceaff;
+
+  color: #49709f;
+
+  font-size: 13px;
+
+  box-sizing: border-box;
+
+}
+
+.school-status ion-spinner {
+
+  width: 20px;
+
+  height: 20px;
+
+}
+
+/* =========================================================
+
+   SCHOOL RESULTS
+
+   ========================================================= */
+
+.school-results {
+
+  width: 100%;
+
+  max-height: 260px;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  margin-top: 8px;
+
+  padding: 4px;
+
+  background: #ffffff;
+
+  border: 1px solid #dce5f0;
+
+  border-radius: 16px;
+
+  box-shadow:
+
+    0 10px 28px rgba(24, 55, 95, 0.12);
+
+  box-sizing: border-box;
+
+  position: relative;
+
+  z-index: 100;
+
+}
+
+/* =========================================================
+
+   SCHOOL RESULT
+
+   ========================================================= */
+
+.school-result {
+
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 12px;
+
+  margin: 0;
+
+  border: 0;
+
+  border-bottom: 1px solid #edf1f6;
+
+  background: #ffffff;
+
+  color: #17233c;
+
+  text-align: left;
+
+  font-family: inherit;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  box-sizing: border-box;
+
+}
+
+.school-result:last-child {
+
+  border-bottom: 0;
+
+}
+
+.school-result:hover {
+
+  background: #f6faff;
+
+}
+
+.school-result:active {
+
+  background: #edf5ff;
+
+}
+
+/* =========================================================
+
+   SCHOOL ICON
+
+   ========================================================= */
+
+.school-result-icon {
+
+  width: 42px;
+
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #eef5ff;
+
+  font-size: 21px;
+
+}
+
+/* =========================================================
+
+   SCHOOL RESULT CONTENT
+
+   ========================================================= */
+
+.school-result-content {
+
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+}
+
+.school-result-content strong {
+
+  display: block;
+
+  width: 100%;
+
+  color: #17233c;
+
+  font-size: 14px;
+
+  line-height: 19px;
+
+  font-weight: 800;
+
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+
+}
+
+.school-result-content span {
+
+  display: block;
+
+  color: #65748b;
+
+  font-size: 11px;
+
+  line-height: 16px;
+
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+
+}
+
+.school-result-content small {
+
+  display: block;
+
+  color: #2878e8;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+}
+
+/* =========================================================
+
+   ARROW
+
+   ========================================================= */
+
+.school-result-arrow {
+
+  flex: 0 0 auto;
+
+  font-size: 25px;
+
+  line-height: 1;
+
+  color: #9aa8bb;
+
+}
+
+/* =========================================================
+
+   NO RESULTS
+
+   ========================================================= */
+
+.school-no-results {
+
+  width: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  padding: 22px 14px;
+
+  margin-top: 8px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e3eaf2;
+
+  border-radius: 15px;
+
+  box-sizing: border-box;
+
+}
+
+.no-school-icon {
+
+  font-size: 25px;
+
+  margin-bottom: 3px;
+
+}
+
+.school-no-results strong {
+
+  font-size: 14px;
+
+  color: #24334d;
+
+}
+
+.school-no-results span {
+
+  font-size: 11px;
+
+  color: #748197;
+
+  text-align: center;
+
+}
+
+/* =========================================================
+
+   SELECTED SCHOOL
+
+   ========================================================= */
+
+.selected-school-card {
+
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  margin-top: 8px;
+
+  background: #f2f8ff;
+
+  border: 1px solid #bcd9ff;
+
+  border-radius: 16px;
+
+  box-sizing: border-box;
+
+}
+
+.selected-school-icon {
+
+  width: 38px;
+
+  height: 38px;
+
+  flex: 0 0 38px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #2878e8;
+
+  color: #ffffff;
+
+  font-size: 20px;
+
+  font-weight: 800;
+
+}
+
+.selected-school-info {
+
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+}
+
+.selected-label {
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+
+  font-weight: 800;
+
+  color: #2878e8;
+
+}
+
+.selected-school-info strong {
+
+  color: #17233c;
+
+  font-size: 14px;
+
+  line-height: 19px;
+
+  overflow-wrap: anywhere;
+
+}
+
+.selected-address {
+
+  color: #687890;
+
+  font-size: 11px;
+
+  line-height: 16px;
+
+  overflow-wrap: anywhere;
+
+}
+
+.change-school-btn {
+
+  flex: 0 0 auto;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #2878e8;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  padding: 8px 4px;
+
+}
+
+/* =========================================================
+
+   VALIDATION
+
+   ========================================================= */
+
+.field-error {
+
+  display: block;
+
+  margin: 5px 4px 0;
+
+  color: #ef4444;
+
+  font-size: 11px;
+
+  line-height: 16px;
+
+  font-weight: 600;
+
+}
+
+.school-error {
+
+  margin-top: 7px;
+
+}
+
+/* =========================================================
+
+   MOBILE
+
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .student-details-card {
+
+    padding-left: 16px;
+
+    padding-right: 16px;
+
+  }
+
+  .school-results {
+
+    max-height: 240px;
+
+  }
+
+  .school-result {
+
+    padding: 12px 9px;
+
+    gap: 9px;
+
+  }
+
+  .school-result-icon {
+
+    width: 38px;
+
+    height: 38px;
+
+    flex-basis: 38px;
+
+    font-size: 19px;
+
+  }
+
+  .school-result-content strong {
+
+    font-size: 13px;
+
+  }
+
+  .school-result-content span {
+
+    font-size: 10px;
+
+  }
+
+  .selected-school-card {
+
+    padding: 12px;
+
+  }
+
+}
+
+/* =========================================================
+
+   PICKUP POINT CONFIRMATION DIALOG
+
+   ========================================================= */
+
+.pickup-confirm-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(3px);
+
+  -webkit-backdrop-filter: blur(3px);
+
+}
+
+.pickup-confirm-dialog {
+
+  width: min(420px, 100%);
+
+  padding: 24px 20px 20px;
+
+  border-radius: 24px;
+
+  background: #ffffff;
+
+  box-shadow:
+
+    0 24px 70px rgba(15, 23, 42, 0.25);
+
+  text-align: center;
+
+  animation:
+
+    pickupDialogIn 180ms ease-out;
+
+}
+
+.pickup-confirm-icon {
+
+  width: 58px;
+
+  height: 58px;
+
+  margin: 0 auto 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eaf2ff;
+
+  font-size: 28px;
+
+}
+
+.pickup-confirm-dialog h4 {
+
+  margin: 0 0 8px;
+
+  color: #17213b;
+
+  font-size: 21px;
+
+  font-weight: 800;
+
+}
+
+.pickup-confirm-dialog>p {
+
+  margin: 0 auto 18px;
+
+  max-width: 340px;
+
+  color: #667085;
+
+  font-size: 14px;
+
+  line-height: 1.55;
+
+}
+
+.pickup-confirm-tips {
+
+  display: grid;
+
+  gap: 9px;
+
+  margin-bottom: 20px;
+
+  text-align: left;
+
+}
+
+.pickup-confirm-tips>div {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 10px 12px;
+
+  border-radius: 12px;
+
+  background: #f6f8fc;
+
+}
+
+.pickup-confirm-tips span {
+
+  width: 24px;
+
+  height: 24px;
+
+  flex: 0 0 24px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #e8f0ff;
+
+  color: #246bce;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+}
+
+.pickup-confirm-tips strong {
+
+  color: #344054;
+
+  font-size: 13px;
+
+}
+
+.pickup-confirm-btn {
+
+  --background: linear-gradient(135deg,
+
+      #ffad00,
+
+      #ff7118);
+
+  --background-activated: #f57c00;
+
+  --border-radius: 14px;
+
+  min-height: 50px;
+
+  font-weight: 800;
+
+}
+
+@keyframes pickupDialogIn {
+
+  from {
+
+    opacity: 0;
+
+    transform: translateY(10px) scale(0.97);
+
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform: translateY(0) scale(1);
+
+  }
+
+}
+
+.school-location-header {
+
+  margin: 8px 0 14px;
+
+}
+
+.school-location-title {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+  color: #ff3b4a;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+}
+
+.location-pin {
+
+  font-size: 18px;
+
+  line-height: 1;
+
+}
+
+.detected-location {
+
+  margin-top: 4px;
+
+  color: #64748b;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+}
+
+.detected-location strong {
+
+  color: #1e293b;
+
+}
+
+.detected-location.loading {
+
+  color: #64748b;
+
+}
+
+.detected-location.error {
+
+  color: #dc2626;
+
+}
+
+/* ============================================================
+
+   PARENT REGISTRATION - NEW FLOW
+
+============================================================ */
+
+.autosave-note {
+
+  margin: 12px 0 16px;
+
+  padding: 10px 12px;
+
+  border-radius: 12px;
+
+  background: #f0f8ff;
+
+  color: #28577d;
+
+  font-size: 13px;
+
+  text-align: center;
+
+}
+
+.driver-card.new-driver-card {
+
+  border-left: 4px solid #f59e0b;
+
+}
+
+.driver-status-message {
+
+  margin-top: 12px;
+
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  background: #f5f9ff;
+
+  color: #315b7d;
+
+  font-size: 13px;
+
+}
+
+.review-item {
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+}
+
+.review-content {
+
+  flex: 1;
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+}
+
+.review-content strong,
+
+.review-content small {
+
+  overflow-wrap: anywhere;
+
+}
+
+.review-item ion-button {
+
+  flex: 0 0 auto;
+
+  margin: 0;
+
+  --padding-start: 8px;
+
+  --padding-end: 8px;
+
+}
+
+.pickup-confirm-dialog ion-button+ion-button {
+
+  margin-top: 8px;
+
+}
+
+@media (max-width: 576px) {
+
+  .review-item {
+
+    flex-wrap: wrap;
+
+  }
+
+  .review-item ion-button {
+
+    margin-left: 42px;
+
+  }
+
+}
+
+/* ============================================================
+
+   DETECTED AREA / CITY
+
+============================================================ */
+
+.detected-location-card {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 12px;
+
+  margin: 12px 0 16px;
+
+  padding: 13px 14px;
+
+  border: 1px solid #cfe3fb;
+
+  border-radius: 14px;
+
+  background: #f5f9ff;
+
+}
+
+.detected-location-icon {
+
+  width: 34px;
+
+  height: 34px;
+
+  flex: 0 0 34px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #e6f1ff;
+
+}
+
+.detected-location-content {
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+}
+
+.detected-location-caption {
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: .5px;
+
+  color: #718078;
+
+}
+
+.detected-location-content strong {
+
+  color: #13213a;
+
+  font-size: 15px;
+
+}
+
+.detected-location-content span:not(.detected-location-caption) {
+
+  color: #526174;
+
+  font-size: 13px;
+
+  line-height: 1.4;
+
+}
+
+.detect-location-retry {
+
+  align-self: flex-start;
+
+  margin-top: 4px;
+
+  padding: 6px 10px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background: #1b7df0;
+
+  color: #fff;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+}
+
+/* ============================================================
+
+   LOCATION + PASSWORD FIXES
+
+============================================================ */
+
+.password-toggle {
+
+  appearance: none;
+
+  border: 0;
+
+  background: transparent;
+
+  padding: 8px;
+
+  margin: 0;
+
+  min-width: 42px;
+
+  min-height: 42px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 18px;
+
+  line-height: 1;
+
+}
+
+.password-toggle:active {
+
+  transform: scale(0.94);
+
+}
+
+.source-note {
+
+  margin-top: 4px;
+
+  font-size: 12px;
+
+}
+
+.detected-location small {
+
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 11px;
+
+  line-height: 1.4;
+
+}
+
+/* New driver parent-onboarding guidance */
+
+.new-driver-helper {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+
+  margin: 4px 0 10px;
+
+  padding: 10px 12px;
+
+  border-radius: 12px;
+
+  background: rgba(30, 136, 229, 0.06);
+
+  border: 1px solid rgba(30, 136, 229, 0.14);
+
+}
+
+.new-driver-helper strong {
+
+  font-size: 13px;
+
+}
+
+.new-driver-helper span {
+
+  font-size: 12px;
+
+  line-height: 1.45;
+
+  opacity: 0.78;
+
+}
+
+/* =========================================================
+
+   TERMS & CONDITIONS CONSENT
+
+========================================================= */
+
+.terms-consent-section {
+
+  margin-top: 20px;
+
+  padding: 16px;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 14px;
+
+  background: #f8fafc;
+
+}
+
+.terms-consent-header {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 12px;
+
+  margin-bottom: 14px;
+
+}
+
+.terms-consent-icon {
+
+  width: 38px;
+
+  height: 38px;
+
+  min-width: 38px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #e8f1ff;
+
+  font-size: 18px;
+
+}
+
+.terms-consent-heading {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+  strong {
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: #172033;
+
+  }
+
+  span {
+
+    font-size: 12px;
+
+    line-height: 1.45;
+
+    color: #64748b;
+
+  }
+
+}
+
+.terms-consent-row {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border: 1px solid #dbe2ea;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  transition:
+
+    border-color 0.2s ease,
+
+    background-color 0.2s ease,
+
+    box-shadow 0.2s ease;
+
+  ion-checkbox {
+
+    flex: 0 0 auto;
+
+    margin-top: 1px;
+
+    --size: 20px;
+
+  }
+
+  &.accepted {
+
+    border-color: #93c5fd;
+
+    background: #f8fbff;
+
+  }
+
+}
+
+.terms-consent-text {
+
+  flex: 1;
+
+  min-width: 0;
+
+  span {
+
+    display: block;
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+    color: #334155;
+
+  }
+
+  small {
+
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 11px;
+
+    line-height: 1.45;
+
+    color: #64748b;
+
+  }
+
+}
+
+.terms-link {
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #2563eb;
+
+  font: inherit;
+
+  font-weight: 600;
+
+  text-decoration: underline;
+
+  cursor: pointer;
+
+}
+
+.terms-link:hover {
+
+  color: #1d4ed8;
+
+}
+
+.terms-validation-message {
+
+  margin-top: 8px;
+
+  padding-left: 2px;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  color: #dc2626;
+
+}
+
+/* Disabled final registration button */
+
+.register-btn[disabled] {
+
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+}
+
+/* Driver 3-step registration */
+
+.driver-step-labels {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 8px;
+
+  margin-top: 12px;
+
+  color: #718096;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+}
+
+.driver-step-labels span.active {
+
+  color: #1269d3;
+
+}
+
+.driver-parent-list {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+
+}
+
+.driver-parent-entry {
+
+  padding: 14px;
+
+  margin-bottom: 12px;
+
+  border: 1px solid #dce5ef;
+
+  border-radius: 16px;
+
+  background: #f8fbff;
+
+}
+
+.driver-parent-heading {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+
+  color: #17243b;
+
+}
+
+.remove-parent-btn {
+
+  border: 0;
+
+  background: transparent;
+
+  color: #d92d20;
+
+  font: inherit;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+}
+
+.driver-navigation {
+
+  display: flex;
+
+  align-items: center;
+
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  margin-top: 18px;
+
+}
+
+.driver-navigation .continue-btn {
+
+  flex: 1;
+
+}
+
+.driver-registration .review-item {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+}
+
+.driver-registration .review-content {
+
+  flex: 1;
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+
+}
+
+.driver-registration .review-content strong,
+
+.driver-registration .review-content small {
+
+  overflow-wrap: anywhere;
+
+}
+
+.driver-registration .register-btn[disabled] {
+
+  opacity: 0.5;
+
+  cursor: not-allowed;
+
+}
+
+@media (max-width: 480px) {
+
+  .driver-navigation {
+
+    align-items: stretch;
+
+  }
+
+  .driver-navigation ion-button {
+
+    min-width: 0;
+
+    font-size: 12px;
+
+  }
+
+  .driver-parent-entry {
+
+    padding: 11px;
+
+  }
+
+}
+
+/* ============================================================
+
+   PREMIUM REGISTRATION VISUAL POLISH
+
+   Presentation only — keep all existing template behavior intact.
+
+   ============================================================ */
+
+:host {
+
+  --registration-ink: #14243d;
+
+  --registration-muted: #687991;
+
+  --registration-blue: #176fe5;
+
+  --registration-blue-dark: #1158bd;
+
+  --registration-border: #dbe5f1;
+
+  --registration-surface: #ffffff;
+
+}
+
+ion-content {
+
+  --background: #f3f7fc;
+
+  --padding-bottom: max(28px, env(safe-area-inset-bottom));
+
+  color: var(--registration-ink);
+
+}
+
+ion-header {
+
+  box-shadow: 0 5px 18px rgba(20, 43, 76, 0.055);
+
+}
+
+ion-toolbar {
+
+  --background: rgba(255, 255, 255, 0.98);
+
+  --color: var(--registration-ink);
+
+  --min-height: 64px;
+
+  padding-inline: clamp(12px, 3vw, 24px);
+
+  box-shadow: 0 1px 0 rgba(219, 229, 241, 0.9);
+
+}
+
+ion-toolbar::after {
+
+  height: 3px;
+
+  background: linear-gradient(90deg, #155ed0 0%, #2f8df5 58%, #4ec7d4 100%);
+
+}
+
+.container {
+
+  max-width: 640px;
+
+  padding: clamp(16px, 4vw, 28px) clamp(12px, 3.8vw, 22px) 44px;
+
+}
+
+.logo {
+
+  background: linear-gradient(145deg, #dcecff 0%, #f5faff 100%);
+
+  border: 1px solid #cfe2fa;
+
+  box-shadow: 0 12px 26px rgba(23, 111, 229, 0.11);
+
+}
+
+.container>h2 {
+
+  color: #14243d;
+
+  letter-spacing: -0.8px;
+
+}
+
+.subtitle {
+
+  color: #718198;
+
+  font-size: 13px;
+
+}
+
+ion-segment {
+
+  margin-top: 30px;
+
+  padding: 5px;
+
+  border: 1px solid #d7e2ef;
+
+  background: #e8eef7;
+
+  box-shadow: 0 5px 16px rgba(23, 47, 82, 0.045);
+
+}
+
+ion-segment-button {
+
+  --indicator-color: #ffffff;
+
+  --indicator-box-shadow: 0 4px 12px rgba(28, 61, 104, 0.11);
+
+  --color: #64748b;
+
+  --color-checked: #155fc5;
+
+  font-weight: 800;
+
+}
+
+.progress-section {
+
+  margin-bottom: 18px;
+
+  padding: 15px 16px;
+
+  border-color: #e0e8f2;
+
+  border-radius: 18px;
+
+  box-shadow: 0 7px 20px rgba(23, 47, 82, 0.045);
+
+}
+
+.progress-track {
+
+  height: 7px;
+
+  background: #e8eef6;
+
+}
+
+.progress-value {
+
+  background: linear-gradient(90deg, #176fe5, #50a6fa);
+
+}
+
+.driver-step-labels {
+
+  margin-top: 11px;
+
+}
+
+.driver-step-labels span {
+
+  transition: color 180ms ease;
+
+}
+
+.onboarding-card {
+
+  padding: clamp(20px, 4.5vw, 28px) clamp(15px, 4vw, 22px) 22px;
+
+  margin-bottom: 17px;
+
+  border: 1px solid #e0e8f2;
+
+  border-radius: 24px;
+
+  background: #fff;
+
+  box-shadow: 0 12px 30px rgba(25, 49, 82, 0.065);
+
+}
+
+.onboarding-card::before {
+
+  height: 4px;
+
+  background: linear-gradient(90deg, #176fe5 0%, #56a8fa 70%, #69c7d0 100%);
+
+}
+
+.step-icon {
+
+  width: 56px;
+
+  height: 56px;
+
+  border-radius: 18px;
+
+  background: linear-gradient(145deg, #e8f2ff, #f5faff);
+
+  border-color: #d8e8fb;
+
+  box-shadow: 0 7px 16px rgba(23, 111, 229, 0.08);
+
+}
+
+.onboarding-card h3 {
+
+  color: #14243d;
+
+  font-size: clamp(21px, 5vw, 24px);
+
+  letter-spacing: -0.55px;
+
+}
+
+.onboarding-card>p {
+
+  margin-bottom: 22px;
+
+  color: #738198;
+
+  font-size: 13px;
+
+}
+
+ion-item,
+
+.custom-input-item {
+
+  --background: #fbfdff;
+
+  --border-color: #dce6f1;
+
+  border-color: #dce6f1;
+
+  border-radius: 15px;
+
+  box-shadow: 0 2px 7px rgba(20, 43, 76, 0.025);
+
+}
+
+ion-item:focus-within,
+
+.custom-input-item:focus-within {
+
+  --background: #ffffff;
+
+  border-color: #5b9df0;
+
+  box-shadow: 0 0 0 3px rgba(23, 111, 229, 0.085);
+
+}
+
+ion-input {
+
+  --highlight-color-focused: #176fe5;
+
+  color: #182943;
+
+}
+
+.register-btn,
+
+.continue-btn {
+
+  --background: linear-gradient(135deg, #176fe5 0%, #287fe9 100%);
+
+  --background-activated: #1158bd;
+
+  --color: #ffffff;
+
+  --border-radius: 15px;
+
+  --box-shadow: 0 8px 18px rgba(23, 111, 229, 0.2);
+
+  min-height: 50px;
+
+  height: auto;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.1px;
+
+  text-transform: none;
+
+}
+
+ion-button {
+
+  --transition: background-color 180ms ease, transform 180ms ease;
+
+  font-weight: 750;
+
+  text-transform: none;
+
+}
+
+ion-button:not([disabled]):active {
+
+  transform: translateY(1px);
+
+}
+
+.location-btn {
+
+  --border-radius: 14px;
+
+  --border-color: #c8dcf5;
+
+  --color: #1765ca;
+
+  font-weight: 750;
+
+  text-transform: none;
+
+}
+
+.parent-navigation,
+
+.driver-navigation {
+
+  gap: 9px;
+
+}
+
+.parent-navigation .continue-btn,
+
+.driver-navigation .continue-btn {
+
+  min-height: 50px;
+
+}
+
+.autosave-note {
+
+  padding: 12px 14px;
+
+  border: 1px solid #d5e8fb;
+
+  border-radius: 14px;
+
+  background: linear-gradient(120deg, #f0f7ff, #f7fbff);
+
+  color: #315d89;
+
+  font-size: 12px;
+
+  line-height: 1.45;
+
+}
+
+.detected-location-card,
+
+.school-status,
+
+.selected-school-card,
+
+.selected-location,
+
+.driver-card,
+
+.driver-parent-entry,
+
+.complete-details {
+
+  box-shadow: 0 4px 12px rgba(25, 49, 82, 0.035);
+
+}
+
+.school-results {
+
+  border-color: #dce6f1;
+
+  border-radius: 16px;
+
+  box-shadow: 0 10px 24px rgba(25, 49, 82, 0.085);
+
+}
+
+.school-result {
+
+  min-height: 68px;
+
+  transition: background-color 160ms ease;
+
+}
+
+.school-result:focus-visible,
+
+.change-school-btn:focus-visible,
+
+.detect-location-retry:focus-visible,
+
+.password-toggle:focus-visible,
+
+.remove-parent-btn:focus-visible,
+
+.terms-link:focus-visible {
+
+  outline: 3px solid rgba(23, 111, 229, 0.28);
+
+  outline-offset: 2px;
+
+}
+
+.map-container {
+
+  border-color: #d5e1ef;
+
+  border-radius: 18px;
+
+  box-shadow: 0 8px 22px rgba(18, 40, 70, 0.07);
+
+}
+
+.review-item {
+
+  padding-block: 15px;
+
+  border-color: #edf1f6;
+
+}
+
+.review-icon {
+
+  background: #f0f6ff;
+
+  border-color: #dce9f8;
+
+}
+
+.review-item label {
+
+  color: #7c8aa0;
+
+  font-size: 9px;
+
+  letter-spacing: 0.55px;
+
+}
+
+.terms-consent-section {
+
+  border-color: #dfe8f2;
+
+  border-radius: 17px;
+
+  background: #f7faff;
+
+}
+
+.terms-consent-row {
+
+  border-color: #dce5f0;
+
+}
+
+.terms-consent-row.accepted {
+
+  border-color: #8ab8f3;
+
+  background: #f0f7ff;
+
+  box-shadow: 0 0 0 2px rgba(23, 111, 229, 0.045);
+
+}
+
+.terms-link {
+
+  min-height: 24px;
+
+}
+
+.driver-parent-entry {
+
+  border-color: #dce6f1;
+
+  border-radius: 17px;
+
+  background: #f8fbff;
+
+}
+
+.remove-parent-btn {
+
+  padding: 8px 10px;
+
+  border-radius: 9px;
+
+  background: #fff1f0;
+
+}
+
+.pickup-confirm-overlay {
+
+  padding: 18px;
+
+  background: rgba(12, 25, 45, 0.62);
+
+}
+
+.pickup-confirm-dialog {
+
+  border: 1px solid rgba(255, 255, 255, 0.75);
+
+  box-shadow: 0 24px 70px rgba(12, 25, 45, 0.3);
+
+}
+
+.pickup-confirm-btn {
+
+  --background: linear-gradient(135deg, #176fe5, #287fe9);
+
+  --background-activated: #1158bd;
+
+}
+
+.complete-card {
+
+  padding-top: 34px;
+
+}
+
+.success-icon {
+
+  background: linear-gradient(145deg, #dcfce7, #effdf4);
+
+  border-color: #b8edcb;
+
+}
+
+.register-btn[disabled],
+
+.continue-btn[disabled] {
+
+  opacity: 0.55;
+
+  box-shadow: none;
+
+}
+
+@media (min-width: 768px) {
+
+  .container {
+
+    padding-top: 30px;
+
+  }
+
+  .onboarding-card {
+
+    padding: 28px 26px 24px;
+
+  }
+
+  .map-container {
+
+    height: 390px;
+
+    min-height: 390px;
+
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  ion-toolbar {
+
+    padding-inline: 12px;
+
+  }
+
+  .container {
+
+    padding: 16px 11px 34px;
+
+  }
+
+  .onboarding-card {
+
+    padding: 22px 14px 18px;
+
+    border-radius: 21px;
+
+  }
+
+  .progress-section {
+
+    padding: 13px 14px;
+
+  }
+
+  .parent-navigation {
+
+    align-items: center;
+
+  }
+
+  .parent-navigation .continue-btn {
+
+    min-width: 0;
+
+  }
+
+  .terms-consent-section {
+
+    padding: 13px;
+
+  }
+
+  .terms-consent-row {
+
+    gap: 10px;
+
+    padding: 12px;
+
+  }
+
+  .map-container {
+
+    height: 320px;
+
+    min-height: 320px;
+
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+
+  *::before,
+
+  *::after {
+
+    animation-duration: 0.01ms !important;
+
+    animation-iteration-count: 1 !important;
+
+    scroll-behavior: auto !important;
+
+    transition-duration: 0.01ms !important;
+
+  }
+
+}
+
+/* ============================================================
+   FINAL UI FIX — CONCEPT 3: PLAYFUL & PREMIUM
+   CSS/SCSS presentation only. No template bindings or behavior changed.
+   Keep every form control visually consistent, including password inputs.
+   ============================================================ */
+
+:host {
+  --registration-ink: #132c35;
+  --registration-muted: #637a7d;
+  --registration-teal: #078b72;
+  --registration-teal-dark: #056b59;
+  --registration-border: #e4e7df;
+  --registration-surface: #fffdf8;
+}
+
+ion-content {
+  --background: #eef8f4;
+  color: var(--registration-ink);
+}
+
+ion-header,
+ion-toolbar {
+  --background: #087d70;
+  --color: #ffffff;
+  background: #087d70;
+  box-shadow: none;
+}
+
+ion-title {
+  color: #ffffff;
+}
+
+ion-title::before {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+ion-title::after {
+  color: #ffffff;
+}
+
+ion-toolbar::after {
+  height: 3px;
+  background: linear-gradient(90deg, #0aa786, #6bd6ba, #f9bd55);
+}
+
+.container {
+  max-width: 620px;
+  padding: 20px 14px 36px;
+}
+
+.logo {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  color: #ffffff;
+  background: linear-gradient(145deg, #078b72, #24b59a);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 24px rgba(7, 139, 114, 0.22);
+}
+
+.logo::before {
+  background: #ffbf47;
+}
+
+.container>h2 {
+  color: #123b36;
+  font-size: clamp(25px, 6vw, 30px);
+  letter-spacing: -0.7px;
+}
+
+.subtitle {
+  color: #617b78;
+  margin-bottom: 22px;
+}
+
+ion-segment {
+  --background: #dceee7;
+  border: 1px solid #c9e3d8;
+  border-radius: 18px;
+  box-shadow: 0 5px 16px rgba(24, 83, 68, 0.06);
+}
+
+ion-segment-button {
+  --color: #55716a;
+  --color-checked: #087b66;
+  --indicator-color: #ffffff;
+  --indicator-box-shadow: 0 3px 10px rgba(25, 75, 62, 0.12);
+  border-radius: 14px;
+}
+
+.progress-section {
+  border-color: #dce9df;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(31, 75, 60, 0.06);
+}
+
+.progress-top span:last-child {
+  color: #078b72;
+}
+
+.progress-track {
+  background: #e5eee6;
+}
+
+.progress-value {
+  background: linear-gradient(90deg, #078b72, #4bc5a1);
+}
+
+.onboarding-card {
+  padding: 22px 17px 20px;
+  border: 1px solid #e8e8df;
+  border-radius: 23px;
+  background: #fffdf8;
+  box-shadow: 0 12px 28px rgba(27, 68, 54, 0.08);
+}
+
+.onboarding-card::before {
+  height: 4px;
+  background: linear-gradient(90deg, #078b72, #5dc8a6, #ffd078);
+}
+
+.step-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: #e5f5ed;
+  border-color: #d1ebdf;
+  box-shadow: none;
+}
+
+.onboarding-card h3 {
+  color: #173b34;
+  font-size: 21px;
+  letter-spacing: -0.35px;
+}
+
+.onboarding-card>p {
+  color: #6d817b;
+  font-size: 12px;
+  margin-bottom: 19px;
+}
+
+/* Uniform control sizing: do not let the password visibility button
+   increase the height of its parent field. */
+.driver-registration ion-item,
+.parent-onboarding ion-item,
+.onboarding-card form ion-item,
+.onboarding-card .form-field ion-item,
+.onboarding-card .custom-input-item,
+.onboarding-card .school-input-item {
+  --background: #ffffff;
+  --border-color: #e4e6df;
+  --padding-start: 13px;
+  --padding-end: 10px;
+  --inner-padding-end: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 58px;
+  min-height: 58px;
+  margin: 0 0 10px;
+  padding: 0;
+  border: 1px solid #e4e6df;
+  border-radius: 14px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(35, 68, 53, 0.025);
+  overflow: hidden;
+}
+
+.driver-registration ion-item::part(native),
+.parent-onboarding ion-item::part(native),
+.onboarding-card form ion-item::part(native),
+.onboarding-card .custom-input-item::part(native),
+.onboarding-card .school-input-item::part(native) {
+  min-height: 0;
+  height: 100%;
+  padding-top: 0;
+  padding-bottom: 0;
+  background: transparent;
+  border: 0;
+  box-sizing: border-box;
+}
+
+.driver-registration ion-item:focus-within,
+.parent-onboarding ion-item:focus-within,
+.onboarding-card ion-item:focus-within {
+  --background: #ffffff;
+  border-color: #49ae96;
+  box-shadow: 0 0 0 3px rgba(8, 139, 114, 0.09);
+}
+
+.driver-registration ion-input,
+.parent-onboarding ion-input,
+.onboarding-card ion-input {
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --highlight-color-focused: #078b72;
+  --placeholder-color: #8b9690;
+  --placeholder-opacity: 1;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  color: #203a34;
+  font-size: 14px;
+  line-height: 1.3;
+  box-sizing: border-box;
+}
+
+/* Password eye control must stay compact and must not size the input row. */
+.password-toggle {
+  flex: 0 0 32px;
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  margin: 0 2px 0 4px;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 9px;
+  background: #f0f7f3;
+  color: #087b66;
+  font-size: 16px;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+.password-toggle:active {
+  transform: scale(0.96);
+}
+
+/* Restore consistent spacing for errors so they don't distort the fields. */
+.driver-registration form small,
+.parent-onboarding form small,
+.onboarding-card .field-error {
+  margin: -4px 3px 9px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.register-btn,
+.continue-btn {
+  --background: linear-gradient(135deg, #078b72, #10a88a);
+  --background-activated: #056b59;
+  --color: #ffffff;
+  --border-radius: 15px;
+  --box-shadow: 0 8px 18px rgba(8, 139, 114, 0.2);
+  height: 50px;
+  min-height: 50px;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: none;
+}
+
+/* Driver actions use the warm orange accent from concept 3. */
+.driver-registration .continue-btn,
+.driver-registration .register-btn {
+  --background: linear-gradient(135deg, #ffb21c, #f58a00);
+  --background-activated: #dd7600;
+  --box-shadow: 0 8px 18px rgba(245, 138, 0, 0.2);
+}
+
+ion-button {
+  font-weight: 750;
+  text-transform: none;
+}
+
+.location-btn {
+  --border-color: #b9dfd1;
+  --color: #087b66;
+  --border-radius: 13px;
+  font-weight: 750;
+  text-transform: none;
+}
+
+.autosave-note,
+.detected-location-card,
+.school-status,
+.selected-school-card,
+.selected-location,
+.driver-card,
+.driver-parent-entry,
+.complete-details {
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(27, 68, 54, 0.045);
+}
+
+.autosave-note {
+  border-color: #cde9dc;
+  background: #e9f7ef;
+  color: #276a55;
+}
+
+.school-results {
+  border-color: #dce8df;
+  border-radius: 15px;
+  box-shadow: 0 10px 24px rgba(27, 68, 54, 0.10);
+}
+
+.school-result {
+  min-height: 62px;
+}
+
+.school-result:active {
+  background: #eef9f3;
+}
+
+.selected-school-card {
+  border-color: #bce4d1;
+  background: #eff9f2;
+}
+
+.selected-school-icon {
+  background: #078b72;
+}
+
+.selected-label {
+  color: #078b72;
+}
+
+.driver-card {
+  background: #eef8f2;
+  border-color: #d5e9db;
+}
+
+.driver-card.new-driver-card {
+  border-left: 4px solid #f5a623;
+}
+
+.driver-avatar {
+  background: #dff2e7;
+  border-radius: 15px;
+}
+
+.terms-consent-section {
+  border-color: #e3e8df;
+  border-radius: 16px;
+  background: #f8faf5;
+}
+
+.terms-consent-icon {
+  background: #e3f4e9;
+}
+
+.terms-link {
+  color: #087b66;
+}
+
+.terms-consent-row.accepted {
+  border-color: #8bcbb4;
+  background: #f0faf4;
+}
+
+.pickup-confirm-dialog {
+  border-radius: 22px;
+}
+
+.pickup-confirm-icon {
+  background: #e3f5eb;
+}
+
+.pickup-confirm-btn {
+  --background: linear-gradient(135deg, #078b72, #10a88a);
+  --background-activated: #056b59;
+  --border-radius: 14px;
+}
+
+.detect-location-retry {
+  background: #078b72;
+}
+
+.complete-card .success-icon {
+  color: #087b66;
+  background: linear-gradient(145deg, #dff5e7, #f0fbf4);
+  border-color: #bce8ce;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px 11px 30px;
+  }
+
+  .onboarding-card {
+    padding: 20px 13px 17px;
+    border-radius: 20px;
+  }
+
+  .driver-registration ion-item,
+  .parent-onboarding ion-item,
+  .onboarding-card form ion-item,
+  .onboarding-card .form-field ion-item,
+  .onboarding-card .custom-input-item,
+  .onboarding-card .school-input-item {
+    height: 56px;
+    min-height: 56px;
+    border-radius: 13px;
+  }
+
+  .driver-registration ion-input,
+  .parent-onboarding ion-input,
+  .onboarding-card ion-input {
+    font-size: 13px;
+  }
+
+  .password-toggle {
+    width: 30px;
+    min-width: 30px;
+    max-width: 30px;
+    height: 30px;
+    min-height: 30px;
+    max-height: 30px;
   }
 
   .map-container {
@@ -1027,1019 +4706,9 @@ small {
   }
 }
 
-/* ============================================================
-   SMALL DEVICES
-============================================================ */
 @media (max-width: 360px) {
-  .container {
-    padding-left: 9px;
-    padding-right: 9px;
-  }
-
-  .container>h2 {
-    font-size: 24px;
-  }
-
   .onboarding-card {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .onboarding-card h3 {
-    font-size: 20px;
-  }
-}
-
-/* ============================================================
-   GOOGLE MAP - SMALL DEVICES
-============================================================ */
-@media (max-width: 360px) {
-  .map-container {
-    height: 300px;
-    min-height: 300px;
-  }
-}
-
-/* ============================================================
-   REDUCED MOTION
-============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-  }
-}
-
-/* =========================================================
-   STEP 3 - STUDENT DETAILS
-   ========================================================= */
-.student-details-card {
-  position: relative;
-  overflow: visible !important;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* =========================================================
-   FORM FIELD
-   ========================================================= */
-.form-field {
-  width: 100%;
-  margin-bottom: 18px;
-  position: relative;
-}
-
-/* =========================================================
-   IONIC INPUT
-   ========================================================= */
-.custom-input-item {
-  --background: #ffffff;
-  --border-color: #d8e2ef;
-  --border-width: 1px;
-  --border-style: solid;
-  --highlight-color-focused: #2878e8;
-  --highlight-color-valid: #2878e8;
-  --padding-start: 18px;
-  --padding-end: 18px;
-  width: 100%;
-  min-height: 72px;
-  margin: 0;
-  border: 1px solid #d8e2ef;
-  border-radius: 17px;
-  box-shadow: none;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-/*
- * Ionic internally adds borders/backgrounds to ion-item.
- * Remove them so our custom card remains consistent.
- */
-.custom-input-item::part(native) {
-  background: transparent;
-  border: 0;
-}
-
-/* =========================================================
-   SCHOOL SECTION
-   ========================================================= */
-.school-section {
-  width: 100%;
-  margin: 4px 0 20px;
-  position: relative;
-  overflow: visible !important;
-  z-index: 20;
-}
-
-/* =========================================================
-   SCHOOL HEADER
-   ========================================================= */
-.school-section-header {
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-.school-section-header h4 {
-  margin: 0;
-  font-size: 17px;
-  line-height: 22px;
-  font-weight: 800;
-  color: #17233c;
-}
-
-.school-location-text {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 3px 0 0;
-  font-size: 12px;
-  line-height: 18px;
-  font-weight: 600;
-  color: #ef4444;
-}
-
-.location-dot {
-  font-size: 13px;
-}
-
-/* =========================================================
-   SCHOOL SEARCH BOX
-   ========================================================= */
-.school-search-box {
-  width: 100%;
-  margin-bottom: 10px;
-  position: relative;
-  z-index: 30;
-}
-
-.school-input-item {
-  min-height: 72px !important;
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-/* Force Ionic input itself to remain visible */
-.school-input-item ion-input {
-  display: block !important;
-  width: 100%;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* =========================================================
-   SCHOOL STATUS
-   ========================================================= */
-.school-status {
-  width: 100%;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  margin: 8px 0;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: #f5f9ff;
-  border: 1px solid #dceaff;
-  color: #49709f;
-  font-size: 13px;
-  box-sizing: border-box;
-}
-
-.school-status ion-spinner {
-  width: 20px;
-  height: 20px;
-}
-
-/* =========================================================
-   SCHOOL RESULTS
-   ========================================================= */
-.school-results {
-  width: 100%;
-  max-height: 260px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin-top: 8px;
-  padding: 4px;
-  background: #ffffff;
-  border: 1px solid #dce5f0;
-  border-radius: 16px;
-  box-shadow:
-    0 10px 28px rgba(24, 55, 95, 0.12);
-  box-sizing: border-box;
-  position: relative;
-  z-index: 100;
-}
-
-/* =========================================================
-   SCHOOL RESULT
-   ========================================================= */
-.school-result {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 12px;
-  margin: 0;
-  border: 0;
-  border-bottom: 1px solid #edf1f6;
-  background: #ffffff;
-  color: #17233c;
-  text-align: left;
-  font-family: inherit;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  box-sizing: border-box;
-}
-
-.school-result:last-child {
-  border-bottom: 0;
-}
-
-.school-result:hover {
-  background: #f6faff;
-}
-
-.school-result:active {
-  background: #edf5ff;
-}
-
-/* =========================================================
-   SCHOOL ICON
-   ========================================================= */
-.school-result-icon {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: #eef5ff;
-  font-size: 21px;
-}
-
-/* =========================================================
-   SCHOOL RESULT CONTENT
-   ========================================================= */
-.school-result-content {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.school-result-content strong {
-  display: block;
-  width: 100%;
-  color: #17233c;
-  font-size: 14px;
-  line-height: 19px;
-  font-weight: 800;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.school-result-content span {
-  display: block;
-  color: #65748b;
-  font-size: 11px;
-  line-height: 16px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.school-result-content small {
-  display: block;
-  color: #2878e8;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-/* =========================================================
-   ARROW
-   ========================================================= */
-.school-result-arrow {
-  flex: 0 0 auto;
-  font-size: 25px;
-  line-height: 1;
-  color: #9aa8bb;
-}
-
-/* =========================================================
-   NO RESULTS
-   ========================================================= */
-.school-no-results {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 22px 14px;
-  margin-top: 8px;
-  background: #f8fafc;
-  border: 1px solid #e3eaf2;
-  border-radius: 15px;
-  box-sizing: border-box;
-}
-
-.no-school-icon {
-  font-size: 25px;
-  margin-bottom: 3px;
-}
-
-.school-no-results strong {
-  font-size: 14px;
-  color: #24334d;
-}
-
-.school-no-results span {
-  font-size: 11px;
-  color: #748197;
-  text-align: center;
-}
-
-/* =========================================================
-   SELECTED SCHOOL
-   ========================================================= */
-.selected-school-card {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  margin-top: 8px;
-  background: #f2f8ff;
-  border: 1px solid #bcd9ff;
-  border-radius: 16px;
-  box-sizing: border-box;
-}
-
-.selected-school-icon {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #2878e8;
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.selected-school-info {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.selected-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 800;
-  color: #2878e8;
-}
-
-.selected-school-info strong {
-  color: #17233c;
-  font-size: 14px;
-  line-height: 19px;
-  overflow-wrap: anywhere;
-}
-
-.selected-address {
-  color: #687890;
-  font-size: 11px;
-  line-height: 16px;
-  overflow-wrap: anywhere;
-}
-
-.change-school-btn {
-  flex: 0 0 auto;
-  border: 0;
-  background: transparent;
-  color: #2878e8;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  padding: 8px 4px;
-}
-
-/* =========================================================
-   VALIDATION
-   ========================================================= */
-.field-error {
-  display: block;
-  margin: 5px 4px 0;
-  color: #ef4444;
-  font-size: 11px;
-  line-height: 16px;
-  font-weight: 600;
-}
-
-.school-error {
-  margin-top: 7px;
-}
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-@media (max-width: 480px) {
-  .student-details-card {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .school-results {
-    max-height: 240px;
-  }
-
-  .school-result {
-    padding: 12px 9px;
-    gap: 9px;
-  }
-
-  .school-result-icon {
-    width: 38px;
-    height: 38px;
-    flex-basis: 38px;
-    font-size: 19px;
-  }
-
-  .school-result-content strong {
-    font-size: 13px;
-  }
-
-  .school-result-content span {
-    font-size: 10px;
-  }
-
-  .selected-school-card {
-    padding: 12px;
-  }
-}
-
-/* =========================================================
-   PICKUP POINT CONFIRMATION DIALOG
-   ========================================================= */
-.pickup-confirm-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-}
-
-.pickup-confirm-dialog {
-  width: min(420px, 100%);
-  padding: 24px 20px 20px;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow:
-    0 24px 70px rgba(15, 23, 42, 0.25);
-  text-align: center;
-  animation:
-    pickupDialogIn 180ms ease-out;
-}
-
-.pickup-confirm-icon {
-  width: 58px;
-  height: 58px;
-  margin: 0 auto 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #eaf2ff;
-  font-size: 28px;
-}
-
-.pickup-confirm-dialog h4 {
-  margin: 0 0 8px;
-  color: #17213b;
-  font-size: 21px;
-  font-weight: 800;
-}
-
-.pickup-confirm-dialog>p {
-  margin: 0 auto 18px;
-  max-width: 340px;
-  color: #667085;
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-.pickup-confirm-tips {
-  display: grid;
-  gap: 9px;
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.pickup-confirm-tips>div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #f6f8fc;
-}
-
-.pickup-confirm-tips span {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #e8f0ff;
-  color: #246bce;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.pickup-confirm-tips strong {
-  color: #344054;
-  font-size: 13px;
-}
-
-.pickup-confirm-btn {
-  --background: linear-gradient(135deg,
-      #ffad00,
-      #ff7118);
-  --background-activated: #f57c00;
-  --border-radius: 14px;
-  min-height: 50px;
-  font-weight: 800;
-}
-
-@keyframes pickupDialogIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.school-location-header {
-  margin: 8px 0 14px;
-}
-
-.school-location-title {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  color: #ff3b4a;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.location-pin {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.detected-location {
-  margin-top: 4px;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.detected-location strong {
-  color: #1e293b;
-}
-
-.detected-location.loading {
-  color: #64748b;
-}
-
-.detected-location.error {
-  color: #dc2626;
-}
-
-/* ============================================================
-   PARENT REGISTRATION - NEW FLOW
-============================================================ */
-.autosave-note {
-  margin: 12px 0 16px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #f0f8ff;
-  color: #28577d;
-  font-size: 13px;
-  text-align: center;
-}
-
-.driver-card.new-driver-card {
-  border-left: 4px solid #f59e0b;
-}
-
-.driver-status-message {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #f5f9ff;
-  color: #315b7d;
-  font-size: 13px;
-}
-
-.review-item {
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.review-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.review-content strong,
-.review-content small {
-  overflow-wrap: anywhere;
-}
-
-.review-item ion-button {
-  flex: 0 0 auto;
-  margin: 0;
-  --padding-start: 8px;
-  --padding-end: 8px;
-}
-
-.pickup-confirm-dialog ion-button+ion-button {
-  margin-top: 8px;
-}
-
-@media (max-width: 576px) {
-  .review-item {
-    flex-wrap: wrap;
-  }
-
-  .review-item ion-button {
-    margin-left: 42px;
-  }
-}
-
-/* ============================================================
-   DETECTED AREA / CITY
-============================================================ */
-.detected-location-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin: 12px 0 16px;
-  padding: 13px 14px;
-  border: 1px solid #cfe3fb;
-  border-radius: 14px;
-  background: #f5f9ff;
-}
-
-.detected-location-icon {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: #e6f1ff;
-}
-
-.detected-location-content {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.detected-location-caption {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  color: #718078;
-}
-
-.detected-location-content strong {
-  color: #13213a;
-  font-size: 15px;
-}
-
-.detected-location-content span:not(.detected-location-caption) {
-  color: #526174;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.detect-location-retry {
-  align-self: flex-start;
-  margin-top: 4px;
-  padding: 6px 10px;
-  border: 0;
-  border-radius: 8px;
-  background: #1b7df0;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* ============================================================
-   LOCATION + PASSWORD FIXES
-============================================================ */
-.password-toggle {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  padding: 8px;
-  margin: 0;
-  min-width: 42px;
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-}
-
-.password-toggle:active {
-  transform: scale(0.94);
-}
-
-.source-note {
-  margin-top: 4px;
-  font-size: 12px;
-}
-
-.detected-location small {
-  display: block;
-  margin-top: 4px;
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-/* New driver parent-onboarding guidance */
-.new-driver-helper {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 4px 0 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(30, 136, 229, 0.06);
-  border: 1px solid rgba(30, 136, 229, 0.14);
-}
-
-.new-driver-helper strong {
-  font-size: 13px;
-}
-
-.new-driver-helper span {
-  font-size: 12px;
-  line-height: 1.45;
-  opacity: 0.78;
-}
-
-/* =========================================================
-   TERMS & CONDITIONS CONSENT
-========================================================= */
-.terms-consent-section {
-  margin-top: 20px;
-  padding: 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #f8fafc;
-}
-
-.terms-consent-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.terms-consent-icon {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: #e8f1ff;
-  font-size: 18px;
-}
-
-.terms-consent-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-
-  strong {
-    font-size: 15px;
-    font-weight: 700;
-    color: #172033;
-  }
-
-  span {
-    font-size: 12px;
-    line-height: 1.45;
-    color: #64748b;
-  }
-}
-
-.terms-consent-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid #dbe2ea;
-  border-radius: 12px;
-  background: #ffffff;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
-
-  ion-checkbox {
-    flex: 0 0 auto;
-    margin-top: 1px;
-    --size: 20px;
-  }
-
-  &.accepted {
-    border-color: #93c5fd;
-    background: #f8fbff;
-  }
-}
-
-.terms-consent-text {
-  flex: 1;
-  min-width: 0;
-
-  span {
-    display: block;
-    font-size: 13px;
-    line-height: 1.55;
-    color: #334155;
-  }
-
-  small {
-    display: block;
-    margin-top: 6px;
-    font-size: 11px;
-    line-height: 1.45;
-    color: #64748b;
-  }
-}
-
-.terms-link {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #2563eb;
-  font: inherit;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.terms-link:hover {
-  color: #1d4ed8;
-}
-
-.terms-validation-message {
-  margin-top: 8px;
-  padding-left: 2px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #dc2626;
-}
-
-/* Disabled final registration button */
-.register-btn[disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-
-/* Driver 3-step registration */
-.driver-step-labels {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 12px;
-  color: #718096;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.driver-step-labels span.active {
-  color: #1269d3;
-}
-
-.driver-parent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.driver-parent-entry {
-  padding: 14px;
-  margin-bottom: 12px;
-  border: 1px solid #dce5ef;
-  border-radius: 16px;
-  background: #f8fbff;
-}
-
-.driver-parent-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: #17243b;
-}
-
-.remove-parent-btn {
-  border: 0;
-  background: transparent;
-  color: #d92d20;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.driver-navigation {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 18px;
-}
-
-.driver-navigation .continue-btn {
-  flex: 1;
-}
-
-.driver-registration .review-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.driver-registration .review-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.driver-registration .review-content strong,
-.driver-registration .review-content small {
-  overflow-wrap: anywhere;
-}
-
-.driver-registration .register-btn[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@media (max-width: 480px) {
-  .driver-navigation {
-    align-items: stretch;
-  }
-
-  .driver-navigation ion-button {
-    min-width: 0;
-    font-size: 12px;
-  }
-
-  .driver-parent-entry {
-    padding: 11px;
+    padding-left: 11px;
+    padding-right: 11px;
   }
 }
