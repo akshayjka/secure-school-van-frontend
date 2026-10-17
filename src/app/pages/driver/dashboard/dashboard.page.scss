@@ -4692,3 +4692,26 @@ ion-header ion-toolbar {
     font-size: .74rem;
   }
 }
+
+
+/* PPT-aligned dashboard map: compact, clear, blue/white, no excess spacing */
+.dashboard-map-card{margin:10px 0 14px;padding:12px;background:#fff;border:1px solid #dcecfb;border-radius:16px;box-shadow:0 5px 16px rgba(8,47,104,.07);overflow:hidden}.dashboard-map-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.dashboard-map-heading h3{margin:3px 0 0;color:#102a52;font-size:15px;font-weight:800;line-height:1.25}.map-eyebrow{color:#0877ed;font-size:10px;font-weight:850;letter-spacing:.09em}.map-student-count,.map-live-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#eaf5ff;color:#0877ed;font-size:10px;font-weight:800;white-space:nowrap}.map-live-pill{background:#e8fff3;color:#087b4b}.map-live-pill .live-dot{width:6px;height:6px;border-radius:50%;background:#08ad68;display:inline-block}.driver-overview-map{width:100%;height:220px;border-radius:12px;background:#eaf0f7;overflow:hidden}.active-driver-map{height:190px}.map-helper{margin:8px 2px 0;color:#637895;font-size:11px;line-height:1.4}.driver-summary h1{line-height:1.2}.primary-driver-action{width:100%;min-height:54px;margin:10px 0 14px;border-radius:14px;font-weight:850;letter-spacing:.02em}.student-group{margin-top:12px}.student-action-card{margin-bottom:10px}.drop-all-button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:380px){.driver-workflow{padding:10px 10px 24px}.driver-overview-map{height:190px}.active-driver-map{height:170px}.dashboard-map-card{padding:10px}.dashboard-map-heading h3{font-size:14px}}
+.ride-bar{display:flex;align-items:center;gap:10px;margin:6px 0 10px;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,#063a7c,#07549b);color:#fff}
+.ride-bar>div{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15}
+.ride-bar .eyebrow{margin:0;color:#c4e3ff;font-size:.6rem}
+.ride-bar strong{font-size:.9rem}
+.ride-bar-picked{display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:999px;background:#fff;color:#12315d;font-size:.75rem;font-weight:800}
+.ride-bar .running-badge{padding:5px 8px;font-size:.6rem}
+.active-driver-map{height:300px}
+.ride-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.ride-actions button{min-height:48px;display:flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:12px;color:#fff;font-size:.85rem;font-weight:800}
+.pick-btn{background:linear-gradient(135deg,#08b96d,#07985b)}
+.drop-btn{background:linear-gradient(135deg,#0878ee,#075ac2)}
+.ride-actions button:disabled{background:#91a2b8;opacity:.6;cursor:not-allowed}
+.route-student-card{cursor:pointer}
+.route-student-card{cursor:pointer;transition:all .18s ease}
+.student-card-details .distance-label{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.student-action-card.route-student-card.selected{border:2px solid #0877ed;background:linear-gradient(135deg,#e3f1ff,#f4faff);box-shadow:0 0 0 4px rgba(8,119,237,.18),0 8px 18px rgba(8,119,237,.28);transform:scale(1.015)}
+.route-student-card.selected .student-card-main{background:transparent}
+.route-student-card.selected .student-avatar{background:#0877ed;border-color:#0877ed;color:#fff}
+.route-student-card.selected h4{color:#064f9d}
+.ride-actions button:disabled{background:#91a2b8;opacity:.6}.ride-actions .dropall-btn{grid-column:1/-1;background:linear-gradient(135deg,#173c70,#0f2a52)}

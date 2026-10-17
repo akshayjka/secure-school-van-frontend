@@ -82,11 +82,7 @@
 
                   </span>
 
-                <h1>
-
-                    Good Morning 👋
-
-                  </h1>
+                <h1>Good Morning, {{ driverName || 'Driver' }} 👋</h1>
 
                 <p>
 
@@ -166,8 +162,15 @@
 
               </section>
 
+            <section class="dashboard-map-card">
+                <div class="dashboard-map-heading">
+                    <div><span class="map-eyebrow">PLANNED ROUTE</span><h3>Today's Pickup Route</h3></div>
+                    <span class="map-student-count">{{ presentStudents.length }} stops</span>
+                </div>
+                <div id="driver-overview-map" class="driver-overview-map" aria-label="Planned route and all student pickup locations"></div>
+                <p class="map-helper">Pickup locations are shown on the map. The nearest stop is recommended automatically.</p>
+            </section>
             <button type="button" class="primary-driver-action" [disabled]="todayStats.present === 0"
-
         (click)="confirmStartMorning()">
 
                 <ion-icon name="play-outline">
@@ -251,254 +254,60 @@
           </ng-container>
 
             <!-- ACTIVE MORNING RIDE: pickup and school-drop lists remain visible together -->
-
-        <ng-container *ngIf="stage === 'morning-pickup' || stage === 'morning-school-drop'">
-
-            <section class="ride-overview-card">
-
-                <div class="ride-overview-heading">
-
-                    <div>
-
-                        <span class="eyebrow">MORNING ROUTE</span>
-
-                        <h2>Home to School</h2>
-
-                      </div>
-
-                    <span class="running-badge">
-
-                        <span class="live-dot"></span>
-
-                        RIDE RUNNING
-
-                      </span>
-
-                  </div>
-
-                <div class="ride-counts">
-
-          <div class="ride-stat present-stat"><span class="ride-stat-icon"><ion-icon
-
-                name="people-outline"></ion-icon></span><span class="ride-stat-copy"><small>Present</small><strong>{{
-
-                todayStats.present }}</strong><em>Students</em></span></div>
-
-          <div class="ride-stat picked-stat"><span class="ride-stat-icon"><ion-icon
-
-                name="car-outline"></ion-icon></span><span class="ride-stat-copy"><small>Picked</small><strong>{{
-
-                morningPickedStudents.length }} / {{ todayStats.present }}</strong><em>Students</em></span></div>
-
+<ng-container *ngIf="rideRunning">
+  <section class="ride-bar">
+    <div>
+      <span class="eyebrow">{{ isMorningRideActive ? 'MORNING' : 'EVENING' }}</span>
+      <strong>{{ isMorningRideActive ? 'Home to School' : 'School to Home' }}</strong>
+    </div>
+    <span class="ride-bar-picked"><ion-icon name="car-outline"></ion-icon>{{ activePickedStudents.length }}/{{ todayStats.present }}</span>
+    <span class="running-badge"><span class="live-dot"></span>RUNNING</span>
+  </section>
+  <section class="dashboard-map-card active-map-card">
+    <div class="dashboard-map-heading">
+      <div><span class="map-eyebrow">LIVE MAP</span><h3>{{ activeDestinationLabel }}</h3></div>
+      <span class="map-live-pill"><span class="live-dot"></span> LIVE</span>
+    </div>
+    <div id="driver-overview-map" class="driver-overview-map active-driver-map" aria-label="Live route to next student"></div>
+  </section>
+<div class="ride-actions">
+  <button type="button" class="pick-btn" [disabled]="!canPick" (click)="pickNext()"><ion-icon name="people-outline"></ion-icon>Pick Up</button>
+  <button type="button" class="drop-btn" [disabled]="!canDrop" (click)="dropSelected()"><ion-icon name="home-outline"></ion-icon>Drop</button>
+  <button type="button" class="dropall-btn" [disabled]="!canDropAll" (click)="dropAllStudents()"><ion-icon name="people-outline"></ion-icon>Drop All</button>
+</div>
+  <section class="student-group">
+    <div class="student-group-heading">
+      <h3>Up Next <span class="nearest-label">(Nearest First)</span></h3>
+      <span class="group-count">{{ activePendingStudents.length }} remaining</span>
+    </div>
+    <ng-container *ngFor="let student of activePendingStudents">
+      <ng-container *ngTemplateOutlet="studentCard; context: { $implicit: student, group: 'pending' }"></ng-container>
+    </ng-container>
+    <div class="empty-state" *ngIf="!activePendingStudents.length">{{ isMorningRideActive ? 'All present students have been picked up.' : 'All eligible students have boarded.' }}</div>
+  </section>
+  <section class="student-group">
+    <div class="student-group-heading">
+      <h3>Picked Up</h3>
+      <span class="group-count picked-count">{{ activePickedStudents.length }} students</span>
+    </div>
+    <ng-container *ngFor="let student of activePickedStudents">
+      <ng-container *ngTemplateOutlet="studentCard; context: { $implicit: student, group: 'picked' }"></ng-container>
+    </ng-container>
+    <div class="empty-state" *ngIf="!activePickedStudents.length">Picked-up students will appear here.</div>
+  </section>
+  <ng-template #studentCard let-student let-group="group">
+    <article class="student-action-card route-student-card" [class.selected]="isSelectedDestination(student)" (click)="selectDestination(student)">
+      <div class="student-card-main">
+        <div class="student-avatar" [class.picked-avatar]="group === 'picked'">{{ student.studentName?.charAt(0) || 'S' }}</div>
+        <div class="student-card-details">
+          <h4>{{ student.studentName }} <span *ngIf="student.studentClass">({{ student.studentClass }}{{ student.studentSection || '' }})</span></h4>
+          <p>{{ getCardAddress(student, group) }}</p>
+          <span class="distance-label">{{ getCardMeta(student, group) }}</span>
         </div>
-
-              </section>
-
-            <section class="student-group">
-
-                <div class="student-group-heading">
-
-                    <div>
-
-            <h3>Up Next <span class="nearest-label">(Nearest First)</span></h3>
-
-          </div>
-
-          <span class="group-count">{{ sortedMorningPendingStudents.length }} remaining</span>
-
-        </div>
-
-                        <article class="student-action-card route-student-card"
-
-           *ngFor="let student of sortedMorningPendingStudents">
-
-                    <button type="button" class="student-card-main" (click)="toggleStudentRoute(student, 'pickup')"
-
-            [attr.aria-expanded]="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="student-avatar">{{ student.studentName?.charAt(0) || 'S' }}</div>
-
-                        <div class="student-card-details">
-
-                            <h4>{{ student.studentName }} <span *ngIf="student.studentClass">({{ student.studentClass
-
-                  }}{{ student.studentSection || '' }})</span></h4>
-
-                            <p>{{ getShortStudentAddress(student) }}</p>
-
-                            <span class="distance-label">{{ getDistanceLabel(student, 'pickup') }}</span>
-
-                          </div>
-
-                        <ion-icon
-
-              [name]="expandedStudentRouteId === getStudentRouteKey(student) ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
-
-                      </button>
-
-                    <div class="student-route-metrics" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="route-metric"><ion-icon
-
-                name="time-outline"></ion-icon><span><small>ETA</small><strong>{{ getStudentRouteInfo(student)?.eta ||
-
-                  'Tap for route' }}</strong></span></div>
-
-                        <div class="route-metric"><ion-icon
-
-                name="car-outline"></ion-icon><span><small>Traffic</small><strong>{{
-
-                  getStudentRouteInfo(student)?.traffic || 'Not checked' }}</strong></span></div>
-
-                        <div class="route-metric route-distance"><ion-icon
-
-                name="navigate-outline"></ion-icon><span><small>Distance</small><strong>{{
-
-                  getStudentRouteInfo(student)?.distance || getDistanceLabel(student, 'pickup') }}</strong></span></div>
-
-                      </div>
-
-                    <div class="student-card-actions">
-
-                        <button type="button" class="direction-button"
-
-              (click)="showStudentDirections(student); $event.stopPropagation()">Show Direction</button>
-
-                        <button type="button" class="primary-action-button pickup-action-button" aria-label="Pick up student" (click)="markMorningPicked(student); $event.stopPropagation()">
-
-                            <ion-icon name="people-outline"></ion-icon><span>Pick Up</span>
-
-                        </button>
-
-                      </div>
-
-                    <div class="student-route-panel" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="student-route-heading"><strong>Road directions</strong><span>{{
-
-                getStudentRouteInfo(student)?.eta || 'Calculating route…' }}</span></div>
-
-                        <div [id]="getStudentRouteMapId(student)" class="student-route-map"
-
-              aria-label="Road route to student pickup"></div>
-
-                      </div>
-
-                  </article>
-
-                <div class="empty-state" *ngIf="sortedMorningPendingStudents.length === 0">
-
-                    All present students have been picked up.
-
-                  </div>
-
-              </section>
-
-            <section class="student-group">
-
-                <div class="student-group-heading">
-
-                    <div>
-
-            <h3>Picked Up</h3>
-
-          </div>
-
-          <span class="group-count picked-count">{{ sortedMorningPickedStudents.length }} students</span>
-
-        </div>
-
-                        <article class="student-action-card picked-card route-student-card"
-
-           *ngFor="let student of sortedMorningPickedStudents">
-
-                    <button type="button" class="student-card-main" (click)="toggleStudentRoute(student, 'school')"
-
-            [attr.aria-expanded]="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="student-avatar picked-avatar">{{ student.studentName?.charAt(0) || 'S' }}</div>
-
-                        <div class="student-card-details">
-
-                            <h4>{{ student.studentName }} <span *ngIf="student.studentClass">({{ student.studentClass
-
-                  }}{{ student.studentSection || '' }})</span></h4>
-
-                            <p>{{ student.schoolName || student.dropArea || 'School' }}</p>
-
-                            <span class="distance-label">{{ getDistanceLabel(student, 'school') }}</span>
-
-                          </div>
-
-                        <ion-icon
-
-              [name]="expandedStudentRouteId === getStudentRouteKey(student) ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
-
-                      </button>
-
-                    <div class="student-route-metrics" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="route-metric"><ion-icon
-
-                name="time-outline"></ion-icon><span><small>ETA</small><strong>{{ getStudentRouteInfo(student)?.eta ||
-
-                  'Tap for route' }}</strong></span></div>
-
-                        <div class="route-metric"><ion-icon
-
-                name="car-outline"></ion-icon><span><small>Traffic</small><strong>{{
-
-                  getStudentRouteInfo(student)?.traffic || 'Not checked' }}</strong></span></div>
-
-                        <div class="route-metric route-distance"><ion-icon
-
-                name="navigate-outline"></ion-icon><span><small>Distance</small><strong>{{
-
-                  getStudentRouteInfo(student)?.distance || getDistanceLabel(student, 'school') }}</strong></span></div>
-
-                      </div>
-
-                    <div class="student-card-actions">
-
-            <button type="button" class="direction-button"
-
-              (click)="showStudentDirections(student); $event.stopPropagation()">Show Direction</button><button
-
-              type="button" class="primary-action-button" (click)="markDroppedAtSchool(student); $event.stopPropagation()">Drop at School</button>
-
-          </div>
-
-                    <div class="student-route-panel" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="student-route-heading"><strong>Road directions</strong><span>{{
-
-                getStudentRouteInfo(student)?.eta || 'Calculating route…' }}</span></div>
-
-                        <div [id]="getStudentRouteMapId(student)" class="student-route-map"
-
-              aria-label="Road route to school"></div>
-
-                      </div>
-
-                  </article>
-
-                <div class="empty-state" *ngIf="sortedMorningPickedStudents.length === 0">
-
-                    Picked-up students will appear here.
-
-                  </div>
-
-                <button type="button" class="drop-all-button"                 [disabled]="!canDropAllMorningStudents"
-
-                        (click)="dropAllMorningStudents()">
-
-                    Drop All at School
-
-                  </button>
-
-              </section>
-
-          </ng-container>
+      </div>
+    </article>
+  </ng-template>
+</ng-container>
 
     <!-- ===================================================
 
@@ -588,8 +397,15 @@
 
               </section>
 
+            <section class="dashboard-map-card">
+                <div class="dashboard-map-heading">
+                    <div><span class="map-eyebrow">PLANNED ROUTE</span><h3>School to Home</h3></div>
+                    <span class="map-student-count">{{ presentStudents.length }} stops</span>
+                </div>
+                <div id="driver-overview-map" class="driver-overview-map" aria-label="Planned return route and student locations"></div>
+                <p class="map-helper">School pickup and home destinations are shown for the return journey.</p>
+            </section>
             <section class="student-preview">
-
                 <article class="compact-student" *ngFor="let student of presentStudents">
 
                     <div class="student-avatar">
@@ -653,242 +469,6 @@
                 START RETURN
 
               </button>
-
-          </ng-container>
-
-        <!-- ACTIVE EVENING RIDE: boarding and home-drop lists remain visible together -->
-
-        <ng-container *ngIf="stage === 'return-boarding' || stage === 'return-home-drop'">
-
-            <section class="ride-overview-card">
-
-                <div class="ride-overview-heading">
-
-                    <div>
-
-                        <span class="eyebrow">EVENING ROUTE</span>
-
-                        <h2>School to Home</h2>
-
-                      </div>
-
-                    <span class="running-badge">
-
-                        <span class="live-dot"></span>
-
-                        RIDE RUNNING
-
-                      </span>
-
-                  </div>
-
-                <div class="ride-counts">
-
-          <div class="ride-stat present-stat"><span class="ride-stat-icon"><ion-icon
-
-                name="people-outline"></ion-icon></span><span class="ride-stat-copy"><small>Present</small><strong>{{
-
-                todayStats.present }}</strong><em>Students</em></span></div>
-
-          <div class="ride-stat picked-stat"><span class="ride-stat-icon"><ion-icon
-
-                name="car-outline"></ion-icon></span><span class="ride-stat-copy"><small>Picked</small><strong>{{
-
-                returnOnboardStudents.length }} / {{ todayStats.present }}</strong><em>Students</em></span></div>
-
-        </div>
-
-              </section>
-
-            <section class="student-group">
-
-                <div class="student-group-heading">
-
-                    <div>
-
-            <h3>Up Next <span class="nearest-label">(Nearest First)</span></h3>
-
-          </div>
-
-          <span class="group-count">{{ sortedReturnWaitingStudents.length }} remaining</span>
-
-        </div>
-
-                        <article class="student-action-card route-student-card"
-
-           *ngFor="let student of sortedReturnWaitingStudents">
-
-                    <button type="button" class="student-card-main" (click)="toggleStudentRoute(student, 'school')"
-
-            [attr.aria-expanded]="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="student-avatar">{{ student.studentName?.charAt(0) || 'S' }}</div>
-
-                        <div class="student-card-details">
-
-              <h4>{{ student.studentName }} <span *ngIf="student.studentClass">({{ student.studentClass }}{{
-
-                  student.studentSection || '' }})</span></h4>
-
-              <p>{{ student.schoolName || student.dropArea || 'School' }}</p><span class="distance-label">{{
-
-                getDistanceLabel(student, 'school') }}</span>
-
-            </div>
-
-                        <ion-icon
-
-              [name]="expandedStudentRouteId === getStudentRouteKey(student) ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
-
-                      </button>
-
-                    <div class="student-route-metrics" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-            <div class="route-metric"><ion-icon name="time-outline"></ion-icon><span><small>ETA</small><strong>{{
-
-                  getStudentRouteInfo(student)?.eta || 'Tap for route' }}</strong></span></div>
-
-            <div class="route-metric"><ion-icon name="car-outline"></ion-icon><span><small>Traffic</small><strong>{{
-
-                  getStudentRouteInfo(student)?.traffic || 'Not checked' }}</strong></span></div>
-
-            <div class="route-metric route-distance"><ion-icon
-
-                name="navigate-outline"></ion-icon><span><small>Distance</small><strong>{{
-
-                  getStudentRouteInfo(student)?.distance || getDistanceLabel(student, 'school') }}</strong></span></div>
-
-          </div>
-
-                    <div class="student-card-actions">
-
-            <button type="button" class="direction-button"
-
-              (click)="showStudentDirections(student); $event.stopPropagation()">Show Direction</button><button
-
-              type="button" class="primary-action-button pickup-action-button" aria-label="Pick up student from school" (click)="markPickedFromSchool(student); $event.stopPropagation()"><ion-icon name="people-outline"></ion-icon><span>Pick Up</span></button></div>
-
-                    <div class="student-route-panel" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-            <div class="student-route-heading"><strong>Road directions</strong><span>{{
-
-                getStudentRouteInfo(student)?.eta || 'Calculating route…' }}</span></div>
-
-            <div [id]="getStudentRouteMapId(student)" class="student-route-map"
-
-              aria-label="Road route to school pickup"></div>
-
-          </div>
-
-                  </article>
-
-                <div class="empty-state" *ngIf="sortedReturnWaitingStudents.length === 0">
-
-                    All eligible students have boarded.
-
-                  </div>
-
-              </section>
-
-            <section class="student-group">
-
-                <div class="student-group-heading">
-
-                    <div>
-
-            <h3>Picked Up</h3>
-
-          </div>
-
-          <span class="group-count picked-count">{{ sortedReturnOnboardStudents.length }} students</span>
-
-        </div>
-
-                        <article class="student-action-card picked-card route-student-card"
-
-           *ngFor="let student of sortedReturnOnboardStudents">
-
-                    <button type="button" class="student-card-main" (click)="toggleStudentRoute(student, 'pickup')"
-
-            [attr.aria-expanded]="expandedStudentRouteId === getStudentRouteKey(student)">
-
-                        <div class="student-avatar picked-avatar">{{ student.studentName?.charAt(0) || 'S' }}</div>
-
-                        <div class="student-card-details">
-
-              <h4>{{ student.studentName }} <span *ngIf="student.studentClass">({{ student.studentClass }}{{
-
-                  student.studentSection || '' }})</span></h4>
-
-              <p>{{ getShortStudentAddress(student) }}</p><span
-
-                class="distance-label">{{ getDistanceLabel(student, 'pickup') }}</span>
-
-            </div>
-
-                        <ion-icon
-
-              [name]="expandedStudentRouteId === getStudentRouteKey(student) ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
-
-                      </button>
-
-                    <div class="student-route-metrics" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-            <div class="route-metric"><ion-icon name="time-outline"></ion-icon><span><small>ETA</small><strong>{{
-
-                  getStudentRouteInfo(student)?.eta || 'Tap for route' }}</strong></span></div>
-
-            <div class="route-metric"><ion-icon name="car-outline"></ion-icon><span><small>Traffic</small><strong>{{
-
-                  getStudentRouteInfo(student)?.traffic || 'Not checked' }}</strong></span></div>
-
-            <div class="route-metric route-distance"><ion-icon
-
-                name="navigate-outline"></ion-icon><span><small>Distance</small><strong>{{
-
-                  getStudentRouteInfo(student)?.distance || getDistanceLabel(student, 'pickup') }}</strong></span></div>
-
-          </div>
-
-                    <div class="student-card-actions">
-
-            <button type="button" class="direction-button"
-
-              (click)="showStudentDirections(student); $event.stopPropagation()">Show Direction</button><button
-
-              type="button" class="primary-action-button" (click)="markDroppedAtHome(student); $event.stopPropagation()">Drop at Home</button>
-
-          </div>
-
-                    <div class="student-route-panel" *ngIf="expandedStudentRouteId === getStudentRouteKey(student)">
-
-            <div class="student-route-heading"><strong>Road directions</strong><span>{{
-
-                getStudentRouteInfo(student)?.eta || 'Calculating route…' }}</span></div>
-
-            <div [id]="getStudentRouteMapId(student)" class="student-route-map" aria-label="Road route to student home">
-
-            </div>
-
-          </div>
-
-                  </article>
-
-                <div class="empty-state" *ngIf="sortedReturnOnboardStudents.length === 0">
-
-                    Students picked up from school will appear here.
-
-                  </div>
-
-                <button type="button" class="drop-all-button"                 [disabled]="!canDropAllReturnStudents"
-
-                      (click)="dropAllReturnStudents()">
-
-                    Drop All at Home
-
-                  </button>
-
-              </section>
 
           </ng-container>
 
