@@ -2094,48 +2094,63 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       student.eveningDroppedAtHomeAt = value;
     }
   }
-  private reconcileStageWithStudentState(
-    workflow: any
-  ): void {
-    if (!workflow || workflow.activeRideStatus !== 'started') {
+
+private reconcileStageWithStudentState(workflow: any): void {
+  if (workflow?.activeRideStatus !== 'started') {
+    return;
+  }
+
+  const rideType = workflow.activeRideType as RideType | null;
+
+  if (rideType === 'morning') {
+    const total = this.presentStudents.length;
+
+    // Do not mark an empty student list as completed.
+    if (total === 0) {
+      this.stage = 'morning-pickup';
       return;
     }
-    const activeRideType = workflow.activeRideType as RideType | null;
-    if (activeRideType === 'morning') {
-      if (
-        this.morningDroppedStudents.length === this.presentStudents.length &&
-        this.presentStudents.length > 0
-      ) {
-        this.stage = 'morning-complete';
-        return;
-      }
-      if (this.morningPendingStudents.length > 0) {
-        this.stage = 'morning-pickup';
-        return;
-      }
-      if (this.morningPickedStudents.length > 0) {
-        this.stage = 'morning-school-drop';
-      }
+
+    const dropped = this.morningDroppedStudents.length;
+    const pending = this.morningPendingStudents.length;
+    const picked = this.morningPickedStudents.length;
+
+    if (dropped === total) {
+      this.stage = 'morning-complete';
+    } else if (pending > 0) {
+      // Students still need pickup, even if others were dropped.
+      this.stage = 'morning-pickup';
+    } else if (picked > 0) {
+      this.stage = 'morning-school-drop';
+    } else {
+      // Unknown or inconsistent status must not mean complete.
+      this.stage = 'morning-pickup';
+    }
+
+    return;
+  }
+
+  if (rideType === 'evening') {
+    const total = this.presentStudents.length;
+
+    if (total === 0) {
+      this.stage = 'return-boarding';
       return;
     }
-    if (activeRideType === 'evening') {
-      if (
-        this.returnDroppedStudents.length === this.presentStudents.length &&
-        this.presentStudents.length > 0
-      ) {
-        this.stage = 'return-complete';
-        return;
-      }
-      if (
-        this.returnWaitingStudents.length === 0 &&
-        this.returnOnboardStudents.length > 0
-      ) {
-        this.stage = 'return-home-drop';
-        return;
-      }
+
+    if (this.returnDroppedStudents.length === total) {
+      this.stage = 'return-complete';
+    } else if (
+      this.returnWaitingStudents.length === 0 &&
+      this.returnOnboardStudents.length > 0
+    ) {
+      this.stage = 'return-home-drop';
+    } else {
       this.stage = 'return-boarding';
     }
   }
+}
+
   // =====================================================
   // STUDENT ADDRESS + GOOGLE MAPS DIRECTIONS
   // =====================================================
