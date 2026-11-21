@@ -3374,6 +3374,61 @@ ion-title {
 
 }
 
+
+.single-action-row,
+.drop-all-row {
+  width: 100%;
+  display: block;
+}
+
+.drop-all-row {
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.driver-action-btn {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #ffffff;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
+
+  ion-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  &.pick-btn {
+    background-color: #0b9f6a;
+  }
+
+  &.drop-btn {
+    background-color: #0877ed;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.99);
+  }
+
+  &:disabled {
+    background-color: #cbd5e1;
+    color: #64748b;
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
+}
 .empty-state {
 
   padding: 18px 8px;
@@ -4715,3 +4770,16 @@ ion-header ion-toolbar {
 .route-student-card.selected .student-avatar{background:#0877ed;border-color:#0877ed;color:#fff}
 .route-student-card.selected h4{color:#064f9d}
 .ride-actions button:disabled{background:#91a2b8;opacity:.6}.ride-actions .dropall-btn{grid-column:1/-1;background:linear-gradient(135deg,#173c70,#0f2a52)}
+.single-action-row,
+.drop-all-row {
+  width: 100%;
+  display: block;
+}
+
+.full-row-action-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}

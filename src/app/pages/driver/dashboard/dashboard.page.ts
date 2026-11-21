@@ -62,6 +62,7 @@ declare const google: any;
 import { DriverMenuPopoverComponent } from '../driver-menu-popover/driver-menu-popover.component';
 import { StudentDetailsModalComponent } from '../student-details-modal/student-details-modal.component';
 import { AddStudentModalComponent } from '../add-student-modal/add-student-modal.component';
+
 type DriverStage =
   | 'morning-ready'
   | 'morning-pickup'
@@ -72,6 +73,7 @@ type DriverStage =
   | 'return-home-drop'
   | 'return-complete'
   | 'day-complete';
+
 type StudentUiStatus =
   | 'Pending'
   | 'Picked'
@@ -79,6 +81,7 @@ type StudentUiStatus =
   | 'Waiting'
   | 'PickedFromSchool'
   | 'DroppedAtHome';
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
@@ -97,7 +100,6 @@ type StudentUiStatus =
   ]
 })
 export class DashboardPage implements OnInit, OnDestroy {
-  // private readonly STAGE_KEY = 'driverStage';
   private readonly MORNING_STATUS_KEY =
     'driverMorningStudentStatuses';
   private readonly EVENING_STATUS_KEY =
@@ -107,6 +109,38 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   /** Prevent duplicate pickup/drop requests for the same student. */
   private readonly studentActionLocks = new Set<string>();
+
+  /** Geofence threshold in kilometers (100 meters) for direct slide without confirmation. */
+  private readonly GEOFENCE_RADIUS_KM = 0.1;
+
+  // =====================================================
+  // SLIDE TO PICK UP / DROP STATE
+  // =====================================================
+  primarySlideOffsetPx = 0;
+  primarySlideProgress = 0;
+  isDraggingPrimarySlide = false;
+  isPrimarySliderSubmitting = false;
+  private primarySlideStartX = 0;
+  private primarySlideMaxPx = 0;
+  private primarySlidePointerId: number | null = null;
+
+  dropAllSlideOffsetPx = 0;
+  dropAllSlideProgress = 0;
+  isDraggingDropAllSlide = false;
+  isDropAllSliderSubmitting = false;
+  private dropAllSlideStartX = 0;
+  private dropAllSlideMaxPx = 0;
+  private dropAllSlidePointerId: number | null = null;
+
+  // =====================================================
+  // PARENT PERMISSION GATE FOR OUT-OF-RADIUS DROPS
+  // =====================================================
+  pendingParentDropApproval: {
+    parentId: string;
+    studentName: string;
+    rideType: RideType;
+    requestedAt: string;
+  } | null = null;
 
   // =====================================================
   // FLEXIBLE CAROUSEL SELECTION
@@ -143,25 +177,21 @@ export class DashboardPage implements OnInit, OnDestroy {
     total: 0
   };
   private routeSeq = 0;
-private fallbackLine: any = null;
-private driverMarker: any = null;
-private geoWatchId: number | null = null;
-private liveHeading = 0;
-private liveOrigin: { latitude: number; longitude: number } | null = null;
-private lastRouteOrigin: { latitude: number; longitude: number } | null = null;
-private lastRouteKey = '';
-private lastRouteAt = 0;
+  private fallbackLine: any = null;
+  private driverMarker: any = null;
+  private geoWatchId: number | null = null;
+  private liveHeading = 0;
+  private liveOrigin: { latitude: number; longitude: number } | null = null;
+  private lastRouteOrigin: { latitude: number; longitude: number } | null = null;
+  private lastRouteKey = '';
+  private lastRouteAt = 0;
   private dashboardMapRefreshTimer: ReturnType<typeof setInterval> | null = null;
   private dashboardMapElement: HTMLElement | null = null;
 
-  /** Expanded student route card; map uses a fixed origin snapshot, not a moving marker. */
-  // expandedStudentRouteId: string | null = null;
   private studentMapsLoaded = false;
   private studentMapsLoading: Promise<void> | null = null;
-  // private readonly studentRouteMaps = new Map<string, any>();
-  // private readonly studentRouteRenderers = new Map<string, any>();
   private readonly studentRouteInfo = new Map<string, { eta: string; distance: string; traffic: string }>();
-  // private readonly studentRouteRequestIds = new Map<string, number>();
+
   constructor(
     private driverService: Driver,
     private router: Router,
@@ -205,11 +235,6 @@ private lastRouteAt = 0;
   ngOnInit(): void {
     this.driverId =
       localStorage.getItem('driverId') || '';
-    /*
-     * IMPORTANT:
-     * MongoDB/backend is the source of truth.
-     * Never restore the ride stage from localStorage.
-     */
     this.stage = 'morning-ready';
     this.morningStatuses = {};
     this.eveningStatuses = {};
@@ -226,11 +251,7 @@ private lastRouteAt = 0;
     );
     this.listenForAttendanceUpdates();
     this.listenForDashboardUpdates();
-    /*
-     * One backend dashboard request returns the complete
-     * workflow. This prevents morning/evening restore calls
-     * from overwriting each other.
-     */
+    this.listenForParentDropConfirmation();
     this.loadDashboard();
     this.loadReferralDetails();
     this.dashboardMapRefreshTimer = setInterval(() => {
@@ -244,7 +265,7 @@ private lastRouteAt = 0;
   ngOnDestroy(): void {
     this.dashboardMapRequestId++;
     if (this.geoWatchId !== null) navigator.geolocation.clearWatch(this.geoWatchId);
-this.driverMarker?.setMap(null);
+    this.driverMarker?.setMap(null);
     if (this.dashboardMapRefreshTimer) clearInterval(this.dashboardMapRefreshTimer);
     this.dashboardMapRefreshTimer = null;
     this.dashboardDirectionsRenderer?.setMap(null);
@@ -252,32 +273,240 @@ this.driverMarker?.setMap(null);
     this.dashboardMapMarkers = [];
     this.dashboardMap = null;
     this.dashboardMapElement = null;
-    // this.studentRouteRenderers.forEach(renderer => renderer.setMap(null));
-    // this.studentRouteRenderers.clear();
-    // this.studentRouteMaps.clear();
     this.studentRouteInfo.clear();
-    // this.studentRouteRequestIds.clear();
     this.attendanceSubscription?.unsubscribe();
     this.dashboardSubscription?.unsubscribe();
     this.locationService.stopTracking();
   }
 
   // =====================================================
-  // BACKEND WORKFLOW
+  // GEOFENCE & PARENT DROP PERMISSION HELPERS
+  // =====================================================
+  private isWithinStudentRadius(
+    student: any,
+    destination: 'pickup' | 'school'
+  ): boolean {
+    const distanceKm = this.getDistanceFromDriver(student, destination);
+    return Number.isFinite(distanceKm) && distanceKm <= this.GEOFENCE_RADIUS_KM;
+  }
+
+  get pendingParentApprovalStudent(): any | null {
+    if (!this.pendingParentDropApproval) return null;
+    return (
+      this.presentStudents.find(
+        s => s.parentId === this.pendingParentDropApproval?.parentId
+      ) || null
+    );
+  }
+
+  isAwaitingParentDropApproval(student: any): boolean {
+    return (
+      !!student?.parentId &&
+      this.pendingParentDropApproval?.parentId === student.parentId
+    );
+  }
+
+  private listenForParentDropConfirmation(): void {
+    const socket = (this.socketService as any)?.socket;
+    if (!socket || typeof socket.on !== 'function') return;
+
+    socket.on('parent-drop-confirmation-response', (payload: any) => {
+      this.ngZone.run(() => {
+        if (!this.pendingParentDropApproval) return;
+        if (payload?.driverId && payload.driverId !== this.driverId) return;
+        if (
+          payload?.parentId &&
+          payload.parentId !== this.pendingParentDropApproval.parentId
+        ) {
+          return;
+        }
+        const approved =
+          payload?.approved === true ||
+          String(payload?.decision || payload?.response || '').toLowerCase() === 'yes';
+        void this.handleParentDropDecision(approved);
+      });
+    });
+  }
+
+  private requestParentDropPermission(
+    student: any,
+    rideType: RideType
+  ): void {
+    const distanceLabel = this.getDistanceLabel(
+      student,
+      rideType === 'morning' ? 'school' : 'pickup'
+    );
+    this.pendingParentDropApproval = {
+      parentId: student.parentId,
+      studentName: student.studentName || 'Student',
+      rideType,
+      requestedAt: new Date().toISOString()
+    };
+
+    const socket = (this.socketService as any)?.socket;
+    if (socket && typeof socket.emit === 'function') {
+      socket.emit('request-parent-drop-confirmation', {
+        driverId: this.driverId,
+        parentId: student.parentId,
+        studentName: student.studentName,
+        rideType,
+        distanceLabel,
+        location: this.liveOrigin || this.locationService.lastKnownPosition || null
+      });
+    }
+
+    this.toastService.showToast(
+      `Driver is outside radius (${distanceLabel}). Sent Yes/No confirmation request to ${student.studentName}'s parent.`,
+      'warning'
+    );
+  }
+
+  async handleParentDropDecision(approved: boolean): Promise<void> {
+    const pending = this.pendingParentDropApproval;
+    if (!pending) return;
+
+    const student = this.presentStudents.find(
+      s => s.parentId === pending.parentId
+    );
+    this.pendingParentDropApproval = null;
+
+    if (!approved || !student) {
+      this.toastService.showToast(
+        `Parent declined drop for ${pending.studentName}. Student remains onboard and next drop is paused.`,
+        'danger'
+      );
+      return;
+    }
+
+    if (pending.rideType === 'morning') {
+      await this.updateStudentAction(
+        student,
+        'morning',
+        'dropped_at_school',
+        'DroppedAtSchool',
+        `${student.studentName} dropped at school (Parent confirmed)`
+      );
+    } else {
+      await this.updateStudentAction(
+        student,
+        'evening',
+        'dropped_at_home',
+        'DroppedAtHome',
+        `${student.studentName} dropped home (Parent confirmed)`
+      );
+    }
+  }
 
   // =====================================================
-  /*
-   * There is intentionally no restoreRideFromBackend()
-   * and no restoreEveningRide().
-   *
-   * GET /drivers/dashboard/:driverId returns:
-   *
-   * workflow.stage
-   * workflow.activeRideType
-   * workflow.activeRideStatus
-   *
-   * That one object controls the dashboard.
-   */
+  // SLIDE TO ACTION GESTURE HANDLERS
+  // =====================================================
+  onPrimarySlideStart(event: PointerEvent, trackEl: HTMLElement): void {
+    if (!this.canExecutePrimaryAction || this.isPrimarySliderSubmitting) return;
+    this.isDraggingPrimarySlide = true;
+    this.primarySlidePointerId = event.pointerId;
+    this.primarySlideStartX = event.clientX - this.primarySlideOffsetPx;
+    this.primarySlideMaxPx = Math.max(1, trackEl.clientWidth - 54);
+    (event.currentTarget as HTMLElement)?.setPointerCapture?.(event.pointerId);
+  }
+
+  onPrimarySlideMove(event: PointerEvent, trackEl: HTMLElement): void {
+    if (!this.isDraggingPrimarySlide || event.pointerId !== this.primarySlidePointerId) return;
+    this.primarySlideMaxPx = Math.max(1, trackEl.clientWidth - 54);
+    const rawOffset = event.clientX - this.primarySlideStartX;
+    this.primarySlideOffsetPx = Math.max(0, Math.min(rawOffset, this.primarySlideMaxPx));
+    this.primarySlideProgress = this.primarySlideOffsetPx / this.primarySlideMaxPx;
+  }
+
+  async onPrimarySlideEnd(event: PointerEvent, trackEl: HTMLElement): Promise<void> {
+    if (!this.isDraggingPrimarySlide || event.pointerId !== this.primarySlidePointerId) return;
+    this.isDraggingPrimarySlide = false;
+    this.primarySlidePointerId = null;
+
+    const threshold = this.primarySlideMaxPx * 0.8;
+    const completed = this.primarySlideOffsetPx >= threshold && this.canExecutePrimaryAction;
+
+    if (!completed) {
+      this.resetPrimarySlider();
+      return;
+    }
+
+    this.primarySlideOffsetPx = this.primarySlideMaxPx;
+    this.primarySlideProgress = 1;
+    this.isPrimarySliderSubmitting = true;
+    try {
+      await this.executePrimaryAction();
+    } finally {
+      this.isPrimarySliderSubmitting = false;
+      this.resetPrimarySlider();
+    }
+  }
+
+  onPrimarySlideCancel(): void {
+    this.isDraggingPrimarySlide = false;
+    this.primarySlidePointerId = null;
+    this.resetPrimarySlider();
+  }
+
+  private resetPrimarySlider(): void {
+    this.primarySlideOffsetPx = 0;
+    this.primarySlideProgress = 0;
+  }
+
+  onDropAllSlideStart(event: PointerEvent, trackEl: HTMLElement): void {
+    if (!this.canDropAll || this.isDropAllSliderSubmitting) return;
+    this.isDraggingDropAllSlide = true;
+    this.dropAllSlidePointerId = event.pointerId;
+    this.dropAllSlideStartX = event.clientX - this.dropAllSlideOffsetPx;
+    this.dropAllSlideMaxPx = Math.max(1, trackEl.clientWidth - 54);
+    (event.currentTarget as HTMLElement)?.setPointerCapture?.(event.pointerId);
+  }
+
+  onDropAllSlideMove(event: PointerEvent, trackEl: HTMLElement): void {
+    if (!this.isDraggingDropAllSlide || event.pointerId !== this.dropAllSlidePointerId) return;
+    this.dropAllSlideMaxPx = Math.max(1, trackEl.clientWidth - 54);
+    const rawOffset = event.clientX - this.dropAllSlideStartX;
+    this.dropAllSlideOffsetPx = Math.max(0, Math.min(rawOffset, this.dropAllSlideMaxPx));
+    this.dropAllSlideProgress = this.dropAllSlideOffsetPx / this.dropAllSlideMaxPx;
+  }
+
+  async onDropAllSlideEnd(event: PointerEvent, trackEl: HTMLElement): Promise<void> {
+    if (!this.isDraggingDropAllSlide || event.pointerId !== this.dropAllSlidePointerId) return;
+    this.isDraggingDropAllSlide = false;
+    this.dropAllSlidePointerId = null;
+
+    const threshold = this.dropAllSlideMaxPx * 0.8;
+    const completed = this.dropAllSlideOffsetPx >= threshold && this.canDropAll;
+
+    if (!completed) {
+      this.resetDropAllSlider();
+      return;
+    }
+
+    this.dropAllSlideOffsetPx = this.dropAllSlideMaxPx;
+    this.dropAllSlideProgress = 1;
+    this.isDropAllSliderSubmitting = true;
+    try {
+      await this.dropAllStudents();
+    } finally {
+      this.isDropAllSliderSubmitting = false;
+      this.resetDropAllSlider();
+    }
+  }
+
+  onDropAllSlideCancel(): void {
+    this.isDraggingDropAllSlide = false;
+    this.dropAllSlidePointerId = null;
+    this.resetDropAllSlider();
+  }
+
+  private resetDropAllSlider(): void {
+    this.dropAllSlideOffsetPx = 0;
+    this.dropAllSlideProgress = 0;
+  }
+
+  // =====================================================
+  // BACKEND WORKFLOW
+  // =====================================================
   private getStudentCoordinates(
     student: any,
     destination: 'pickup' | 'school'
@@ -300,6 +529,7 @@ this.driverMarker?.setMap(null);
     }
     return { latitude, longitude };
   }
+
   private calculateDistanceKm(
     from: { latitude: number; longitude: number },
     to: { latitude: number; longitude: number }
@@ -318,17 +548,19 @@ this.driverMarker?.setMap(null);
       Math.sqrt(Math.max(0, 1 - a))
     );
   }
+
   private getDistanceFromDriver(
     student: any,
     destination: 'pickup' | 'school'
   ): number {
-   const driver: { latitude: number; longitude: number } | null = this.liveOrigin || this.locationService.lastKnownPosition;
+    const driver: { latitude: number; longitude: number } | null = this.liveOrigin || this.locationService.lastKnownPosition;
     const target = this.getStudentCoordinates(student, destination);
     if (!driver || !target) {
       return Number.POSITIVE_INFINITY;
     }
     return this.calculateDistanceKm(driver, target);
   }
+
   /** Morning: nearest waiting pickup first. */
   get sortedMorningPendingStudents(): any[] {
     return [...this.morningPendingStudents].sort((a, b) =>
@@ -336,6 +568,7 @@ this.driverMarker?.setMap(null);
       this.getDistanceFromDriver(b, 'pickup')
     );
   }
+
   /** Morning: students already onboard and awaiting school drop. */
   get sortedMorningPickedStudents(): any[] {
     return [...this.morningPickedStudents].sort((a, b) =>
@@ -343,6 +576,7 @@ this.driverMarker?.setMap(null);
       this.getDistanceFromDriver(b, 'school')
     );
   }
+
   /** Evening: nearest waiting school pickup first. */
   get sortedReturnWaitingStudents(): any[] {
     return [...this.returnWaitingStudents].sort((a, b) =>
@@ -350,6 +584,7 @@ this.driverMarker?.setMap(null);
       this.getDistanceFromDriver(b, 'school')
     );
   }
+
   /** Evening: students onboard and awaiting home drop. */
   get sortedReturnOnboardStudents(): any[] {
     return [...this.returnOnboardStudents].sort((a, b) =>
@@ -357,14 +592,23 @@ this.driverMarker?.setMap(null);
       this.getDistanceFromDriver(b, 'pickup')
     );
   }
+
   get canDropAllMorningStudents(): boolean {
-    // Drop all currently onboard students once no present students remain waiting.
-    return this.morningPickedStudents.length > 0 && this.morningPendingStudents.length === 0;
+    return (
+      !this.pendingParentDropApproval &&
+      this.morningPickedStudents.length > 0 &&
+      this.morningPendingStudents.length === 0
+    );
   }
+
   get canDropAllReturnStudents(): boolean {
-    // Drop all currently onboard students once no present students remain waiting at school.
-    return this.returnOnboardStudents.length > 0 && this.returnWaitingStudents.length === 0;
+    return (
+      !this.pendingParentDropApproval &&
+      this.returnOnboardStudents.length > 0 &&
+      this.returnWaitingStudents.length === 0
+    );
   }
+
   getDistanceLabel(
     student: any,
     destination: 'pickup' | 'school'
@@ -378,38 +622,51 @@ this.driverMarker?.setMap(null);
     }
     return `${distance.toFixed(1)} km away`;
   }
-  /**
-   * Sequential updates avoid firing many student-status requests at once.
-   * Existing methods remain responsible for backend updates and local state.
-   */
+
   async dropAllMorningStudents(): Promise<void> {
     if (!this.canDropAllMorningStudents) return;
     const students = [...this.sortedMorningPickedStudents];
-    const confirmed = await this.dialogService.confirm(
-      'Drop All Students?',
-      `This will mark ${students.length} onboard student(s) as dropped at school. Continue?`
+    const outOfRadiusStudents = students.filter(
+      student => !this.isWithinStudentRadius(student, 'school')
     );
-    if (!confirmed) return;
+
+    if (outOfRadiusStudents.length > 0) {
+      const confirmed = await this.dialogService.confirm(
+        'Outside School Radius',
+        `${outOfRadiusStudents.length} student(s) are outside the school drop radius. Continue and request parent confirmation?`
+      );
+      if (!confirmed) return;
+    }
+
     for (const student of students) {
-      // The batch confirmation is the only confirmation for this operation.
+      if (this.pendingParentDropApproval) break;
       await this.markDroppedAtSchool(student, true);
     }
   }
+
   async dropAllReturnStudents(): Promise<void> {
     if (!this.canDropAllReturnStudents) return;
     const students = [...this.sortedReturnOnboardStudents];
-    const confirmed = await this.dialogService.confirm(
-      'Drop All Students?',
-      `This will mark ${students.length} onboard student(s) as dropped at home. Continue?`
+    const outOfRadiusStudents = students.filter(
+      student => !this.isWithinStudentRadius(student, 'pickup')
     );
-    if (!confirmed) return;
+
+    if (outOfRadiusStudents.length > 0) {
+      const confirmed = await this.dialogService.confirm(
+        'Outside Home Radius',
+        `${outOfRadiusStudents.length} student(s) are outside their home drop radius. Continue and request parent confirmation?`
+      );
+      if (!confirmed) return;
+    }
+
     for (const student of students) {
-      // The batch confirmation is the only confirmation for this operation.
+      if (this.pendingParentDropApproval) break;
       await this.markDroppedAtHome(student, true);
     }
-  }  // =====================================================
-  // SELECTED MORNING PICKUP
+  }
 
+  // =====================================================
+  // SELECTED MORNING PICKUP
   // =====================================================
   get selectedMorningPickup(): any | null {
     const students = this.morningPendingStudents;
@@ -423,6 +680,7 @@ this.driverMarker?.setMap(null);
       );
     return students[this.selectedMorningPickupIndex] || null;
   }
+
   // =====================================================
   // MORNING DROP CAROUSEL
   // =====================================================
@@ -438,6 +696,7 @@ this.driverMarker?.setMap(null);
       );
     return students[this.selectedMorningDropIndex] || null;
   }
+
   // =====================================================
   // RETURN BOARDING CAROUSEL
   // =====================================================
@@ -453,6 +712,7 @@ this.driverMarker?.setMap(null);
       );
     return students[this.selectedReturnBoardingIndex] || null;
   }
+
   // =====================================================
   // RETURN HOME DROP CAROUSEL
   // =====================================================
@@ -468,6 +728,7 @@ this.driverMarker?.setMap(null);
       );
     return students[this.selectedReturnDropIndex] || null;
   }
+
   private normalizeCarouselIndex(
     index: number,
     length: number
@@ -480,7 +741,6 @@ this.driverMarker?.setMap(null);
 
   // =====================================================
   // MORNING PICKUP SELECTION
-
   // =====================================================
   selectMorningPickup(index: number): void {
     const students = this.morningPendingStudents;
@@ -490,6 +750,7 @@ this.driverMarker?.setMap(null);
     this.selectedMorningPickupIndex =
       this.normalizeCarouselIndex(index, students.length);
   }
+
   selectMorningPickupByStudent(student: any): void {
     const index = this.morningPendingStudents.findIndex(
       s => s.parentId === student.parentId
@@ -499,10 +760,12 @@ this.driverMarker?.setMap(null);
     }
     this.selectedMorningPickupIndex = index;
   }
+
   onMorningSwipeStart(event: TouchEvent): void {
     this.morningSwipeStartX =
       event.changedTouches[0]?.clientX || 0;
   }
+
   onMorningSwipeEnd(event: TouchEvent): void {
     const endX =
       event.changedTouches[0]?.clientX || 0;
@@ -512,17 +775,16 @@ this.driverMarker?.setMap(null);
       return;
     }
     if (delta < 0) {
-      // Swipe left → next
       this.selectMorningPickup(
         this.selectedMorningPickupIndex + 1
       );
     } else {
-      // Swipe right → previous
       this.selectMorningPickup(
         this.selectedMorningPickupIndex - 1
       );
     }
   }
+
   selectMorningDrop(index: number): void {
     const students = this.morningPickedStudents;
     if (!students.length) {
@@ -531,6 +793,7 @@ this.driverMarker?.setMap(null);
     this.selectedMorningDropIndex =
       this.normalizeCarouselIndex(index, students.length);
   }
+
   selectMorningDropByStudent(student: any): void {
     const index = this.morningPickedStudents.findIndex(
       s => s.parentId === student.parentId
@@ -540,10 +803,12 @@ this.driverMarker?.setMap(null);
     }
     this.selectedMorningDropIndex = index;
   }
+
   onMorningDropSwipeStart(event: TouchEvent): void {
     this.morningDropSwipeStartX =
       event.changedTouches[0]?.clientX || 0;
   }
+
   onMorningDropSwipeEnd(event: TouchEvent): void {
     const endX =
       event.changedTouches[0]?.clientX || 0;
@@ -565,7 +830,6 @@ this.driverMarker?.setMap(null);
 
   // =====================================================
   // RETURN BOARDING SELECTION
-
   // =====================================================
   selectReturnBoarding(index: number): void {
     const students = this.returnWaitingStudents;
@@ -575,6 +839,7 @@ this.driverMarker?.setMap(null);
     this.selectedReturnBoardingIndex =
       this.normalizeCarouselIndex(index, students.length);
   }
+
   selectReturnBoardingByStudent(student: any): void {
     const index = this.returnWaitingStudents.findIndex(
       s => s.parentId === student.parentId
@@ -584,10 +849,12 @@ this.driverMarker?.setMap(null);
     }
     this.selectedReturnBoardingIndex = index;
   }
+
   onReturnSwipeStart(event: TouchEvent): void {
     this.returnSwipeStartX =
       event.changedTouches[0]?.clientX || 0;
   }
+
   onReturnSwipeEnd(event: TouchEvent): void {
     const endX =
       event.changedTouches[0]?.clientX || 0;
@@ -606,6 +873,7 @@ this.driverMarker?.setMap(null);
       );
     }
   }
+
   selectReturnDrop(index: number): void {
     const students = this.returnOnboardStudents;
     if (!students.length) {
@@ -614,6 +882,7 @@ this.driverMarker?.setMap(null);
     this.selectedReturnDropIndex =
       this.normalizeCarouselIndex(index, students.length);
   }
+
   selectReturnDropByStudent(student: any): void {
     const index = this.returnOnboardStudents.findIndex(
       s => s.parentId === student.parentId
@@ -623,10 +892,12 @@ this.driverMarker?.setMap(null);
     }
     this.selectedReturnDropIndex = index;
   }
+
   onReturnDropSwipeStart(event: TouchEvent): void {
     this.returnDropSwipeStartX =
       event.changedTouches[0]?.clientX || 0;
   }
+
   onReturnDropSwipeEnd(event: TouchEvent): void {
     const endX =
       event.changedTouches[0]?.clientX || 0;
@@ -648,7 +919,6 @@ this.driverMarker?.setMap(null);
 
   // =====================================================
   // ORIGINAL ROUTE POSITION
-
   // =====================================================
   getRoutePosition(
     student: any
@@ -665,7 +935,6 @@ this.driverMarker?.setMap(null);
 
   // =====================================================
   // DERIVED UI STATE
-
   // =====================================================
   get isMorningRideActive(): boolean {
     return (
@@ -673,16 +942,14 @@ this.driverMarker?.setMap(null);
       this.stage === 'morning-school-drop'
     );
   }
+
   get isReturnRideActive(): boolean {
     return (
       this.stage === 'return-boarding' ||
       this.stage === 'return-home-drop'
     );
   }
-  /*
-   * A "complete" screen is not an active Ride document.
-   * Only pickup/drop stages represent a running ride.
-   */
+
   get rideRunning(): boolean {
     return (
       this.stage === 'morning-pickup' ||
@@ -691,6 +958,7 @@ this.driverMarker?.setMap(null);
       this.stage === 'return-home-drop'
     );
   }
+
   get activeRideType(): RideType | null {
     if (
       this.stage === 'morning-pickup' ||
@@ -706,6 +974,7 @@ this.driverMarker?.setMap(null);
     }
     return null;
   }
+
   get morningPendingStudents(): any[] {
     return this.presentStudents.filter(
       student =>
@@ -713,6 +982,7 @@ this.driverMarker?.setMap(null);
         === 'Pending'
     );
   }
+
   get morningPickedStudents(): any[] {
     return this.presentStudents.filter(
       student =>
@@ -720,6 +990,7 @@ this.driverMarker?.setMap(null);
         === 'Picked'
     );
   }
+
   get morningDroppedStudents(): any[] {
     return this.presentStudents.filter(
       student =>
@@ -727,6 +998,7 @@ this.driverMarker?.setMap(null);
         === 'DroppedAtSchool'
     );
   }
+
   get returnWaitingStudents(): any[] {
     return this.presentStudents.filter(
       student =>
@@ -734,6 +1006,7 @@ this.driverMarker?.setMap(null);
         === 'Waiting'
     );
   }
+
   get returnOnboardStudents(): any[] {
     return this.presentStudents.filter(
       student =>
@@ -741,6 +1014,7 @@ this.driverMarker?.setMap(null);
         === 'PickedFromSchool'
     );
   }
+
   get returnDroppedStudents(): any[] {
     return this.presentStudents.filter(
       student =>
@@ -748,18 +1022,23 @@ this.driverMarker?.setMap(null);
         === 'DroppedAtHome'
     );
   }
+
   get nextMorningPickup(): any | null {
     return this.sortedMorningPendingStudents[0] || null;
   }
+
   get nextSchoolDrop(): any | null {
     return this.sortedMorningPickedStudents[0] || null;
   }
+
   get nextReturnBoarding(): any | null {
     return this.sortedReturnWaitingStudents[0] || null;
   }
+
   get nextHomeDrop(): any | null {
     return this.sortedReturnOnboardStudents[0] || null;
   }
+
   get currentSequence(): number {
     if (
       this.stage === 'morning-pickup' &&
@@ -811,6 +1090,7 @@ this.driverMarker?.setMap(null);
     }
     return 0;
   }
+
   get activeDestinationLabel(): string {
     const student = this.getRecommendedDashboardStudent();
     return student ? `Next: ${student.studentName || 'Student'}` : 'All stops completed';
@@ -823,7 +1103,7 @@ this.driverMarker?.setMap(null);
     }
     switch (this.stage) {
       case 'morning-ready': return this.sortedMorningPendingStudents[0] || this.presentStudents.slice().sort((a, b) => this.getDistanceFromDriver(a, 'pickup') - this.getDistanceFromDriver(b, 'pickup'))[0] || null;
-     case 'morning-pickup': return this.sortedMorningPendingStudents[0] || this.sortedMorningPickedStudents[0] || null;
+      case 'morning-pickup': return this.sortedMorningPendingStudents[0] || this.sortedMorningPickedStudents[0] || null;
       case 'morning-school-drop': return this.sortedMorningPickedStudents[0] || null;
       case 'return-ready': return this.presentStudents.slice().sort((a, b) => this.getDistanceFromDriver(a, 'school') - this.getDistanceFromDriver(b, 'school'))[0] || null;
       case 'return-boarding': return this.sortedReturnWaitingStudents[0] || this.sortedReturnOnboardStudents[0] || null;
@@ -867,268 +1147,303 @@ this.driverMarker?.setMap(null);
     ));
   }
 
- private async refreshDashboardMap(): Promise<void> {
-  if (!document.getElementById('driver-overview-map') || this.currentView !== 'dashboard') return;
-  const requestId = ++this.dashboardMapRequestId;
-  try {
-    await this.ensureStudentMapsLoaded();
-    const mapElement = document.getElementById('driver-overview-map');
-    if (requestId !== this.dashboardMapRequestId || !mapElement) return;
-    const origin = await this.getDashboardMapOrigin();
-    const recommended = this.getRecommendedDashboardStudent();
-    const destination = recommended ? this.getDashboardMapTarget(recommended) : null;
-    const center = origin ? { lat: origin.latitude, lng: origin.longitude } : destination ? { lat: destination.latitude, lng: destination.longitude } : { lat: 11.0168, lng: 76.9558 };
-    if (this.dashboardMapElement !== mapElement) {
-      this.dashboardDirectionsRenderer?.setMap(null);
-      this.dashboardDirectionsRenderer = null;
-      this.driverMarker?.setMap(null);
-      this.driverMarker = null;
-      this.dashboardMap = null;
-      this.dashboardMapElement = mapElement;
-      this.lastRouteKey = '';
+  private async refreshDashboardMap(): Promise<void> {
+    if (!document.getElementById('driver-overview-map') || this.currentView !== 'dashboard') return;
+    const requestId = ++this.dashboardMapRequestId;
+    try {
+      await this.ensureStudentMapsLoaded();
+      const mapElement = document.getElementById('driver-overview-map');
+      if (requestId !== this.dashboardMapRequestId || !mapElement) return;
+      const origin = await this.getDashboardMapOrigin();
+      const recommended = this.getRecommendedDashboardStudent();
+      const destination = recommended ? this.getDashboardMapTarget(recommended) : null;
+      const center = origin ? { lat: origin.latitude, lng: origin.longitude } : destination ? { lat: destination.latitude, lng: destination.longitude } : { lat: 11.0168, lng: 76.9558 };
+      if (this.dashboardMapElement !== mapElement) {
+        this.dashboardDirectionsRenderer?.setMap(null);
+        this.dashboardDirectionsRenderer = null;
+        this.driverMarker?.setMap(null);
+        this.driverMarker = null;
+        this.dashboardMap = null;
+        this.dashboardMapElement = mapElement;
+        this.lastRouteKey = '';
+      }
+      if (!this.dashboardMap) {
+        this.dashboardMap = new google.maps.Map(mapElement, { center, zoom: 14, mapTypeControl: false, streetViewControl: false, fullscreenControl: false, clickableIcons: false, gestureHandling: 'cooperative', zoomControl: true });
+      }
+      this.dashboardMapMarkers.forEach(m => m.setMap(null));
+      this.dashboardMapMarkers = [];
+      const isReturn = ['return-ready', 'return-boarding', 'return-home-drop'].includes(this.stage);
+      this.presentStudents.forEach((student, index) => {
+        const type = this.stage === 'morning-ready' || this.stage === 'return-ready' ? (isReturn ? 'school' : 'pickup') : this.getDashboardDestinationType(student);
+        const coords = this.getStudentCoordinates(student, type);
+        if (!coords) return;
+        const marker = new google.maps.Marker({ map: this.dashboardMap, position: { lat: coords.latitude, lng: coords.longitude }, title: student.studentName || 'Student', label: { text: String(index + 1), color: '#ffffff', fontWeight: '700' }, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 13, fillColor: student.parentId === recommended?.parentId ? '#0877ed' : '#0b9f6a', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 2 } });
+        marker.addListener('click', () => this.ngZone.run(() => this.selectDestination(student)));
+        this.dashboardMapMarkers.push(marker);
+      });
+      if (origin) {
+        const position = { lat: origin.latitude, lng: origin.longitude };
+        if (this.driverMarker) this.driverMarker.setPosition(position);
+        else this.driverMarker = new google.maps.Marker({ map: this.dashboardMap, position, title: 'You', zIndex: 999, icon: this.driverIcon() });
+      }
+      if (!this.dashboardDirectionsRenderer) {
+        this.dashboardDirectionsRenderer = new google.maps.DirectionsRenderer({ map: this.dashboardMap, suppressMarkers: true, polylineOptions: { strokeColor: '#0877ed', strokeOpacity: 0.95, strokeWeight: 5 } });
+      }
+      const routeKey = `${this.stage}|${recommended ? this.getStudentRouteKey(recommended) : ''}`;
+      this.dashboardDirectionsRenderer.setOptions({ preserveViewport: this.rideRunning && routeKey === this.lastRouteKey });
+      this.fallbackLine?.setMap(null);
+      this.fallbackLine = null;
+      if (origin && destination) {
+        this.lastRouteOrigin = origin;
+        this.lastRouteAt = Date.now();
+        const refit = routeKey !== this.lastRouteKey;
+        this.lastRouteKey = routeKey;
+        const originPoint = { lat: origin.latitude, lng: origin.longitude };
+        const destinationPoint = { lat: destination.latitude, lng: destination.longitude };
+        const request: any = { origin: originPoint, destination: destinationPoint, travelMode: google.maps.TravelMode.DRIVING };
+        if (this.stage === 'morning-ready' || this.stage === 'return-ready') {
+          const type = isReturn ? 'school' : 'pickup';
+          request.waypoints = this.presentStudents.filter(s => s.parentId !== recommended?.parentId).map(s => this.getStudentCoordinates(s, type)).filter((p): p is { latitude: number; longitude: number } => !!p).slice(0, 20).map(p => ({ location: { lat: p.latitude, lng: p.longitude }, stopover: true }));
+          request.optimizeWaypoints = true;
+        } else {
+          request.drivingOptions = { departureTime: new Date(), trafficModel: google.maps.TrafficModel.BEST_GUESS };
+        }
+        const seq = ++this.routeSeq;
+        new google.maps.DirectionsService().route(request, (result: any, status: any) => this.ngZone.run(() => {
+          if (seq !== this.routeSeq || !this.dashboardMap) return;
+          if (status === 'OK') {
+            this.dashboardDirectionsRenderer?.setDirections(result);
+            if (recommended && this.rideRunning) this.storeRouteInfo(recommended, result);
+            return;
+          }
+          console.error('[DRIVER MAP] Directions failed:', status);
+          this.dashboardDirectionsRenderer?.set('directions', null);
+          void this.drawRoadFallback(originPoint, destinationPoint, seq, refit, recommended);
+        }));
+      } else {
+        this.routeSeq++;
+        this.dashboardDirectionsRenderer.set('directions', null);
+        const bounds = new google.maps.LatLngBounds();
+        if (origin) bounds.extend({ lat: origin.latitude, lng: origin.longitude });
+        this.dashboardMapMarkers.forEach(m => bounds.extend(m.getPosition()));
+        if (!bounds.isEmpty()) this.dashboardMap.fitBounds(bounds);
+      }
+    } catch (error) {
+      console.error('[DRIVER DASHBOARD MAP] Unable to render map', error);
     }
-    if (!this.dashboardMap) {
-      this.dashboardMap = new google.maps.Map(mapElement, { center, zoom: 14, mapTypeControl: false, streetViewControl: false, fullscreenControl: false, clickableIcons: false, gestureHandling: 'cooperative', zoomControl: true });
-    }
-    this.dashboardMapMarkers.forEach(m => m.setMap(null));
-    this.dashboardMapMarkers = [];
-    const isReturn = ['return-ready', 'return-boarding', 'return-home-drop'].includes(this.stage);
-    this.presentStudents.forEach((student, index) => {
-      const type = this.stage === 'morning-ready' || this.stage === 'return-ready' ? (isReturn ? 'school' : 'pickup') : this.getDashboardDestinationType(student);
-      const coords = this.getStudentCoordinates(student, type);
-      if (!coords) return;
-      const marker = new google.maps.Marker({ map: this.dashboardMap, position: { lat: coords.latitude, lng: coords.longitude }, title: student.studentName || 'Student', label: { text: String(index + 1), color: '#ffffff', fontWeight: '700' }, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 13, fillColor: student.parentId === recommended?.parentId ? '#0877ed' : '#0b9f6a', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 2 } });
-      marker.addListener('click', () => this.ngZone.run(() => this.selectDestination(student)));
-      this.dashboardMapMarkers.push(marker);
-    });
-    if (origin) {
-      const position = { lat: origin.latitude, lng: origin.longitude };
-      if (this.driverMarker) this.driverMarker.setPosition(position);
-      else this.driverMarker = new google.maps.Marker({ map: this.dashboardMap, position, title: 'You', zIndex: 999, icon: this.driverIcon() });
-    }
-    if (!this.dashboardDirectionsRenderer) {
-      this.dashboardDirectionsRenderer = new google.maps.DirectionsRenderer({ map: this.dashboardMap, suppressMarkers: true, polylineOptions: { strokeColor: '#0877ed', strokeOpacity: 0.95, strokeWeight: 5 } });
-    }
-    const routeKey = `${this.stage}|${recommended ? this.getStudentRouteKey(recommended) : ''}`;
-    this.dashboardDirectionsRenderer.setOptions({ preserveViewport: this.rideRunning && routeKey === this.lastRouteKey });
-  this.fallbackLine?.setMap(null);
-this.fallbackLine = null;
-if (origin && destination) {
-  this.lastRouteOrigin = origin;
-  this.lastRouteAt = Date.now();
-const refit = routeKey !== this.lastRouteKey;
-this.lastRouteKey = routeKey;
-  const originPoint = { lat: origin.latitude, lng: origin.longitude };
-  const destinationPoint = { lat: destination.latitude, lng: destination.longitude };
-  const request: any = { origin: originPoint, destination: destinationPoint, travelMode: google.maps.TravelMode.DRIVING };
-  if (this.stage === 'morning-ready' || this.stage === 'return-ready') {
-    const type = isReturn ? 'school' : 'pickup';
-    request.waypoints = this.presentStudents.filter(s => s.parentId !== recommended?.parentId).map(s => this.getStudentCoordinates(s, type)).filter((p): p is { latitude: number; longitude: number } => !!p).slice(0, 20).map(p => ({ location: { lat: p.latitude, lng: p.longitude }, stopover: true }));
-    request.optimizeWaypoints = true;
-  } else {
-    request.drivingOptions = { departureTime: new Date(), trafficModel: google.maps.TrafficModel.BEST_GUESS };
   }
-  const seq = ++this.routeSeq;
-  new google.maps.DirectionsService().route(request, (result: any, status: any) => this.ngZone.run(() => {
-    if (seq !== this.routeSeq || !this.dashboardMap) return;
-    if (status === 'OK') {
-      this.dashboardDirectionsRenderer?.setDirections(result);
-      if (recommended && this.rideRunning) this.storeRouteInfo(recommended, result);
-      return;
-    }
-   console.error('[DRIVER MAP] Directions failed:', status);
-  this.dashboardDirectionsRenderer?.set('directions', null);
-  void this.drawRoadFallback(originPoint, destinationPoint, seq, refit, recommended);
-  }));
-} else {
-  this.routeSeq++;
-  this.dashboardDirectionsRenderer.set('directions', null);
-  const bounds = new google.maps.LatLngBounds();
-  if (origin) bounds.extend({ lat: origin.latitude, lng: origin.longitude });
-  this.dashboardMapMarkers.forEach(m => bounds.extend(m.getPosition()));
-  if (!bounds.isEmpty()) this.dashboardMap.fitBounds(bounds);
-}
-  } 
-  
-  catch (error) {
-    console.error('[DRIVER DASHBOARD MAP] Unable to render map', error);
-  }
-}
 
-private async drawRoadFallback(
-  from: { lat: number; lng: number },
-  to: { lat: number; lng: number },
-  seq: number,
-  refit: boolean,
-  student: any
-): Promise<void> {
-  let path: { lat: number; lng: number }[] = [from, to];
-  try {
-    const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`);
-    const route = (await response.json())?.routes?.[0];
-    if (route?.geometry?.coordinates?.length) {
-      path = route.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
-      if (student && this.rideRunning) {
-        this.studentRouteInfo.clear();
-        this.studentRouteInfo.set(this.getStudentRouteKey(student), {
-          eta: `${Math.max(1, Math.ceil(route.duration / 60))} min`,
-          distance: `${(route.distance / 1000).toFixed(1)} km`,
-          traffic: ''
-        });
+  private async drawRoadFallback(
+    from: { lat: number; lng: number },
+    to: { lat: number; lng: number },
+    seq: number,
+    refit: boolean,
+    student: any
+  ): Promise<void> {
+    let path: { lat: number; lng: number }[] = [from, to];
+    try {
+      const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`);
+      const route = (await response.json())?.routes?.[0];
+      if (route?.geometry?.coordinates?.length) {
+        path = route.geometry.coordinates.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
+        if (student && this.rideRunning) {
+          this.studentRouteInfo.clear();
+          this.studentRouteInfo.set(this.getStudentRouteKey(student), {
+            eta: `${Math.max(1, Math.ceil(route.duration / 60))} min`,
+            distance: `${(route.distance / 1000).toFixed(1)} km`,
+            traffic: ''
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[DRIVER MAP] Road fallback failed', error);
+    }
+    if (seq !== this.routeSeq || !this.dashboardMap) return;
+    this.ngZone.run(() => {
+      this.fallbackLine?.setMap(null);
+      this.fallbackLine = new google.maps.Polyline({ map: this.dashboardMap, path, strokeColor: '#0877ed', strokeOpacity: 0.95, strokeWeight: 6 });
+      if (refit) {
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach(p => bounds.extend(p));
+        this.dashboardMap.fitBounds(bounds);
+      }
+    });
+  }
+
+  private startGeoWatch(): void {
+    if (!navigator.geolocation) return;
+    this.geoWatchId = navigator.geolocation.watchPosition(
+      p => this.ngZone.run(() => {
+        const next = { latitude: p.coords.latitude, longitude: p.coords.longitude };
+        const prev = this.liveOrigin;
+        if (typeof p.coords.heading === 'number' && !isNaN(p.coords.heading)) this.liveHeading = p.coords.heading;
+        else if (prev && this.calculateDistanceKm(prev, next) > 0.003) this.liveHeading = this.bearing(prev, next);
+        this.liveOrigin = next;
+        this.onDriverMoved();
+      }),
+      () => { },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
+    );
+  }
+
+  private bearing(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }): number {
+    const r = (d: number) => d * Math.PI / 180;
+    const dLng = r(b.longitude - a.longitude);
+    const y = Math.sin(dLng) * Math.cos(r(b.latitude));
+    const x = Math.cos(r(a.latitude)) * Math.sin(r(b.latitude)) - Math.sin(r(a.latitude)) * Math.cos(r(b.latitude)) * Math.cos(dLng);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  private driverIcon(): any {
+    return { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale: 6, rotation: this.liveHeading, fillColor: '#f59e0b', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 2 };
+  }
+
+  private onDriverMoved(): void {
+    const origin = this.liveOrigin;
+    if (!origin || !this.dashboardMap || !this.driverMarker || this.currentView !== 'dashboard') return;
+    const position = { lat: origin.latitude, lng: origin.longitude };
+    this.driverMarker.setPosition(position);
+    this.driverMarker.setIcon(this.driverIcon());
+    if (!this.rideRunning) return;
+    this.dashboardMap.panTo(position);
+    const movedMeters = this.lastRouteOrigin ? this.calculateDistanceKm(this.lastRouteOrigin, origin) * 1000 : Infinity;
+    if (movedMeters > 20 && Date.now() - this.lastRouteAt > 4000) void this.refreshDashboardMap();
+  }
+
+  private storeRouteInfo(student: any, result: any): void {
+    const leg = result?.routes?.[0]?.legs?.[0];
+    if (!leg) return;
+    const seconds = Number(leg.duration_in_traffic?.value) || Number(leg.duration?.value);
+    this.studentRouteInfo.clear();
+    this.studentRouteInfo.set(this.getStudentRouteKey(student), {
+      eta: seconds ? `${Math.max(1, Math.ceil(seconds / 60))} min` : (leg.duration?.text || ''),
+      distance: leg.distance?.text || '',
+      traffic: ''
+    });
+  }
+
+  selectDestination(student: any): void {
+    const key = this.getStudentRouteKey(student);
+    const clearing = this.selectedDashboardDestinationId === key;
+    this.selectedDashboardDestinationId = clearing ? null : key;
+    if (!clearing && !this.getDashboardMapTarget(student)) {
+      this.toastService.showToast('Student location is unavailable', 'warning');
+    }
+    void this.refreshDashboardMap();
+  }
+
+  isSelectedDestination(student: any): boolean {
+    return this.selectedDashboardDestinationId === this.getStudentRouteKey(student);
+  }
+
+  get activePendingStudents(): any[] {
+    return this.isMorningRideActive ? this.sortedMorningPendingStudents : this.sortedReturnWaitingStudents;
+  }
+
+  private isPendingStudent(student: any): boolean {
+    return this.isMorningRideActive ? this.getMorningStatus(student) === 'Pending' : this.getEveningStatus(student) === 'Waiting';
+  }
+
+  private isPickedStudent(student: any): boolean {
+    return this.isMorningRideActive ? this.getMorningStatus(student) === 'Picked' : this.getEveningStatus(student) === 'PickedFromSchool';
+  }
+
+  get selectedStudent(): any | null {
+    const id = this.selectedDashboardDestinationId;
+    if (!id) return null;
+    return [...this.activePendingStudents, ...this.activePickedStudents].find(s => this.getStudentRouteKey(s) === id) || null;
+  }
+
+  get activePickedStudents(): any[] {
+    return this.isMorningRideActive ? this.sortedMorningPickedStudents : this.sortedReturnOnboardStudents;
+  }
+
+  /**
+   * Resolves the target student for the single primary action slider:
+   * - If a student is explicitly selected, use that student.
+   * - Otherwise default to the next recommended student.
+   */
+  get actionTargetStudent(): any | null {
+    const selected = this.selectedStudent;
+    if (selected) {
+      return selected;
+    }
+    return this.getRecommendedDashboardStudent();
+  }
+
+  get primaryActionMode(): 'pick' | 'drop' {
+    const target = this.actionTargetStudent;
+    if (target && this.isPickedStudent(target)) {
+      return 'drop';
+    }
+    return 'pick';
+  }
+
+  get primaryActionLabel(): string {
+    return this.primaryActionMode === 'drop' ? 'Drop' : 'Pick Up';
+  }
+
+  get primaryActionIcon(): string {
+    return this.primaryActionMode === 'drop' ? 'home-outline' : 'people-outline';
+  }
+
+  get canExecutePrimaryAction(): boolean {
+    const target = this.actionTargetStudent;
+    if (!target) {
+      return false;
+    }
+    if (this.primaryActionMode === 'drop' && this.pendingParentDropApproval) {
+      return false;
+    }
+    return this.isPendingStudent(target) || this.isPickedStudent(target);
+  }
+
+  async executePrimaryAction(): Promise<void> {
+    const student = this.actionTargetStudent;
+    if (!student) return;
+
+    if (this.primaryActionMode === 'pick') {
+      if (!this.isPendingStudent(student)) return;
+      if (this.isMorningRideActive) {
+        await this.markMorningPicked(student);
+      } else {
+        await this.markPickedFromSchool(student);
+      }
+    } else {
+      if (!this.isPickedStudent(student) || this.pendingParentDropApproval) return;
+      if (this.isMorningRideActive) {
+        await this.markDroppedAtSchool(student);
+      } else {
+        await this.markDroppedAtHome(student);
       }
     }
-  } catch (error) {
-    console.error('[DRIVER MAP] Road fallback failed', error);
   }
-  if (seq !== this.routeSeq || !this.dashboardMap) return;
-  this.ngZone.run(() => {
-    this.fallbackLine?.setMap(null);
-    this.fallbackLine = new google.maps.Polyline({ map: this.dashboardMap, path, strokeColor: '#0877ed', strokeOpacity: 0.95, strokeWeight: 6 });
-    if (refit) {
-      const bounds = new google.maps.LatLngBounds();
-      path.forEach(p => bounds.extend(p));
-      this.dashboardMap.fitBounds(bounds);
-    }
-  });
-}
 
-private startGeoWatch(): void {
-  if (!navigator.geolocation) return;
-  this.geoWatchId = navigator.geolocation.watchPosition(
-    p => this.ngZone.run(() => {
-      const next = { latitude: p.coords.latitude, longitude: p.coords.longitude };
-      const prev = this.liveOrigin;
-      if (typeof p.coords.heading === 'number' && !isNaN(p.coords.heading)) this.liveHeading = p.coords.heading;
-      else if (prev && this.calculateDistanceKm(prev, next) > 0.003) this.liveHeading = this.bearing(prev, next);
-      this.liveOrigin = next;
-      this.onDriverMoved();
-    }),
-    () => { },
-    { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
-  );
-}
-
-private bearing(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }): number {
-  const r = (d: number) => d * Math.PI / 180;
-  const dLng = r(b.longitude - a.longitude);
-  const y = Math.sin(dLng) * Math.cos(r(b.latitude));
-  const x = Math.cos(r(a.latitude)) * Math.sin(r(b.latitude)) - Math.sin(r(a.latitude)) * Math.cos(r(b.latitude)) * Math.cos(dLng);
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-}
-
-private driverIcon(): any {
-  return { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale: 6, rotation: this.liveHeading, fillColor: '#f59e0b', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 2 };
-}
-
-private onDriverMoved(): void {
-  const origin = this.liveOrigin;
-  if (!origin || !this.dashboardMap || !this.driverMarker || this.currentView !== 'dashboard') return;
-  const position = { lat: origin.latitude, lng: origin.longitude };
-  this.driverMarker.setPosition(position);
-  this.driverMarker.setIcon(this.driverIcon());
-  if (!this.rideRunning) return;
-  this.dashboardMap.panTo(position);
-  const movedMeters = this.lastRouteOrigin ? this.calculateDistanceKm(this.lastRouteOrigin, origin) * 1000 : Infinity;
-  if (movedMeters > 20 && Date.now() - this.lastRouteAt > 4000) void this.refreshDashboardMap();
-}
-
-private storeRouteInfo(student: any, result: any): void {
-  const leg = result?.routes?.[0]?.legs?.[0];
-  if (!leg) return;
-  const seconds = Number(leg.duration_in_traffic?.value) || Number(leg.duration?.value);
-  this.studentRouteInfo.clear();
-  this.studentRouteInfo.set(this.getStudentRouteKey(student), {
-    eta: seconds ? `${Math.max(1, Math.ceil(seconds / 60))} min` : (leg.duration?.text || ''),
-    distance: leg.distance?.text || '',
-    traffic: ''
-  });
-}
-
-selectDestination(student: any): void {
-  const key = this.getStudentRouteKey(student);
-  const clearing = this.selectedDashboardDestinationId === key;
-  this.selectedDashboardDestinationId = clearing ? null : key;
-  if (!clearing && !this.getDashboardMapTarget(student)) {
-    this.toastService.showToast('Student location is unavailable', 'warning');
+  get canDropAll(): boolean {
+    return this.isMorningRideActive ? this.canDropAllMorningStudents : this.canDropAllReturnStudents;
   }
-  void this.refreshDashboardMap();
-}
 
-isSelectedDestination(student: any): boolean {
-  return this.selectedDashboardDestinationId === this.getStudentRouteKey(student);
-}
+  async dropAllStudents(): Promise<void> {
+    if (!this.canDropAll) return;
+    if (this.isMorningRideActive) await this.dropAllMorningStudents();
+    else await this.dropAllReturnStudents();
+  }
 
-get activePendingStudents(): any[] {
-  return this.isMorningRideActive ? this.sortedMorningPendingStudents : this.sortedReturnWaitingStudents;
-}
-private isPendingStudent(student: any): boolean {
-  return this.isMorningRideActive ? this.getMorningStatus(student) === 'Pending' : this.getEveningStatus(student) === 'Waiting';
-}
+  private getCardDestination(group: 'pending' | 'picked'): 'pickup' | 'school' {
+    return this.isMorningRideActive === (group === 'pending') ? 'pickup' : 'school';
+  }
 
-get selectedStudent(): any | null {
-  const id = this.selectedDashboardDestinationId;
-  if (!id) return null;
-  return [...this.activePendingStudents, ...this.activePickedStudents].find(s => this.getStudentRouteKey(s) === id) || null;
-}
+  getCardAddress(student: any, group: 'pending' | 'picked'): string {
+    return this.getCardDestination(group) === 'pickup' ? this.getShortStudentAddress(student) : (student.schoolName || student.dropArea || 'School');
+  }
 
-get activePickedStudents(): any[] {
-  return this.isMorningRideActive ? this.sortedMorningPickedStudents : this.sortedReturnOnboardStudents;
-}
-
-get pickTarget(): any | null {
-  const recommended = this.getRecommendedDashboardStudent();
-  return recommended && this.isPendingStudent(recommended) ? recommended : this.activePendingStudents[0] || null;
-}
-
-get canPick(): boolean {
-  const selected = this.selectedStudent;
-  return selected ? this.isPendingStudent(selected) : !!this.pickTarget;
-}
-
-async pickNext(): Promise<void> {
-  if (!this.canPick) return;
-  const student = this.pickTarget;
-  if (!student) return;
-  if (this.isMorningRideActive) await this.markMorningPicked(student);
-  else await this.markPickedFromSchool(student);
-}
-
-get canDropAll(): boolean {
-  return this.isMorningRideActive ? this.canDropAllMorningStudents : this.canDropAllReturnStudents;
-}
-async dropSelected(): Promise<void> {
-  const student = this.selectedStudent;
-  if (!student || this.isPendingStudent(student)) return;
-  if (this.isMorningRideActive) await this.markDroppedAtSchool(student);
-  else await this.markDroppedAtHome(student);
-}
-async dropAllStudents(): Promise<void> {
-  if (!this.canDropAll) return;
-  if (this.isMorningRideActive) await this.dropAllMorningStudents();
-  else await this.dropAllReturnStudents();
-}
-get canDrop(): boolean {
-  const selected = this.selectedStudent;
-  return !!selected && !this.isPendingStudent(selected);
-}
-
-
-
-private getCardDestination(group: 'pending' | 'picked'): 'pickup' | 'school' {
-  return this.isMorningRideActive === (group === 'pending') ? 'pickup' : 'school';
-}
-
-getCardAddress(student: any, group: 'pending' | 'picked'): string {
-  return this.getCardDestination(group) === 'pickup' ? this.getShortStudentAddress(student) : (student.schoolName || student.dropArea || 'School');
-}
-
-getCardMeta(student: any, group: 'pending' | 'picked'): string {
-  const destination = this.getCardDestination(group);
-  const real = this.studentRouteInfo.get(this.getStudentRouteKey(student))?.eta;
-  const distance = this.getDistanceFromDriver(student, destination);
-  const eta = real || (Number.isFinite(distance) ? `~${Math.max(1, Math.round(distance * 1.3 / 25 * 60))} min` : 'unavailable');
-  return `${this.getDistanceLabel(student, destination)} • ETA ${eta}`;
-}
+  getCardMeta(student: any, group: 'pending' | 'picked'): string {
+    const destination = this.getCardDestination(group);
+    const real = this.studentRouteInfo.get(this.getStudentRouteKey(student))?.eta;
+    const distance = this.getDistanceFromDriver(student, destination);
+    const eta = real || (Number.isFinite(distance) ? `~${Math.max(1, Math.round(distance * 1.3 / 25 * 60))} min` : 'unavailable');
+    return `${this.getDistanceLabel(student, destination)} • ETA ${eta}`;
+  }
 
   get dashboardPickedCount(): number {
     return this.isReturnRideActive || this.stage === 'return-ready' ? this.returnOnboardStudents.length : this.morningPickedStudents.length;
@@ -1159,9 +1474,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
 
   // =====================================================
   // ATTENDANCE SOCKET
-
   // =====================================================
-
   private listenForAttendanceUpdates(): void {
     this.attendanceSubscription =
       this.socketService
@@ -1197,9 +1510,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
 
   // =====================================================
   // REAL-TIME WORKFLOW STATE
-
   // =====================================================
-
   private listenForDashboardUpdates(): void {
     this.dashboardSubscription =
       this.socketService
@@ -1209,8 +1520,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             if (event?.driverId && event.driverId !== this.driverId) {
               return;
             }
-            // MongoDB remains the source of truth. The socket only
-            // tells the UI that it should re-read the authoritative state.
             this.loadDashboard();
           },
           error: error => {
@@ -1221,9 +1530,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
 
   // =====================================================
   // LOAD
-
   // =====================================================
-
   private loadDashboard(): void {
     if (!this.driverId) {
       return;
@@ -1239,20 +1546,11 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             );
             return;
           }
-          /*
-           * -------------------------------------------------
-           * 1. LOAD STUDENTS
-           * -------------------------------------------------
-           */
           this.driverName = String(res.driver?.name || res.driver?.driverName || res.driver?.fullName || res.driverName || localStorage.getItem('name') || localStorage.getItem('userName') || 'Driver');
           this.students =
             res.students || [];
           this.rebuildAttendanceGroups();
-          /*
-           * -------------------------------------------------
-           * 2. LOAD PERSISTED STUDENT STATUS
-           * -------------------------------------------------
-           */
+
           const morningStatuses:
             Record<string, StudentUiStatus> = {};
           const eveningStatuses:
@@ -1311,40 +1609,18 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             morningStatuses;
           this.eveningStatuses =
             eveningStatuses;
-          /*
-           * -------------------------------------------------
-           * 3. CRITICAL FIX
-           * -------------------------------------------------
-           *
-           * The backend decides the current workflow.
-           *
-           * Therefore after logout/login:
-           *
-           * morning pickup -> morning pickup
-           * school drop    -> school drop
-           * return ready   -> return ready
-           * return boarding -> return boarding
-           * home drop      -> home drop
-           * day complete   -> day complete
-           */
+
           if (res.workflow?.stage) {
             this.stage =
               res.workflow.stage as DriverStage;
           } else {
-            /*
-             * Compatibility fallback only for an old backend.
-             */
             this.stage =
               this.calculateFallbackStage();
           }
           this.reconcileStageWithStudentState(
             res.workflow
           );
-          /*
-           * -------------------------------------------------
-           * 4. RESUME GPS IF RIDE IS STILL ACTIVE
-           * -------------------------------------------------
-           */
+
           if (
             res.workflow?.activeRideType &&
             res.workflow?.activeRideStatus ===
@@ -1358,7 +1634,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             this.locationService.stopTracking();
           }
           this.normalizeAllCarouselIndexes();
-          // this.expandFirstAvailableStudentRoute();
           this.selectedDashboardDestinationId = this.isEligibleDashboardDestination(this.presentStudents.find(s => this.getStudentRouteKey(s) === this.selectedDashboardDestinationId)) ? this.selectedDashboardDestinationId : null;
           setTimeout(() => void this.refreshDashboardMap(), 180);
         },
@@ -1367,10 +1642,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             'Dashboard loading error:',
             err
           );
-          /*
-           * Do not allow the UI to assume a ride is running
-           * when the backend cannot confirm it.
-           */
           this.locationService.stopTracking();
           this.toastService.showToast(
             'Unable to load dashboard',
@@ -1379,11 +1650,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
         }
       });
   }
-  /*
-   * Compatibility fallback.
-   *
-   * With the updated backend this should normally never run.
-   */
 
   private calculateFallbackStage(): DriverStage {
     const total =
@@ -1416,28 +1682,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
     }
     return 'morning-school-drop';
   }
-
-  /** Opens the first actionable student by default, matching the supplied design. */
-
-  // private expandFirstAvailableStudentRoute(): void {
-  //   if (this.expandedStudentRouteId) return;
-  //   let student: any = null;
-  //   let destination: 'pickup' | 'school' = 'pickup';
-  //   if (this.stage === 'morning-pickup') {
-  //     student = this.sortedMorningPendingStudents[0] || this.sortedMorningPickedStudents[0] || null;
-  //     destination = student && this.getMorningStatus(student) === 'Picked' ? 'school' : 'pickup';
-  //   } else if (this.stage === 'morning-school-drop') {
-  //     student = this.sortedMorningPickedStudents[0] || this.sortedMorningPendingStudents[0] || null;
-  //     destination = student && this.getMorningStatus(student) === 'Picked' ? 'school' : 'pickup';
-  //   } else if (this.stage === 'return-boarding') {
-  //     student = this.sortedReturnWaitingStudents[0] || this.sortedReturnOnboardStudents[0] || null;
-  //     destination = student && this.getEveningStatus(student) === 'PickedFromSchool' ? 'pickup' : 'school';
-  //   } else if (this.stage === 'return-home-drop') {
-  //     student = this.sortedReturnOnboardStudents[0] || this.sortedReturnWaitingStudents[0] || null;
-  //     destination = 'pickup';
-  //   }
-  //   if (student) void this.toggleStudentRoute(student, destination);
-  // }
 
   private normalizeAllCarouselIndexes(): void {
     this.selectedMorningPickupIndex =
@@ -1499,7 +1743,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
 
   // =====================================================
   // MORNING
-
   // =====================================================
   async confirmStartMorning(): Promise<void> {
     if (
@@ -1524,25 +1767,16 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
     );
   }
 
-  // =====================================================
-  // RESET STUDENT STATUS FOR A NEW RIDE
-  // =====================================================
   private resetMorningStatusesForNewRide(): void {
-    /*
-     * Compatibility method only.
-     * Never reset persisted student progress when a ride starts.
-     */
     this.selectedMorningPickupIndex = 0;
     this.selectedMorningDropIndex = 0;
   }
+
   private resetEveningStatusesForNewRide(): void {
-    /*
-     * Compatibility method only.
-     * Never reset persisted student progress when a return ride starts.
-     */
     this.selectedReturnBoardingIndex = 0;
     this.selectedReturnDropIndex = 0;
   }
+
   private startRide(
     rideType: RideType
   ): void {
@@ -1553,9 +1787,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       );
       return;
     }
-    /*
-     * Prevent accidental duplicate calls.
-     */
     if (
       rideType === 'morning' &&
       this.isMorningRideActive
@@ -1576,14 +1807,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       );
       return;
     }
-    console.log(
-      '[RIDE] Starting ride',
-      {
-        driverId:
-          this.driverId,
-        rideType
-      }
-    );
     this.rideService
       .startRide(
         this.driverId,
@@ -1593,10 +1816,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
         next: (
           response: any
         ) => {
-          console.log(
-            '[RIDE] Start success',
-            response
-          );
           if (
             !response?.success
           ) {
@@ -1611,10 +1830,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             response?.data?.rideType;
           const status =
             response?.data?.status;
-          /*
-           * NEVER start GPS unless backend
-           * confirms the exact ride type.
-           */
           if (
             startedRideType !==
             rideType ||
@@ -1631,9 +1846,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             );
             return;
           }
-          /*
-           * Backend has confirmed the ride.
-           */
           this.locationService
             .startTracking(
               this.driverId,
@@ -1655,9 +1867,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
               ),
             'success'
           );
-          /*
-           * Backend is source of truth.
-           */
           this.loadDashboard();
         },
         error: (
@@ -1679,6 +1888,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
         }
       });
   }
+
   async markMorningPicked(
     student: any
   ): Promise<void> {
@@ -1695,15 +1905,20 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
     ) {
       return;
     }
-    const confirmed =
-      await this.dialogService.confirm(
-        'Picked Up?',
-        `Confirm ${student.studentName} has been picked up.`
-      );
-    if (!confirmed) {
-      return;
+
+    // Only prompt confirmation when driver is outside the student's pickup radius
+    if (!this.isWithinStudentRadius(student, 'pickup')) {
+      const confirmed =
+        await this.dialogService.confirm(
+          'Outside Pickup Radius',
+          `You are outside ${student.studentName}'s pickup radius (${this.getDistanceLabel(student, 'pickup')}). Confirm pickup anyway?`
+        );
+      if (!confirmed) {
+        return;
+      }
     }
-    this.updateStudentAction(
+
+    await this.updateStudentAction(
       student,
       'morning',
       'picked_up',
@@ -1711,6 +1926,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       `${student.studentName} picked up`
     );
   }
+
   async markDroppedAtSchool(
     student: any,
     skipConfirmation = false
@@ -1721,13 +1937,29 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
     ) {
       return;
     }
-    if (!skipConfirmation) {
-      const confirmed = await this.dialogService.confirm(
-        'Dropped At School?',
-        `Confirm ${student.studentName} has reached school. Live tracking for this parent will end.`
+
+    if (this.pendingParentDropApproval) {
+      this.toastService.showToast(
+        `Waiting for ${this.pendingParentDropApproval.studentName}'s parent confirmation before next drop.`,
+        'warning'
       );
-      if (!confirmed) return;
+      return;
     }
+
+    // Inside school radius: slide alone completes drop without confirmation.
+    // Outside school radius: require driver confirmation and parent Yes/No approval.
+    if (!this.isWithinStudentRadius(student, 'school')) {
+      if (!skipConfirmation) {
+        const confirmed = await this.dialogService.confirm(
+          'Outside Drop Radius',
+          `You are outside ${student.studentName}'s school drop radius (${this.getDistanceLabel(student, 'school')}). Request parent permission (Yes/No) to drop?`
+        );
+        if (!confirmed) return;
+      }
+      this.requestParentDropPermission(student, 'morning');
+      return;
+    }
+
     await this.updateStudentAction(
       student,
       'morning',
@@ -1768,10 +2000,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             'Morning ride ended',
             'success'
           );
-          /*
-           * Do not manually force return-ready.
-           * Backend calculates the next workflow.
-           */
           this.loadDashboard();
         },
         error: (error: any) => {
@@ -1791,7 +2019,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
 
   // =====================================================
   // RETURN
-
   // =====================================================
   async confirmStartReturn(): Promise<void> {
     if (
@@ -1803,10 +2030,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       );
       return;
     }
-    /*
-     * Before starting evening ride,
-     * morning must be completed.
-     */
     if (
       this.morningDroppedStudents.length !==
       this.presentStudents.length
@@ -1829,6 +2052,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       'evening'
     );
   }
+
   async markPickedFromSchool(
     student: any
   ): Promise<void> {
@@ -1839,13 +2063,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       );
       return;
     }
-    /*
-     * IMPORTANT:
-     *
-     * UI state alone is not enough.
-     * We first verify that the backend
-     * confirms an active evening ride.
-     */
     if (
       !this.isReturnRideActive
     ) {
@@ -1853,9 +2070,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
         'Please start the return ride first.',
         'warning'
       );
-      /*
-       * Re-read backend state.
-       */
       this.loadDashboard();
       return;
     }
@@ -1865,15 +2079,20 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
     ) {
       return;
     }
-    const confirmed =
-      await this.dialogService.confirm(
-        'Picked Up From School?',
-        `Confirm ${student.studentName} has boarded the van.`
-      );
-    if (!confirmed) {
-      return;
+
+    // Only prompt confirmation when driver is outside the school pickup radius
+    if (!this.isWithinStudentRadius(student, 'school')) {
+      const confirmed =
+        await this.dialogService.confirm(
+          'Outside Pickup Radius',
+          `You are outside ${student.studentName}'s school pickup radius (${this.getDistanceLabel(student, 'school')}). Confirm boarding anyway?`
+        );
+      if (!confirmed) {
+        return;
+      }
     }
-    this.updateStudentAction(
+
+    await this.updateStudentAction(
       student,
       'evening',
       'picked_from_school',
@@ -1881,6 +2100,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       `${student.studentName} picked up from school`
     );
   }
+
   async markDroppedAtHome(
     student: any,
     skipConfirmation = false
@@ -1898,13 +2118,29 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
     ) {
       return;
     }
-    if (!skipConfirmation) {
-      const confirmed = await this.dialogService.confirm(
-        'Dropped At Home?',
-        `Confirm ${student.studentName} has been dropped home. Live tracking for this parent will end.`
+
+    if (this.pendingParentDropApproval) {
+      this.toastService.showToast(
+        `Waiting for ${this.pendingParentDropApproval.studentName}'s parent confirmation before next drop.`,
+        'warning'
       );
-      if (!confirmed) return;
+      return;
     }
+
+    // Inside home radius: slide alone completes drop without confirmation.
+    // Outside home radius: require driver confirmation and parent Yes/No approval.
+    if (!this.isWithinStudentRadius(student, 'pickup')) {
+      if (!skipConfirmation) {
+        const confirmed = await this.dialogService.confirm(
+          'Outside Drop Radius',
+          `You are outside ${student.studentName}'s home drop radius (${this.getDistanceLabel(student, 'pickup')}). Request parent permission (Yes/No) to drop?`
+        );
+        if (!confirmed) return;
+      }
+      this.requestParentDropPermission(student, 'evening');
+      return;
+    }
+
     await this.updateStudentAction(
       student,
       'evening',
@@ -1945,9 +2181,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
             'Return ride ended',
             'success'
           );
-          /*
-           * Backend should now return day-complete.
-           */
           this.loadDashboard();
         },
         error: (error: any) => {
@@ -1967,7 +2200,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
 
   // =====================================================
   // ACTION API + STATE ADVANCE
-
   // =====================================================
   private updateStudentAction(
     student: any,
@@ -2042,8 +2274,6 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
           }
           this.persistStatuses();
           this.normalizeAllCarouselIndexes();
-          // if (this.expandedStudentRouteId) this.disposeStudentRouteMap(this.expandedStudentRouteId);
-          // this.expandedStudentRouteId = null;
           this.selectedDashboardDestinationId = null;
           this.studentActionLocks.delete(actionKey);
           this.toastService.showToast(successMessage, 'success');
@@ -2063,6 +2293,7 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
       });
     });
   }
+
   private applyLocalStudentStatus(
     student: any,
     rideType: RideType,
@@ -2095,83 +2326,65 @@ getCardMeta(student: any, group: 'pending' | 'picked'): string {
     }
   }
 
-private reconcileStageWithStudentState(workflow: any): void {
-  if (workflow?.activeRideStatus !== 'started') {
-    return;
-  }
-
-  const rideType = workflow.activeRideType as RideType | null;
-
-  if (rideType === 'morning') {
-    const total = this.presentStudents.length;
-
-    // Do not mark an empty student list as completed.
-    if (total === 0) {
-      this.stage = 'morning-pickup';
+  private reconcileStageWithStudentState(workflow: any): void {
+    if (workflow?.activeRideStatus !== 'started') {
       return;
     }
 
-    const dropped = this.morningDroppedStudents.length;
-    const pending = this.morningPendingStudents.length;
-    const picked = this.morningPickedStudents.length;
+    const rideType = workflow.activeRideType as RideType | null;
 
-    if (dropped === total) {
-      this.stage = 'morning-complete';
-    } else if (pending > 0) {
-      // Students still need pickup, even if others were dropped.
-      this.stage = 'morning-pickup';
-    } else if (picked > 0) {
-      this.stage = 'morning-school-drop';
-    } else {
-      // Unknown or inconsistent status must not mean complete.
-      this.stage = 'morning-pickup';
-    }
+    if (rideType === 'morning') {
+      const total = this.presentStudents.length;
 
-    return;
-  }
+      if (total === 0) {
+        this.stage = 'morning-pickup';
+        return;
+      }
 
-  if (rideType === 'evening') {
-    const total = this.presentStudents.length;
+      const dropped = this.morningDroppedStudents.length;
+      const pending = this.morningPendingStudents.length;
+      const picked = this.morningPickedStudents.length;
 
-    if (total === 0) {
-      this.stage = 'return-boarding';
+      if (dropped === total) {
+        this.stage = 'morning-complete';
+      } else if (pending > 0) {
+        this.stage = 'morning-pickup';
+      } else if (picked > 0) {
+        this.stage = 'morning-school-drop';
+      } else {
+        this.stage = 'morning-pickup';
+      }
+
       return;
     }
 
-    if (this.returnDroppedStudents.length === total) {
-      this.stage = 'return-complete';
-    } else if (
-      this.returnWaitingStudents.length === 0 &&
-      this.returnOnboardStudents.length > 0
-    ) {
-      this.stage = 'return-home-drop';
-    } else {
-      this.stage = 'return-boarding';
+    if (rideType === 'evening') {
+      const total = this.presentStudents.length;
+
+      if (total === 0) {
+        this.stage = 'return-boarding';
+        return;
+      }
+
+      if (this.returnDroppedStudents.length === total) {
+        this.stage = 'return-complete';
+      } else if (
+        this.returnWaitingStudents.length === 0 &&
+        this.returnOnboardStudents.length > 0
+      ) {
+        this.stage = 'return-home-drop';
+      } else {
+        this.stage = 'return-boarding';
+      }
     }
   }
-}
 
   // =====================================================
   // STUDENT ADDRESS + GOOGLE MAPS DIRECTIONS
   // =====================================================
-  /**
-   * Shows only the useful area portion of the address.
-   *
-   * Example:
-   * "12, Gandhi Nagar\nCoimbatore\nTamil Nadu - 641001"
-   *
-   * Displays:
-   * "12, Gandhi Nagar"
-   * "Gandhi Nagar"
-   *
-   * If the address is comma separated, it removes
-   * city/state/pincode information as much as possible.
-   */
   getShortStudentAddress(student: any): string {
     if (!student) return 'Pickup area unavailable';
 
-    // Prefer the dedicated area fields. These are more useful on a driver card
-    // than a full address containing house number, city, state, and PIN code.
     const area = String(
       student.pickupArea || student.dropArea || student.area || ''
     ).trim();
@@ -2189,58 +2402,21 @@ private reconcileStageWithStudentState(workflow: any): void {
       .filter((part: string) => !/\b\d{6}\b/.test(part))
       .filter((part: string) => !/^(Tamil Nadu|Karnataka|Kerala|Andhra Pradesh|Telangana|India)$/i.test(part));
 
-    // Common address format: "Door no, Area, City, State, PIN".
-    // Prefer the area segment; retain at most two short segments as a fallback.
     const useful = lines.filter((part: string) => !/^\d+[\/-]?[\w-]*$/.test(part));
     if (!useful.length) return 'Pickup area unavailable';
     const areaLike = useful.length > 1 ? useful[1] : useful[0];
     return areaLike || useful.slice(0, 2).join(', ');
   }
-  /**
-   * Opens Google Maps directions from the driver's
-   * current GPS position to the student's home.
-   *
-   * IMPORTANT:
-   * The driver must allow location permission.
-   */
+
   getStudentRouteKey(student: any): string {
     return String(student?.parentId || student?._id || student?.id || student?.mobileNumber || student?.studentName || 'student')
       .replace(/[^a-zA-Z0-9_-]/g, '-');
   }
-  // getStudentRouteMapId(student: any): string {
-  //   return `student-route-map-${this.getStudentRouteKey(student)}`;
-  // }
+
   getStudentRouteInfo(student: any): { eta: string; distance: string; traffic: string } | null {
     return this.studentRouteInfo.get(this.getStudentRouteKey(student)) || null;
   }
-  // async toggleStudentRoute(student: any, destination: 'pickup' | 'school'): Promise<void> {
-  //   const key = this.getStudentRouteKey(student);
 
-  //   // Tap the expanded card again to collapse it.
-  //   if (this.expandedStudentRouteId === key) {
-  //     this.expandedStudentRouteId = null;
-  //     this.disposeStudentRouteMap(key);
-  //     return;
-  //   }
-
-  //   // Switching students collapses the previous card and opens the new one.
-  //   if (this.expandedStudentRouteId) {
-  //     this.disposeStudentRouteMap(this.expandedStudentRouteId);
-  //   }
-
-  //   this.expandedStudentRouteId = key;
-  //   await new Promise<void>(resolve => setTimeout(resolve, 80));
-
-  //   // Do not create a map if the user switched cards while this call was waiting.
-  //   if (this.expandedStudentRouteId !== key) return;
-  //   await this.initializeStudentRoute(student, destination);
-  // }
-  // private disposeStudentRouteMap(key: string): void {
-  //   this.studentRouteRenderers.get(key)?.setMap(null);
-  //   this.studentRouteRenderers.delete(key);
-  //   this.studentRouteMaps.delete(key);
-  //   this.studentRouteRequestIds.set(key, (this.studentRouteRequestIds.get(key) || 0) + 1);
-  // }
   private async ensureStudentMapsLoaded(): Promise<void> {
     if (this.studentMapsLoaded) return;
     if (this.studentMapsLoading) return this.studentMapsLoading;
@@ -2259,86 +2435,7 @@ private reconcileStageWithStudentState(workflow: any): void {
       throw error;
     }
   }
-  // private async initializeStudentRoute(student: any, destination: 'pickup' | 'school'): Promise<void> {
-  //   const key = this.getStudentRouteKey(student);
-  //   const originFix = this.locationService.lastKnownPosition;
-  //   const target = this.getStudentCoordinates(student, destination);
-  //   const element = document.getElementById(this.getStudentRouteMapId(student));
-  //   if (!originFix || !target || !element) {
-  //     this.studentRouteInfo.set(key, {
-  //       eta: 'Unavailable',
-  //       distance: 'Location unavailable',
-  //       traffic: 'Traffic unavailable'
-  //     });
-  //     return;
-  //   }
-  //   const requestId = (this.studentRouteRequestIds.get(key) || 0) + 1;
-  //   this.studentRouteRequestIds.set(key, requestId);
-  //   try {
-  //     await this.ensureStudentMapsLoaded();
-  //     if (this.expandedStudentRouteId !== key || this.studentRouteRequestIds.get(key) !== requestId) return;
-  //     const origin = { lat: originFix.latitude, lng: originFix.longitude };
-  //     const destinationPoint = { lat: target.latitude, lng: target.longitude };
-  //     let map = this.studentRouteMaps.get(key);
-  //     if (!map) {
-  //       map = new google.maps.Map(element, {
-  //         center: origin,
-  //         zoom: 13,
-  //         mapTypeControl: false,
-  //         streetViewControl: false,
-  //         fullscreenControl: false,
-  //         clickableIcons: false,
-  //         gestureHandling: 'cooperative'
-  //       });
-  //       this.studentRouteMaps.set(key, map);
-  //     }
-  //     let renderer = this.studentRouteRenderers.get(key);
-  //     if (!renderer) {
-  //       renderer = new google.maps.DirectionsRenderer({
-  //         map,
-  //         suppressMarkers: false,
-  //         preserveViewport: false,
-  //         polylineOptions: { strokeColor: '#1677ee', strokeOpacity: 0.95, strokeWeight: 5 }
-  //       });
-  //       this.studentRouteRenderers.set(key, renderer);
-  //     } else {
-  //       renderer.setMap(map);
-  //     }
-  //     const service = new google.maps.DirectionsService();
-  //     service.route({
-  //       origin,
-  //       destination: destinationPoint,
-  //       travelMode: google.maps.TravelMode.DRIVING,
-  //       drivingOptions: { departureTime: new Date(), trafficModel: google.maps.TrafficModel.BEST_GUESS }
-  //     }, (result: any, status: any) => {
-  //       this.ngZone.run(() => {
-  //         if (this.expandedStudentRouteId !== key || this.studentRouteRequestIds.get(key) !== requestId) return;
-  //         const leg = result?.routes?.[0]?.legs?.[0];
-  //         if (status !== 'OK' || !leg) {
-  //           this.studentRouteInfo.set(key, { eta: 'Unavailable', distance: 'Route unavailable', traffic: 'Traffic unavailable' });
-  //           return;
-  //         }
-  //         renderer.setDirections(result);
-  //         const trafficSeconds = Number(leg.duration_in_traffic?.value);
-  //         const normalSeconds = Number(leg.duration?.value);
-  //         const chosenSeconds = Number.isFinite(trafficSeconds) && trafficSeconds > 0 ? trafficSeconds : normalSeconds;
-  //         const eta = Number.isFinite(chosenSeconds)
-  //           ? `${Math.max(1, Math.ceil(chosenSeconds / 60))} min`
-  //           : (leg.duration?.text || 'Calculating…');
-  //         const distance = leg.distance?.text || 'Distance unavailable';
-  //         let traffic = 'Traffic unavailable';
-  //         if (Number.isFinite(trafficSeconds) && trafficSeconds > 0 && Number.isFinite(normalSeconds) && normalSeconds > 0) {
-  //           const ratio = trafficSeconds / normalSeconds;
-  //           traffic = ratio < 1.15 ? 'Light traffic' : ratio < 1.45 ? 'Moderate traffic' : 'Heavy traffic';
-  //         }
-  //         this.studentRouteInfo.set(key, { eta, distance, traffic });
-  //       });
-  //     });
-  //   } catch (error) {
-  //     console.error('[DRIVER STUDENT ROUTE] Unable to load route', error);
-  //     this.studentRouteInfo.set(key, { eta: 'Unavailable', distance: 'Route unavailable', traffic: 'Traffic unavailable' });
-  //   }
-  // }
+
   async showStudentDirections(student: any): Promise<void> {
     if (!student) {
       this.toastService.showToast(
@@ -2376,13 +2473,13 @@ private reconcileStageWithStudentState(workflow: any): void {
         const origin =
           `${driverLatitude},${driverLongitude}`;
         const mapsUrl =
-          'https\://www.google.com/maps/dir/?api=1' +
+          'https://www.google.com/maps/dir/?api=1' +
           `&origin=${encodeURIComponent(origin)}` +
           `&destination=${encodeURIComponent(destination)}` +
           '&travelmode=driving';
         window.open(
           mapsUrl,
-          '\_system'
+          '_system'
         );
       },
       error => {
@@ -2402,17 +2499,7 @@ private reconcileStageWithStudentState(workflow: any): void {
       }
     );
   }
-  /**
-   * Determines the student's destination.
-   *
-   * Priority:
-   * 1. Full pickup/home address
-   * 2. Home address
-   * 3. Pickup area
-   *
-   * If later your backend provides latitude/longitude,
-   * this method can be upgraded to use coordinates.
-   */
+
   private getStudentMapDestination(
     student: any
   ): string {
@@ -2425,13 +2512,6 @@ private reconcileStageWithStudentState(workflow: any): void {
       ''
     ).trim();
   }
-  /*
-   * Kept for compatibility with older template/code.
-   *
-   * IMPORTANT:
-   * This method must NOT change this.stage.
-   * The backend workflow is the only authority.
-   */
 
   private advanceStageIfNeeded(): void {
     this.normalizeAllCarouselIndexes();
@@ -2451,8 +2531,6 @@ private reconcileStageWithStudentState(workflow: any): void {
       case 'pending':
         return 'Pending';
     }
-    // Backend always returns morningStatus. Keep local fallback only for legacy
-    // objects that do not contain the field at all.
     if (student && Object.prototype.hasOwnProperty.call(student, 'morningStatus')) {
       return 'Pending';
     }
@@ -2475,6 +2553,7 @@ private reconcileStageWithStudentState(workflow: any): void {
     }
     return this.eveningStatuses[student?.parentId] || 'Waiting';
   }
+
   private restoreStatuses(
     key: string
   ): Record<string, StudentUiStatus> {
@@ -2504,9 +2583,7 @@ private reconcileStageWithStudentState(workflow: any): void {
 
   // =====================================================
   // MENU / SECONDARY SCREENS
-
   // =====================================================
-
   async openMenu(event: Event) {
     const popover =
       await this.popoverCtrl.create({
@@ -2545,16 +2622,6 @@ private reconcileStageWithStudentState(workflow: any): void {
       || 'Driver Dashboard';
   }
 
-  /**
-   * Return to the dashboard.
-   *
-   * TEST MODE:
-   * When the complete screen is visible, the Back to Dashboard
-   * button resets today's completed test cycle first. This lets
-   * QA immediately start Home -> School again without waiting
-   * for the next day.
-   */
-
   goBack(): void {
     if (this.stage === 'day-complete') {
       this.resetCompletedTestCycle();
@@ -2576,11 +2643,10 @@ private reconcileStageWithStudentState(workflow: any): void {
       .resetTestCycle(this.driverId)
       .subscribe({
         next: () => {
-          // Stop any remaining GPS session before reloading.
           this.locationService.stopTracking();
-          // Clear only UI-side cached student statuses.
           this.morningStatuses = {};
           this.eveningStatuses = {};
+          this.pendingParentDropApproval = null;
           localStorage.removeItem(
             this.MORNING_STATUS_KEY
           );
@@ -2594,7 +2660,6 @@ private reconcileStageWithStudentState(workflow: any): void {
             'Test cycle reset. Start the morning ride again.',
             'success'
           );
-          // MongoDB is authoritative; reload the dashboard.
           this.loadDashboard();
         },
         error: (error: any) => {
@@ -2613,9 +2678,7 @@ private reconcileStageWithStudentState(workflow: any): void {
 
   // =====================================================
   // REFERRAL
-
   // =====================================================
-
   loadReferralDetails(): void {
     this.driverService
       .getReferralDetails(
@@ -2659,9 +2722,7 @@ private reconcileStageWithStudentState(workflow: any): void {
 
   // =====================================================
   // STUDENTS
-
   // =====================================================
-
   async openStudent(student: any) {
     const modal =
       await this.modalCtrl.create({
@@ -2690,21 +2751,12 @@ private reconcileStageWithStudentState(workflow: any): void {
 
   // =====================================================
   // DEV / NEXT-DAY RESET
-
   // =====================================================
-
-  /**
-   * Legacy UI-only reset helper.
-   *
-   * This intentionally does NOT reset MongoDB. Use the
-   * day-complete Back to Dashboard button for the test-cycle
-   * reset, because that calls the protected backend endpoint.
-   */
-
   resetDay(): void {
     this.locationService.stopTracking();
     this.morningStatuses = {};
     this.eveningStatuses = {};
+    this.pendingParentDropApproval = null;
     localStorage.removeItem(this.MORNING_STATUS_KEY);
     localStorage.removeItem(this.EVENING_STATUS_KEY);
     this.stage = 'morning-ready';
@@ -2713,26 +2765,13 @@ private reconcileStageWithStudentState(workflow: any): void {
 
   // =====================================================
   // LOGOUT
-
   // =====================================================
-
   async logout() {
     const confirmed =
       await this.dialogService.confirmLogout();
     if (!confirmed) {
       return;
     }
-    /*
-     * LOGOUT IS NOT END RIDE.
-     *
-     * Do NOT call rideService.endRide().
-     * Do NOT reset Parent.morningStatus/eveningStatus.
-     * Do NOT delete the Ride document.
-     *
-     * MongoDB keeps the ride and student progress.
-     * After login, loadDashboard() reads the same workflow
-     * and resumes the correct screen.
-     */
     this.locationService.stopTracking();
     [
       'token',
