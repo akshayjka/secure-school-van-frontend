@@ -2623,12 +2623,17 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    if (this.stage === 'day-complete') {
+    if (this.stage === 'day-complete' && this.currentView === 'dashboard') {
+      if (environment.production) {
+        this.resetDay();
+        return;
+      }
       this.resetCompletedTestCycle();
       return;
     }
     this.currentView = 'dashboard';
     this.pageTitle = 'Driver Dashboard';
+    setTimeout(() => void this.refreshDashboardMap(), 180);
   }
 
   private resetCompletedTestCycle(): void {
@@ -2667,11 +2672,10 @@ export class DashboardPage implements OnInit, OnDestroy {
             'Test cycle reset error:',
             error
           );
-          this.toastService.showToast(
-            error?.error?.message ||
-            'Unable to reset the test ride cycle',
-            'danger'
-          );
+          // Fallback to local dashboard reset if backend test endpoint is disabled in production
+          this.resetDay();
+          this.currentView = 'dashboard';
+          this.pageTitle = 'Driver Dashboard';
         }
       });
   }
