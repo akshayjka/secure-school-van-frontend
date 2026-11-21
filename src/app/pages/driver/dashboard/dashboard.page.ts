@@ -187,6 +187,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   private lastRouteAt = 0;
   private dashboardMapRefreshTimer: ReturnType<typeof setInterval> | null = null;
   private dashboardMapElement: HTMLElement | null = null;
+  private localDayResetOverride = false;
 
   private studentMapsLoaded = false;
   private studentMapsLoading: Promise<void> | null = null;
@@ -1611,8 +1612,12 @@ export class DashboardPage implements OnInit, OnDestroy {
             eveningStatuses;
 
           if (res.workflow?.stage) {
-            this.stage =
-              res.workflow.stage as DriverStage;
+            if (this.localDayResetOverride && res.workflow.stage === 'day-complete') {
+              this.stage = 'morning-ready';
+            } else {
+              this.localDayResetOverride = false;
+              this.stage = res.workflow.stage as DriverStage;
+            }
           } else {
             this.stage =
               this.calculateFallbackStage();
@@ -2624,10 +2629,6 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   goBack(): void {
     if (this.stage === 'day-complete' && this.currentView === 'dashboard') {
-      if (environment.production) {
-        this.resetDay();
-        return;
-      }
       this.resetCompletedTestCycle();
       return;
     }
@@ -2648,6 +2649,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       .resetTestCycle(this.driverId)
       .subscribe({
         next: () => {
+          this.localDayResetOverride = false;
           this.locationService.stopTracking();
           this.morningStatuses = {};
           this.eveningStatuses = {};
@@ -2662,17 +2664,17 @@ export class DashboardPage implements OnInit, OnDestroy {
           this.currentView = 'dashboard';
           this.pageTitle = 'Driver Dashboard';
           this.toastService.showToast(
-            'Test cycle reset. Start the morning ride again.',
+            'Cycle reset. You can start the morning ride again.',
             'success'
           );
           this.loadDashboard();
         },
         error: (error: any) => {
           console.error(
-            'Test cycle reset error:',
+            'Cycle reset error:',
             error
           );
-          // Fallback to local dashboard reset if backend test endpoint is disabled in production
+          this.localDayResetOverride = true;
           this.resetDay();
           this.currentView = 'dashboard';
           this.pageTitle = 'Driver Dashboard';
