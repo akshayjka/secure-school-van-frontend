@@ -26,16 +26,16 @@
 
 <ion-content>
   <!-- =====================================================
-       STATE-BASED DRIVER DASHBOARD
+       STATE-BASED DASHBOARD
   ====================================================== -->
   <main *ngIf="currentView === 'dashboard'" class="driver-workflow">
 
-    <!-- DRIVER / RIDE STATE -->
-    <section class="driver-summary" *ngIf="stage !== 'day-complete' && !rideRunning">
+    <!-- PROFILE / RIDE STATE -->
+    <section class="driver-summary greeting-card" *ngIf="stage !== 'day-complete' && !rideRunning">
       <div>
-        <span class="eyebrow">DRIVER</span>
-        <h1>Good Morning, {{ driverName || 'Driver' }} 👋</h1>
-        <p>Driver ID: {{ driverId }}</p>
+        <span class="eyebrow">{{ driverName || 'PARTNER' }}</span>
+        <h1>{{ timeGreeting }}, {{ driverName || 'Partner' }} 👋</h1>
+        <p class="card-submeta">ID: {{ driverId }} • {{ stage === 'return-ready' ? 'Evening Shift' : 'Morning Shift' }}</p>
       </div>
       <span class="ride-state" [class.running]="rideRunning">
         {{ rideRunning ? 'RIDE RUNNING' : 'READY' }}
@@ -92,9 +92,9 @@
           </div>
           <div class="student-copy">
             <strong>{{ student.studentName }}</strong>
-            <span>{{ student.pickupArea }}</span>
+            <span>{{ getShortStudentAddress(student) }}</span>
           </div>
-          <span class="present-chip">PRESENT</span>
+          <span class="present-chip student-status-pill">PRESENT</span>
         </article>
 
         <div class="empty-state" *ngIf="presentStudents.length === 0">
@@ -109,10 +109,10 @@
     <ng-container *ngIf="rideRunning">
       <section class="ride-bar">
         <div>
-          <span class="eyebrow">{{ isMorningRideActive ? 'MORNING' : 'EVENING' }}</span>
+          <span class="eyebrow">{{ timeGreeting }} • {{ isMorningRideActive ? 'MORNING' : 'EVENING' }}</span>
           <strong>{{ isMorningRideActive ? 'Home to School' : 'School to Home' }}</strong>
         </div>
-        <span class="ride-bar-picked">
+        <span class="ride-bar-picked ride-summary-pill">
           <ion-icon name="car-outline"></ion-icon>{{ activePickedStudents.length }}/{{ todayStats.present }}
         </span>
         <span class="running-badge"><span class="live-dot"></span>RUNNING</span>
@@ -142,7 +142,7 @@
               Waiting for Parent Drop Confirmation ({{ pendingParentApprovalStudent.studentName }})
             </strong>
             <span style="display: block; font-size: 12px; color: #b45309;">
-              Driver is outside student drop radius. Next drop is locked until parent replies Yes/No.
+              {{ driverName || 'You' }} are outside student drop radius. Next drop is locked until parent replies Yes/No.
             </span>
           </div>
         </div>
@@ -313,14 +313,14 @@
         <p>{{ morningDroppedStudents.length }} / {{ presentStudents.length }} students dropped</p>
       </section>
 
-      <p class="center-message">All student drop-offs are complete.</p>
+      <p class="center-message">All student drop-offs are complete, {{ driverName || 'Partner' }}.</p>
 
       <button type="button" class="primary-driver-action danger-action" (click)="endMorningRide()">
         <ion-icon name="stop-outline"></ion-icon>
         END MORNING RIDE
       </button>
 
-      <p class="tracking-footer">Driver GPS + admin live tracking stop after ending.</p>
+      <p class="tracking-footer">{{ driverName || 'Your' }} live GPS &amp; route tracking stop after ending.</p>
     </ng-container>
 
     <!-- ===================================================
@@ -361,7 +361,7 @@
             <strong>{{ student.studentName }}</strong>
             <span>Waiting at school</span>
           </div>
-          <span class="waiting-chip">WAITING</span>
+          <span class="waiting-chip student-status-pill">WAITING</span>
         </article>
       </section>
 
@@ -381,7 +381,7 @@
         <p>{{ returnDroppedStudents.length }} / {{ returnDroppedStudents.length + returnOnboardStudents.length }} students dropped home</p>
       </section>
 
-      <p class="center-message">Today's return journey is complete.</p>
+      <p class="center-message">Today's return journey is complete, {{ driverName || 'Partner' }}.</p>
 
       <button
         type="button"
@@ -392,7 +392,7 @@
         END RETURN RIDE
       </button>
 
-      <p class="tracking-footer">Admin live tracking stops when the ride ends.</p>
+      <p class="tracking-footer">Live tracking stops when the ride ends.</p>
     </ng-container>
 
     <!-- ===================================================
@@ -405,7 +405,7 @@
             <ion-icon name="checkmark-circle-outline"></ion-icon>
           </div>
           <span class="completion-eyebrow">DAY COMPLETE</span>
-          <h2>Great Job Today!</h2>
+          <h2>{{ timeGreeting }}, {{ driverName || 'Partner' }}!</h2>
           <p>All scheduled rides are completed successfully.</p>
           <div class="completion-message">
             <ion-icon name="shield-checkmark-outline"></ion-icon>
@@ -478,7 +478,7 @@
         </section>
 
         <div class="driver-motivation">
-          <p>“You make a difference every day.”</p>
+          <p>“You make a difference every day, {{ driverName || 'Partner' }}.”</p>
           <span>Thank you for keeping our students safe.</span>
           <ion-icon name="shield-checkmark-outline"></ion-icon>
         </div>
@@ -518,9 +518,9 @@
         <ion-icon name="share-social-outline"></ion-icon>
       </div>
       <h2>Referral Program</h2>
-      <p class="section-description">Share your referral code with other drivers.</p>
+      <p class="section-description">Share your referral code with fellow partners.</p>
       <div class="referral-code-box">
-        <span>Your Referral Code</span>
+        <span>{{ driverName ? driverName + "'s Referral Code" : 'Your Referral Code' }}</span>
         <strong>{{ referralCode }}</strong>
       </div>
       <div class="referral-count">

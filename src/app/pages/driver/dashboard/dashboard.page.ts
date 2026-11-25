@@ -161,7 +161,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   private dashboardMapRequestId = 0;
   private dashboardMapMarkers: any[] = [];
   currentView = 'dashboard';
-  pageTitle = 'Driver Dashboard';
+  pageTitle = 'Dashboard';
   referralCode = '';
   referralCount = 0;
   referredByCode = '';
@@ -233,9 +233,37 @@ export class DashboardPage implements OnInit, OnDestroy {
     });
   }
 
+  /** Time-aware greeting for the dashboard header and completion card. */
+  get timeGreeting(): 'Good Morning' | 'Good Afternoon' | 'Good Evening' {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      return 'Good Morning';
+    }
+    if (hour < 17) {
+      return 'Good Afternoon';
+    }
+    return 'Good Evening';
+  }
+
+  private get displayPartnerName(): string {
+    return this.driverName?.trim() || 'Partner';
+  }
+
+  private get defaultDashboardTitle(): string {
+    return this.driverName?.trim()
+      ? `${this.driverName.trim()}'s Dashboard`
+      : 'Dashboard';
+  }
+
   ngOnInit(): void {
     this.driverId =
       localStorage.getItem('driverId') || '';
+    this.driverName = String(
+      localStorage.getItem('name') ||
+      localStorage.getItem('userName') ||
+      ''
+    ).trim();
+    this.pageTitle = this.defaultDashboardTitle;
     this.stage = 'morning-ready';
     this.morningStatuses = {};
     this.eveningStatuses = {};
@@ -348,6 +376,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     if (socket && typeof socket.emit === 'function') {
       socket.emit('request-parent-drop-confirmation', {
         driverId: this.driverId,
+        driverName: this.displayPartnerName,
         parentId: student.parentId,
         studentName: student.studentName,
         rideType,
@@ -357,7 +386,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     }
 
     this.toastService.showToast(
-      `Driver is outside radius (${distanceLabel}). Sent Yes/No confirmation request to ${student.studentName}'s parent.`,
+      `${this.displayPartnerName}, you are outside radius (${distanceLabel}). Sent Yes/No confirmation request to ${student.studentName}'s parent.`,
       'warning'
     );
   }
@@ -1185,7 +1214,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       if (origin) {
         const position = { lat: origin.latitude, lng: origin.longitude };
         if (this.driverMarker) this.driverMarker.setPosition(position);
-        else this.driverMarker = new google.maps.Marker({ map: this.dashboardMap, position, title: 'You', zIndex: 999, icon: this.driverIcon() });
+        else this.driverMarker = new google.maps.Marker({ map: this.dashboardMap, position, title: this.displayPartnerName, zIndex: 999, icon: this.driverIcon() });
       }
       if (!this.dashboardDirectionsRenderer) {
         this.dashboardDirectionsRenderer = new google.maps.DirectionsRenderer({ map: this.dashboardMap, suppressMarkers: true, polylineOptions: { strokeColor: '#0877ed', strokeOpacity: 0.95, strokeWeight: 5 } });
@@ -1217,7 +1246,7 @@ export class DashboardPage implements OnInit, OnDestroy {
             if (recommended && this.rideRunning) this.storeRouteInfo(recommended, result);
             return;
           }
-          console.error('[DRIVER MAP] Directions failed:', status);
+          console.error('[MAP] Directions failed:', status);
           this.dashboardDirectionsRenderer?.set('directions', null);
           void this.drawRoadFallback(originPoint, destinationPoint, seq, refit, recommended);
         }));
@@ -1230,7 +1259,7 @@ export class DashboardPage implements OnInit, OnDestroy {
         if (!bounds.isEmpty()) this.dashboardMap.fitBounds(bounds);
       }
     } catch (error) {
-      console.error('[DRIVER DASHBOARD MAP] Unable to render map', error);
+      console.error('[DASHBOARD MAP] Unable to render map', error);
     }
   }
 
@@ -1257,7 +1286,7 @@ export class DashboardPage implements OnInit, OnDestroy {
         }
       }
     } catch (error) {
-      console.error('[DRIVER MAP] Road fallback failed', error);
+      console.error('[MAP] Road fallback failed', error);
     }
     if (seq !== this.routeSeq || !this.dashboardMap) return;
     this.ngZone.run(() => {
@@ -1453,7 +1482,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   get dashboardTitle(): string {
     switch (this.stage) {
       case 'morning-ready':
-        return 'Driver Dashboard';
+        return this.defaultDashboardTitle;
       case 'morning-pickup':
         return 'Morning Pickup';
       case 'morning-school-drop':
@@ -1503,7 +1532,7 @@ export class DashboardPage implements OnInit, OnDestroy {
           },
           error: error =>
             console.error(
-              'Driver attendance socket error:',
+              'Attendance socket error:',
               error
             )
         });
@@ -1524,7 +1553,7 @@ export class DashboardPage implements OnInit, OnDestroy {
             this.loadDashboard();
           },
           error: error => {
-            console.error('Driver dashboard socket error:', error);
+            console.error('Dashboard socket error:', error);
           }
         });
   }
@@ -1547,7 +1576,18 @@ export class DashboardPage implements OnInit, OnDestroy {
             );
             return;
           }
-          this.driverName = String(res.driver?.name || res.driver?.driverName || res.driver?.fullName || res.driverName || localStorage.getItem('name') || localStorage.getItem('userName') || 'Driver');
+          this.driverName = String(
+            res.driver?.name ||
+            res.driver?.driverName ||
+            res.driver?.fullName ||
+            res.driverName ||
+            localStorage.getItem('name') ||
+            localStorage.getItem('userName') ||
+            'Partner'
+          ).trim();
+          if (this.currentView === 'dashboard') {
+            this.pageTitle = this.defaultDashboardTitle;
+          }
           this.students =
             res.students || [];
           this.rebuildAttendanceGroups();
@@ -1762,7 +1802,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     const confirmed =
       await this.dialogService.confirm(
         'Start Morning Ride?',
-        `${this.presentStudents.length} student(s) are present. Start the ride before picking up students?`
+        `${this.displayPartnerName}, ${this.presentStudents.length} student(s) are present. Start the ride before picking up students?`
       );
     if (!confirmed) {
       return;
@@ -1787,7 +1827,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   ): void {
     if (!this.driverId) {
       this.toastService.showToast(
-        'Driver ID is missing. Please login again.',
+        'Account ID is missing. Please login again.',
         'danger'
       );
       return;
@@ -1861,14 +1901,14 @@ export class DashboardPage implements OnInit, OnDestroy {
               ? (
                 rideType ===
                   'morning'
-                  ? 'Morning ride resumed'
-                  : 'Return ride resumed'
+                  ? `Morning ride resumed, ${this.displayPartnerName}`
+                  : `Return ride resumed, ${this.displayPartnerName}`
               )
               : (
                 rideType ===
                   'morning'
-                  ? 'Morning ride started'
-                  : 'Return ride started'
+                  ? `Morning ride started, ${this.displayPartnerName}`
+                  : `Return ride started, ${this.displayPartnerName}`
               ),
             'success'
           );
@@ -1911,12 +1951,11 @@ export class DashboardPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Only prompt confirmation when driver is outside the student's pickup radius
     if (!this.isWithinStudentRadius(student, 'pickup')) {
       const confirmed =
         await this.dialogService.confirm(
           'Outside Pickup Radius',
-          `You are outside ${student.studentName}'s pickup radius (${this.getDistanceLabel(student, 'pickup')}). Confirm pickup anyway?`
+          `${this.displayPartnerName}, you are outside ${student.studentName}'s pickup radius (${this.getDistanceLabel(student, 'pickup')}). Confirm pickup anyway?`
         );
       if (!confirmed) {
         return;
@@ -1951,13 +1990,11 @@ export class DashboardPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Inside school radius: slide alone completes drop without confirmation.
-    // Outside school radius: require driver confirmation and parent Yes/No approval.
     if (!this.isWithinStudentRadius(student, 'school')) {
       if (!skipConfirmation) {
         const confirmed = await this.dialogService.confirm(
           'Outside Drop Radius',
-          `You are outside ${student.studentName}'s school drop radius (${this.getDistanceLabel(student, 'school')}). Request parent permission (Yes/No) to drop?`
+          `${this.displayPartnerName}, you are outside ${student.studentName}'s school drop radius (${this.getDistanceLabel(student, 'school')}). Request parent permission (Yes/No) to drop?`
         );
         if (!confirmed) return;
       }
@@ -1988,7 +2025,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     const confirmed =
       await this.dialogService.confirm(
         'End Morning Ride?',
-        'All student school drop-offs are complete. End the morning ride?'
+        `All student school drop-offs are complete, ${this.displayPartnerName}. End the morning ride?`
       );
     if (!confirmed) {
       return;
@@ -2002,7 +2039,7 @@ export class DashboardPage implements OnInit, OnDestroy {
         next: () => {
           this.locationService.stopTracking();
           this.toastService.showToast(
-            'Morning ride ended',
+            `Morning ride ended, ${this.displayPartnerName}`,
             'success'
           );
           this.loadDashboard();
@@ -2048,7 +2085,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     const confirmed =
       await this.dialogService.confirm(
         'Start Return Journey?',
-        'Start the return ride before picking students from school.'
+        `${this.displayPartnerName}, start the return ride before picking students from school?`
       );
     if (!confirmed) {
       return;
@@ -2085,12 +2122,11 @@ export class DashboardPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Only prompt confirmation when driver is outside the school pickup radius
     if (!this.isWithinStudentRadius(student, 'school')) {
       const confirmed =
         await this.dialogService.confirm(
           'Outside Pickup Radius',
-          `You are outside ${student.studentName}'s school pickup radius (${this.getDistanceLabel(student, 'school')}). Confirm boarding anyway?`
+          `${this.displayPartnerName}, you are outside ${student.studentName}'s school pickup radius (${this.getDistanceLabel(student, 'school')}). Confirm boarding anyway?`
         );
       if (!confirmed) {
         return;
@@ -2132,13 +2168,11 @@ export class DashboardPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Inside home radius: slide alone completes drop without confirmation.
-    // Outside home radius: require driver confirmation and parent Yes/No approval.
     if (!this.isWithinStudentRadius(student, 'pickup')) {
       if (!skipConfirmation) {
         const confirmed = await this.dialogService.confirm(
           'Outside Drop Radius',
-          `You are outside ${student.studentName}'s home drop radius (${this.getDistanceLabel(student, 'pickup')}). Request parent permission (Yes/No) to drop?`
+          `${this.displayPartnerName}, you are outside ${student.studentName}'s home drop radius (${this.getDistanceLabel(student, 'pickup')}). Request parent permission (Yes/No) to drop?`
         );
         if (!confirmed) return;
       }
@@ -2169,7 +2203,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     const confirmed =
       await this.dialogService.confirm(
         "End Today's Ride?",
-        'All present students have been dropped home. End the return ride?'
+        `All present students have been dropped home, ${this.displayPartnerName}. End the return ride?`
       );
     if (!confirmed) {
       return;
@@ -2183,7 +2217,7 @@ export class DashboardPage implements OnInit, OnDestroy {
         next: () => {
           this.locationService.stopTracking();
           this.toastService.showToast(
-            'Return ride ended',
+            `Great work today, ${this.displayPartnerName}! Return ride ended.`,
             'success'
           );
           this.loadDashboard();
@@ -2219,7 +2253,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       if (!this.driverId) {
-        this.toastService.showToast('Driver ID is missing. Please login again.', 'danger');
+        this.toastService.showToast('Account ID is missing. Please login again.', 'danger');
         resolve(false);
         return;
       }
@@ -2489,7 +2523,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       },
       error => {
         console.error(
-          'Driver location error:',
+          'Location error:',
           error
         );
         this.toastService.showToast(
@@ -2624,7 +2658,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     };
     this.pageTitle =
       titles[view]
-      || 'Driver Dashboard';
+      || this.defaultDashboardTitle;
   }
 
   goBack(): void {
@@ -2633,14 +2667,14 @@ export class DashboardPage implements OnInit, OnDestroy {
       return;
     }
     this.currentView = 'dashboard';
-    this.pageTitle = 'Driver Dashboard';
+    this.pageTitle = this.defaultDashboardTitle;
     setTimeout(() => void this.refreshDashboardMap(), 180);
   }
 
   private resetCompletedTestCycle(): void {
     if (!this.driverId) {
       this.toastService.showToast(
-        'Driver ID is missing. Please login again.',
+        'Account ID is missing. Please login again.',
         'danger'
       );
       return;
@@ -2662,9 +2696,9 @@ export class DashboardPage implements OnInit, OnDestroy {
           );
           this.stage = 'morning-ready';
           this.currentView = 'dashboard';
-          this.pageTitle = 'Driver Dashboard';
+          this.pageTitle = this.defaultDashboardTitle;
           this.toastService.showToast(
-            'Cycle reset. You can start the morning ride again.',
+            `Cycle reset, ${this.displayPartnerName}. You can start the morning ride again.`,
             'success'
           );
           this.loadDashboard();
@@ -2677,7 +2711,7 @@ export class DashboardPage implements OnInit, OnDestroy {
           this.localDayResetOverride = true;
           this.resetDay();
           this.currentView = 'dashboard';
-          this.pageTitle = 'Driver Dashboard';
+          this.pageTitle = this.defaultDashboardTitle;
         }
       });
   }
